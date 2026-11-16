@@ -1,0 +1,15 @@
+{
+  "name": "lazer-emniyet",
+  "version": "1.0.0",
+  "description": "Lazer tehlike analizi: MPE, NOHD, OD, EN 207/EN 208 (ICNIRP 2013, IEC 60825-1:2014, ANSI Z136.1-2014)",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "build": "node tools/build-single.js",
+    "start": "xdg-open index.html"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

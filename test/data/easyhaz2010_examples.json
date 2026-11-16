@@ -1,0 +1,369 @@
+{
+ "source": "Kentek EasyHaz LSO örnek dosyaları (2010, ANSI Z136.1-2007 kuralları ≈ ICNIRP 2000 ≈ 2006/25/AT); Support Documents klasöründen okundu",
+ "cases": [
+  {
+   "c": {
+    "dosya": "Surelite III NdYAG.txt",
+    "wl": 532.0,
+    "mode": "rp",
+    "kind": "Q",
+    "value": 0.425,
+    "T": 0.25,
+    "tau": 4e-09,
+    "f": 10.0,
+    "d_mm": 1.24183297157288,
+    "div_mrad": 0.6,
+    "spec": "1/e2",
+    "rho": 1.0,
+    "theta": 0.0,
+    "dr_r": 1.0,
+    "dr_T": 0.25,
+    "lens_f_mm": 100.0,
+    "lens_b_mm": 5.0,
+    "fiber_NA": null
+   },
+   "eh": {
+    "mpe_ansi": 3.799e-06,
+    "od_rng": 6.463,
+    "od_worst": 6.463,
+    "nohd": 28130.0,
+    "lol_nohd": 337.4,
+    "dr_nhz": 5.967,
+    "dr_od": 1.552
+   }
+  },
+  {
+   "c": {
+    "dosya": "CO2 Cutter.txt",
+    "wl": 10600.0,
+    "mode": "cw",
+    "kind": "P",
+    "value": 2000.0,
+    "T": 10.0,
+    "tau": null,
+    "f": null,
+    "d_mm": 18.0,
+    "div_mrad": 1.5,
+    "spec": "1/e2",
+    "rho": 1.0,
+    "theta": 0.0,
+    "dr_r": 0.5,
+    "dr_T": 10.0,
+    "lens_f_mm": 0,
+    "lens_b_mm": 0,
+    "fiber_NA": null
+   },
+   "eh": {
+    "mpe_ansi": 0.1,
+    "od_rng": 4.18,
+    "od_worst": 5.318,
+    "nohd": 1504.0,
+    "dr_nhz": 0.798,
+    "dr_od": 0.406
+   }
+  },
+  {
+   "c": {
+    "dosya": "CO2 Marker.txt",
+    "wl": 10600.0,
+    "mode": "cw",
+    "kind": "P",
+    "value": 20.0,
+    "T": 10.0,
+    "tau": null,
+    "f": null,
+    "d_mm": 8.0,
+    "div_mrad": 2.0,
+    "spec": "1/e2",
+    "rho": 0.2,
+    "theta": 60.0,
+    "dr_r": 0.5,
+    "dr_T": 10.0,
+    "lens_f_mm": 0,
+    "lens_b_mm": 0,
+    "fiber_NA": null
+   },
+   "eh": {
+    "mpe_ansi": 0.1,
+    "od_rng": 2.82,
+    "od_worst": 3.318,
+    "nohd": 112.8,
+    "dr_nhz": 0.025,
+    "dr_od": 0.0
+   }
+  },
+  {
+   "c": {
+    "dosya": "CW NdYAG.txt",
+    "wl": 1064.0,
+    "mode": "cw",
+    "kind": "P",
+    "value": 100.0,
+    "T": 10.0,
+    "tau": null,
+    "f": null,
+    "d_mm": 5.0,
+    "div_mrad": 2.0,
+    "spec": "1/e2",
+    "rho": 1.0,
+    "theta": 0.0,
+    "dr_r": 0.5,
+    "dr_T": 10.0,
+    "lens_f_mm": 0,
+    "lens_b_mm": 0,
+    "fiber_NA": null
+   },
+   "eh": {
+    "mpe_ansi": 0.005,
+    "od_rng": 4.707,
+    "od_worst": 4.716,
+    "nohd": 1128.0,
+    "dr_nhz": 0.798,
+    "dr_od": 0.406
+   }
+  },
+  {
+   "c": {
+    "dosya": "Doubled NdYAG (3B).txt",
+    "wl": 532.0,
+    "mode": "cw",
+    "kind": "P",
+    "value": 0.2,
+    "T": 0.25,
+    "tau": null,
+    "f": null,
+    "d_mm": 1.0,
+    "div_mrad": 1.0,
+    "spec": "1/e2",
+    "rho": 1.0,
+    "theta": 0.0,
+    "dr_r": 0.5,
+    "dr_T": 0.25,
+    "lens_f_mm": 0,
+    "lens_b_mm": 0,
+    "fiber_NA": null
+   },
+   "eh": {
+    "mpe_ansi": 0.002546,
+    "od_rng": 2.31,
+    "od_worst": 2.31,
+    "nohd": 141.3,
+    "dr_nhz": 0.05,
+    "dr_od": 0.0
+   }
+  },
+  {
+   "c": {
+    "dosya": "Mode-Locked TiSaph.txt",
+    "wl": 800.0,
+    "mode": "rp",
+    "kind": "P",
+    "value": 0.8,
+    "T": 10.0,
+    "tau": 4e-14,
+    "f": 10000000.0,
+    "d_mm": 1.4,
+    "div_mrad": 1.2,
+    "spec": "1/e2",
+    "rho": 1.0,
+    "theta": 0.0,
+    "dr_r": 0.5,
+    "dr_T": 10.0,
+    "lens_f_mm": 0,
+    "lens_b_mm": 0,
+    "fiber_NA": null
+   },
+   "eh": {
+    "mpe_ansi": 0.001585,
+    "od_rng": 3.118,
+    "od_worst": 3.118,
+    "nohd": 298.8,
+    "dr_nhz": 0.127,
+    "dr_od": 0.0
+   }
+  },
+  {
+   "c": {
+    "dosya": "Practice Problem 2.txt",
+    "wl": 755.0,
+    "mode": "sp",
+    "kind": "Q",
+    "value": 10.0,
+    "T": null,
+    "tau": 0.002,
+    "f": null,
+    "d_mm": 4.0,
+    "div_mrad": 2.0,
+    "spec": "1/e",
+    "rho": 1.0,
+    "theta": 0.0,
+    "dr_r": 0.5,
+    "dr_T": 0.002,
+    "lens_f_mm": 0,
+    "lens_b_mm": 0,
+    "fiber_NA": null
+   },
+   "eh": {
+    "mpe_ansi": 2.193e-05,
+    "od_rng": 6.053,
+    "od_worst": 6.074,
+    "nohd": 3809.0,
+    "dr_nhz": 3.81,
+    "dr_od": 1.764
+   }
+  },
+  {
+   "c": {
+    "dosya": "Practice Problem 3.txt",
+    "wl": 1064.0,
+    "mode": "rp",
+    "kind": "Q",
+    "value": 0.5,
+    "T": 10.0,
+    "tau": 1e-08,
+    "f": 10.0,
+    "d_mm": 3.0,
+    "div_mrad": 1.0,
+    "spec": "1/e2",
+    "rho": 1.0,
+    "theta": 0.0,
+    "dr_r": 0.5,
+    "dr_T": 10.0,
+    "lens_f_mm": 0,
+    "lens_b_mm": 0,
+    "fiber_NA": null
+   },
+   "eh": {
+    "mpe_ansi": 1.581e-05,
+    "od_rng": 5.915,
+    "od_worst": 5.915,
+    "nohd": 8970.0,
+    "dr_nhz": 3.173,
+    "dr_od": 1.605
+   }
+  },
+  {
+   "c": {
+    "dosya": "Practice Problem 4.txt",
+    "wl": 1064.0,
+    "mode": "rp",
+    "kind": "Q",
+    "value": 4.0,
+    "T": 10.0,
+    "tau": 0.002,
+    "f": 20.0,
+    "d_mm": 10.0,
+    "div_mrad": 0.677363455295563,
+    "spec": "1/e",
+    "rho": 1.0,
+    "theta": 0.0,
+    "dr_r": 0.5,
+    "dr_T": 10.0,
+    "lens_f_mm": 100.0,
+    "lens_b_mm": 10.0,
+    "fiber_NA": 0.2
+   },
+   "eh": {
+    "mpe_ansi": 0.0004527,
+    "od_rng": 5.25,
+    "od_worst": 5.662,
+    "nohd": 7004.0,
+    "lol_nohd": 47.74,
+    "fo_nohd": 20.13,
+    "dr_nhz": 2.372,
+    "dr_od": 1.352
+   }
+  },
+  {
+   "c": {
+    "dosya": "Q-Switched NdYAG Marker.txt",
+    "wl": 1064.0,
+    "mode": "rp",
+    "kind": "P",
+    "value": 10.0,
+    "T": 10.0,
+    "tau": 1e-07,
+    "f": 10000.0,
+    "d_mm": 5.0,
+    "div_mrad": 1.0,
+    "spec": "1/e2",
+    "rho": 1.0,
+    "theta": 0.0,
+    "dr_r": 0.5,
+    "dr_T": 10.0,
+    "lens_f_mm": 102.0,
+    "lens_b_mm": 5.0,
+    "fiber_NA": null
+   },
+   "eh": {
+    "mpe_ansi": 0.002812,
+    "od_rng": 3.957,
+    "od_worst": 3.966,
+    "nohd": 951.3,
+    "lol_nohd": 19.38,
+    "dr_nhz": 0.336,
+    "dr_od": 0.0
+   }
+  },
+  {
+   "c": {
+    "dosya": "Surelite II-20 NdYAG.txt",
+    "wl": 1064.0,
+    "mode": "rp",
+    "kind": "Q",
+    "value": 0.55,
+    "T": 10.0,
+    "tau": 5e-09,
+    "f": 20.0,
+    "d_mm": 4.67,
+    "div_mrad": 0.6,
+    "spec": "1/e2",
+    "rho": 1.0,
+    "theta": 0.0,
+    "dr_r": 0.5,
+    "dr_T": 10.0,
+    "lens_f_mm": 0,
+    "lens_b_mm": 0,
+    "fiber_NA": null
+   },
+   "eh": {
+    "mpe_ansi": 2.659e-05,
+    "od_rng": 6.026,
+    "od_worst": 6.031,
+    "nohd": 17100.0,
+    "dr_nhz": 3.629,
+    "dr_od": 1.722
+   }
+  },
+  {
+   "c": {
+    "dosya": "Surelite III-10 UV.txt",
+    "wl": 355.0,
+    "mode": "rp",
+    "kind": "Q",
+    "value": 0.225,
+    "T": 100.0,
+    "tau": 5e-09,
+    "f": 10.0,
+    "d_mm": 6.33,
+    "div_mrad": 0.6,
+    "spec": "1/e2",
+    "rho": 1.0,
+    "theta": 0.0,
+    "dr_r": 0.5,
+    "dr_T": 100.0,
+    "lens_f_mm": 0,
+    "lens_b_mm": 0,
+    "fiber_NA": null
+   },
+   "eh": {
+    "mpe_ansi": 0.01,
+    "od_rng": 3.029,
+    "od_worst": 4.284,
+    "nohd": 398.8,
+    "dr_nhz": 0.085,
+    "dr_od": 0.0
+   }
+  }
+ ]
+}

@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lazer Emniyet Analizi</title>
+  <meta name="description" content="Lazer tehlike analizi: MPE, NOHD, OD, EN 207/EN 208 göz koruyucu seçimi (ICNIRP 2013 · IEC 60825-1:2014 · 2006/25/AT · ANSI Z136.1-2014).">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 4 62 58H2Z' fill='%23ffd400' stroke='%23111' stroke-width='4' stroke-linejoin='round'/%3E%3Ccircle cx='32' cy='40' r='5' fill='%23111'/%3E%3Cpath d='M32 40 20 28M32 40l14-6M32 40l-2 12' stroke='%23111' stroke-width='3'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <svg width="30" height="27" viewBox="0 0 64 58" aria-hidden="true"><path d="M32 3 61 55H3Z" fill="#ffd400" stroke="#111" stroke-width="4" stroke-linejoin="round"/><circle cx="32" cy="37" r="5" fill="#111"/><path d="M32 37 19 25M32 37l15-6M32 37l-2 12M32 37h-14" stroke="#111" stroke-width="3" stroke-linecap="round"/></svg>
+      <div>
+        <h1>Lazer Emniyet Analizi</h1>
+        <div class="std">ICNIRP 2013 · IEC 60825-1:2014 · 2006/25/AT · ANSI Z136.1-2014 · EN 207 / EN 208</div>
+      </div>
+    </div>
+    <nav class="toolbar" aria-label="Komutlar">
+      <button class="tbtn" id="btn-new" title="Yeni analiz (varsayılan değerler)">Yeni</button>
+      <div class="menu">
+        <button class="tbtn" id="btn-examples" aria-haspopup="true" aria-expanded="false">Örnekler ▾</button>
+        <div class="menu-list hidden" id="menu-examples" role="menu"></div>
+      </div>
+      <button class="tbtn" id="btn-save" title="Envantere kaydet">Kaydet</button>
+      <button class="tbtn" id="btn-inventory">Envanter</button>
+      <button class="tbtn primary" id="btn-report">Rapor</button>
+      <button class="tbtn" id="btn-help">Yardım</button>
+      <button class="selftest" id="selftest" title="Hesap motoru öz-denetimi">Öz-denetim…</button>
+    </nav>
+  </header>
+  <div id="selftest-banner" class="banner fail hidden" role="alert"></div>
+
+  <main class="layout">
+    <section class="col" id="inputs" aria-label="Girişler"></section>
+    <section class="col" id="results" aria-label="Sonuçlar" aria-live="polite"></section>
+  </main>
+
+  <!-- Envanter -->
+  <dialog id="dlg-inventory" aria-labelledby="inv-title">
+    <div class="dlg-head">
+      <h2 id="inv-title">Lazer envanteri</h2>
+      <input class="search" id="inv-search" placeholder="Ara: tanım, model, seri no, konum…" aria-label="Envanterde ara">
+      <div class="sp">
+        <button class="btn" id="inv-export">JSON dışa aktar</button>
+        <button class="btn" id="inv-csv">CSV (Excel)</button>
+        <label class="btn" for="inv-import-file">JSON içe aktar</label>
+        <input type="file" id="inv-import-file" accept=".json,application/json" class="hidden">
+        <button class="btn" data-close>Kapat</button>
+      </div>
+    </div>
+    <div class="dlg-body" id="inv-body"></div>
+  </dialog>
+
+  <!-- Rapor önizleme -->
+  <dialog id="dlg-report" aria-labelledby="rep-title">
+    <div class="dlg-head">
+      <h2 id="rep-title">Lazer tehlike analizi raporu</h2>
+      <div class="sp">
+        <button class="btn primary" id="rep-print">Yazdır / PDF</button>
+        <button class="btn" id="rep-html">HTML olarak kaydet</button>
+        <button class="btn" data-close>Kapat</button>
+      </div>
+    </div>
+    <div class="dlg-body"><div class="report-preview" id="rep-body"></div></div>
+  </dialog>
+
+  <!-- Yardım -->
+  <dialog id="dlg-help" aria-labelledby="help-title">
+    <div class="dlg-head">
+      <h2 id="help-title">Yardım ve yöntem</h2>
+      <div class="sp"><button class="btn" data-close>Kapat</button></div>
+    </div>
+    <div class="dlg-body help-doc" id="help-body"></div>
+  </dialog>
+
+  <!-- Öz-denetim ayrıntısı -->
+  <dialog id="dlg-selftest" aria-labelledby="st-title">
+    <div class="dlg-head">
+      <h2 id="st-title">Hesap motoru öz-denetimi</h2>
+      <div class="sp"><button class="btn" data-close>Kapat</button></div>
+    </div>
+    <div class="dlg-body" id="st-body"></div>
+  </dialog>
+
+  <div id="report-print" class="report" aria-hidden="true"></div>
+  <div class="toast" id="toast" role="status"></div>
+
+  <script src="js/core/units.js"></script>
+  <script src="js/core/mpe.js"></script>
+  <script src="js/core/mpe_aord.js"></script>
+  <script src="js/core/beam.js"></script>
+  <script src="js/core/eyewear.js"></script>
+  <script src="js/core/analysis.js"></script>
+  <script src="js/core/selftest.js"></script>
+  <script src="js/ui/examples.js"></script>
+  <script src="js/ui/form.js"></script>
+  <script src="js/ui/render.js"></script>
+  <script src="js/ui/store.js"></script>
+  <script src="js/ui/report.js"></script>
+  <script src="js/ui/help.js"></script>
+  <script src="js/ui/app.js"></script>
+</body>
+</html>
