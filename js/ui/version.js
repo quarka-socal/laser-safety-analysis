@@ -6,7 +6,7 @@
 (function (root) {
   'use strict';
   const LE = (root.LE = root.LE || {});
-  LE.APP_VERSION = '1.5.1';
+  LE.APP_VERSION = '1.5.2';
   LE.APP_DATE = '2026-11-16'; // sürüm tarihi
   LE.BUILD_TIME = /*BUILD_TIME*/ null; // tek dosya derlemesinde tools/build-single.js yazar
   LE.APP_AUTHOR = 'S.OCAL';

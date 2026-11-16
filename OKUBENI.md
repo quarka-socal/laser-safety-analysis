@@ -190,7 +190,7 @@ Standart tablolarındaki yuvarlamadan doğan küçük basamaklar olduğu gibi uy
 elle hesaplanmış değerler, EasyHaz LSO örnek dosyalarındaki sonuçlar, yayımlanmış EN 207/208 örnekleri).
 Biri bile başarısız olursa kırmızı uyarı bandı çıkar. Başlıktaki yeşil rozete tıklayarak ayrıntıyı görebilirsiniz.
 
-**Geliştirme testleri** — `node --test test/*.test.js` (Node ≥ 18; Node 18 ve 24 ile denenir): 119 test.
+**Geliştirme testleri** — `node --test test/*.test.js` (Node ≥ 18; Node 18 ve 24 ile denenir): 130 test.
 
 - ICNIRP Tablo 5, 7, 8 satır noktaları; düzeltme faktörleri; ölçüm açıklıkları
 - Tüm dalga boylarında MPE'nin süreyle azalmadığı (bilinen tablo basamakları hariç) ve sürekliliği
@@ -322,6 +322,13 @@ Lisans: **GNU Genel Kamu Lisansı sürüm 3 ya da (seçiminize bağlı olarak) d
 uygulamanın içinde Hakkında penceresinden okunabilir (`js/ui/license.js`; test, iki metnin aynı olduğunu denetler).
 Kaynak kodu HTML/JS dosyaları ve `android/` klasörüdür; tek dosya sürümü de küçültülmemiş, okunur kaynak içerir.
 
+## Güvenlik
+
+Siber güvenlik değerlendirmesi, bulgular, düzeltmeler, kanıtlar ve kalan riskler: **`GUVENLIK.md`**. Özet: uygulama hiçbir
+izin istemez (ağ yok; işletim sistemi düzeyinde de engelli), dışarıdan veri yalnız kullanıcının seçtiği JSON dosyasıyla girer
+ve her metin kaçışlı basılır, tek dosya sürümünde İçerik Güvenlik Politikası yalnız gömülü betiklere izin verir, veriler yalnız
+cihazda kalır, dağıtım APK'sı hata ayıklanamaz. `test/guvenlik.test.js` bunları her test çalıştırmasında denetler.
+
 ## Android sürümü
 
 `android/` klasöründeki uygulama, masaüstündeki doğrulanmış tek dosyalık sürümü (`dist/LazerEmniyet.html`) olduğu gibi
@@ -337,13 +344,14 @@ içine gömen çevrimdışı bir **WebView kabuğudur**. Hesap motoru, arayüz, 
 | Geri tuşu | Önce açık pencereyi/menüyü kapatır, sonra uygulamadan çıkar |
 | Tema ve dil | Uygulama içi Ayarlar (Sistem/Açık/Koyu, Türkçe/English); durum çubuğu şeridi, gezinme çubuğu, Android bildirimleri ve onay pencereleri de seçimi izler |
 | Ağ | **INTERNET izni yok, hiçbir izin istenmez.** Sayfa APK'nın içinden, ağa çıkmayan sabit bir https kökenden sunulur |
-| Yedek | Bulut yedeği kapalıdır (`allowBackup=false`); envanter yalnız cihazda kalır, yedek için **JSON dışa aktar** |
+| Yedek | Bulut yedeği ve cihazdan cihaza aktarım kapalıdır (`allowBackup=false`, `dataExtractionRules`); envanter ve Amsler geçmişi yalnız cihazda kalır. Yedek için **JSON dışa aktar**, Amsler sonuçları için **Yazdır / PDF** |
+| Güvenlik | Dağıtım (release) derlemesi hata ayıklanamaz; WebView yalnız kendi sayfasını yükler, dosya ve içerik erişimi kapalı, dış adres açılmaz; sayfada İçerik Güvenlik Politikası. Ayrıntılar ve kanıtlar: `GUVENLIK.md` |
 | Uygulama adı | Ana ekranda ve uygulama listesinde **Laser Safety Analysis** |
 | Amsler Grid testi | Ekranın fiziksel piksel yoğunluğu (`screenMetrics`) ile 5 mm kareler; test süresince ekran açık, parlaklık en yüksek, yakınlaştırma sıfır (`testScreen`) |
 | Hakkında | Uygulama sürümü ve sürüm kodu, cihaz, Android ve WebView sürümü (`appInfo`) |
 
 Gereksinim: Android 11 veya üstü (minSdk 30); hedef Android 15 (targetSdk 35). Uygulama kimliği `com.quarka.lazeremniyet`.
-Sürüm numarası `js/ui/version.js` dosyasındaki uygulama sürümünden otomatik alınır: 1.5.1 → versionName 1.5.1, versionCode 10501.
+Sürüm numarası `js/ui/version.js` dosyasındaki uygulama sürümünden otomatik alınır: 1.5.2 → versionName 1.5.2, versionCode 10502.
 Hesap motorunun sürümü ayrıdır: `js/core/analysis.js` → `ENGINE_VERSION`, şu an 1.3.1.
 
 ### Derleme
@@ -353,11 +361,13 @@ Sistem JDK'sında `javac` yoktur; Android Studio'nun JDK'sı kullanılır. Gradl
 ```bash
 cd android
 export JAVA_HOME=~/Downloads/android-studio/jbr
-./gradlew --offline -Porg.gradle.java.installations.paths=$JAVA_HOME :app:assembleDebug
+./gradlew --offline -Porg.gradle.java.installations.paths=$JAVA_HOME :app:assembleRelease
 ```
 
-Çıktı: `android/app/build/outputs/apk/debug/app-debug.apk`, yaklaşık 2,6 MB. Klasör Android Studio ile de açılabilir
-(Open → `android`).
+Çıktı: `android/app/build/outputs/apk/release/app-release.apk`, yaklaşık 2,2 MB. **Telefona bu dağıtım (release) APK'sı
+kurulur**: hata ayıklanamaz, bu bilgisayarın anahtarıyla imzalıdır (debug sürümüyle aynı anahtar, bu yüzden önceki sürümlerin
+üzerine kurulur). Geliştirme ve emülatörde Chrome hata ayıklama protokolüyle sınama için `:app:assembleDebug`
+(`apk/debug/app-debug.apk`) kullanılır. Klasör Android Studio ile de açılabilir (Open → `android`).
 
 Derleme `copyWebApp` göreviyle `../dist/LazerEmniyet.html` dosyasını varlık olarak kopyalar. Dosya eskiyse görev derlemeyi
 durdurur. Bunun iki ölçütü var: gömülü uygulama ya da motor sürümü kaynaktakiyle aynı değilse, ya da Android köprüsü
@@ -368,7 +378,7 @@ durdurur. Bunun iki ölçütü var: gömülü uygulama ya da motor sürümü kay
 - **USB ile** (telefonda Geliştirici seçenekleri → USB hata ayıklama açık):
 
   ```bash
-  ~/Android/Sdk/platform-tools/adb install -r android/app/build/outputs/apk/debug/app-debug.apk
+  ~/Android/Sdk/platform-tools/adb install -r android/app/build/outputs/apk/release/app-release.apk
   ```
 
 - **Dosya ile**: APK'yı telefona kopyalayıp dosya yöneticisinden açın. Telefon, o uygulama için "bilinmeyen kaynaklardan
@@ -379,7 +389,7 @@ durdurur. Bunun iki ölçütü var: gömülü uygulama ya da motor sürümü kay
 1. Web kaynaklarında (`js/`, `css/`, `index.html`) değişiklik yapıldıysa önce testleri çalıştırın, sonra tek dosyayı
    üretin: `node --test test/*.test.js`, ardından `node tools/build-single.js`. Hesap motoru değiştiyse
    `ENGINE_VERSION` değerini artırın; Android sürüm numarası buradan gelir.
-2. Yukarıdaki komutla APK'yı yeniden derleyin ve `adb install -r` ile üzerine kurun. Aynı bilgisayarın debug anahtarıyla
+2. Yukarıdaki komutla APK'yı yeniden derleyin ve `adb install -r` ile üzerine kurun. Aynı bilgisayarın anahtarıyla
    imzalı APK verileri korur.
 3. Başka bir bilgisayarda derlenen APK farklı anahtarla imzalanır. O zaman önce kaldırmak gerekir ve bu envanteri siler.
    Güncellemeden önce **Envanter → JSON dışa aktar** ile yedek alın.
@@ -452,6 +462,7 @@ js/ui/                form, sonuç ekranı, envanter, rapor, yardım, örnekler
   lang_en.js          İngilizce sözlük
 test/                 Node testleri; test/data: EasyHaz 2014 doğrulama verisi ve 2010 örnek dosyaları
 LICENSE               GNU GPL v3 tam metni
+GUVENLIK.md           siber güvenlik değerlendirmesi (bulgular, kanıtlar, kalan riskler)
 tools/kisayol-kur.sh  Linux masaüstü kısayolu (uygulama menüsü + masaüstü); --kaldir ile kaldırır
 tools/laser-safety-analysis.svg  kısayol simgesi
 tools/build-single.js tek dosya derlemesi → dist/LazerEmniyet.html (derleme zamanını da yazar)
@@ -479,6 +490,16 @@ Klasör bir git deposudur. İlk commit `1be12d6`, inceleme öncesi v1.3 durumudu
 `git log` ile görülebilir.
 
 ## Sürüm notları
+
+**Uygulama 1.5.2 (16.11.2026, motor 1.3.1 değişmedi) — güvenlik**
+- Siber güvenlik incelemesi: 8 bulgu (2 orta, 3 düşük, 3 sertleştirme), hepsi düzeltildi; ayrıntılar `GUVENLIK.md`.
+- Dağıtım APK'sı artık release derlemesi (hata ayıklanamaz; aynı anahtar, veriler korunarak üzerine kurulur).
+- CSV dışa aktarmada formül enjeksiyonu koruması; içe aktarmada yalnız tanımlı alanlar.
+- Tek dosya sürümünde İçerik Güvenlik Politikası (gömülü betiklerin SHA-256 özetleri; ağ, çerçeve, `eval` kapalı);
+  kaydedilen HTML rapor betik çalıştıramaz.
+- Android: dış adresler engellenir (sistem tarayıcısına da verilmez), WebView içerik ve konum erişimi kapalı,
+  cihazdan cihaza aktarım kapalı (`dataExtractionRules`).
+- Testler 130 (yeni: guvenlik.test.js, 11 test).
 
 **PC masaüstü kısayolu (16.11.2026, uygulama 1.5.1)** — `tools/kisayol-kur.sh`: Linux uygulama menüsüne ve masaüstüne
 "Laser Safety Analysis" simgesi; tek dosya sürümünü varsayılan tarayıcıda açar. `desktop-file-validate` ile geçerli;

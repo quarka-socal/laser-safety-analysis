@@ -75,7 +75,9 @@ class MainActivity : Activity() {
         with(web.settings) {
             javaScriptEnabled = true
             domStorageEnabled = true // envanter ve oturum (localStorage) kalıcı
-            allowFileAccess = false
+            allowFileAccess = false // file:// yok
+            allowContentAccess = false // content:// yok (dosyalar yalnız sistem dosya seçicisiyle)
+            setGeolocationEnabled(false)
             builtInZoomControls = true // iki parmakla yakınlaştırma (tablolar, grafik)
             displayZoomControls = false
             setSupportMultipleWindows(false)
@@ -179,14 +181,9 @@ class MainActivity : Activity() {
 
         override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
             val u = request.url
-            if (u.host == HOST) return false
-            // Sayfadan dışarıya bağlantı yok; olursa uygulama içinde açılmaz, sistem tarayıcısına verilir.
-            if (u.scheme == "http" || u.scheme == "https") {
-                try {
-                    startActivity(Intent(Intent.ACTION_VIEW, u))
-                } catch (_: ActivityNotFoundException) {
-                }
-            }
+            if (u.scheme == "https" && u.host == HOST) return false
+            // Sayfada dış bağlantı yoktur. Başka her adres engellenir ve sistem tarayıcısına da verilmez:
+            // sayfaya bir şekilde betik sızsa bile adres çubuğu üzerinden veri dışarı taşınamaz.
             return true
         }
     }

@@ -8,9 +8,12 @@
 
         allowBackup=false: envanter yalnız bu cihazda kalır (bulut yedeği yok);
         yedek için uygulamadaki "JSON dışa aktar" kullanılır.
+        dataExtractionRules: Android 12+ cihazlarda bazı üreticiler allowBackup=false olsa da cihazdan
+        cihaza aktarım yapar; kurallar bulut yedeğini ve cihaz aktarımını tüm klasörler için kapatır.
     -->
     <application
         android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
         android:enableOnBackInvokedCallback="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"

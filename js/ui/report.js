@@ -181,7 +181,9 @@
   function standaloneHTML(body, title) {
     const css = Array.from(document.styleSheets).map((s) => { try { return Array.from(s.cssRules).map((r) => r.cssText).join('\n'); } catch (e) { return ''; } }).join('\n');
     const lang = (typeof document !== 'undefined' && document.documentElement.lang) || 'tr';
-    return '<!doctype html><html lang="' + lang + '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>' + LE.render.esc(title) + '</title><style>' + css +
+    return '<!doctype html><html lang="' + lang + '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">' +
+      '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; style-src \'unsafe-inline\'; img-src data:">' +
+      '<title>' + LE.render.esc(title) + '</title><style>' + css +
       '\nbody{background:#fff;padding:18px} #report-print{display:block}</style></head><body><div id="report-print" class="report" style="max-width:900px;margin:0 auto">' + body + '</div></body></html>';
   }
 

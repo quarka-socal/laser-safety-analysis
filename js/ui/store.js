@@ -140,8 +140,14 @@
     return { added, updated, skipped, list };
   }
 
+  /**
+   * CSV hücresi. Formül enjeksiyonu (CWE-1236): =, +, -, @, sekme ya da satır başıyla başlayan metin
+   * Excel/LibreOffice'te formül olarak çalışmasın diye tek tırnakla başlatılır; yalnız sayı olan metin
+   * (ör. "-12,5") değişmez.
+   */
   function csvCell(v) {
-    const s = v === null || v === undefined ? '' : String(v);
+    let s = v === null || v === undefined ? '' : String(v);
+    if (/^[=+\-@\t\r]/.test(s) && !/^[-+]?\d+(?:[.,]\d+)?$/.test(s)) s = "'" + s;
     return /[;"\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
   }
 

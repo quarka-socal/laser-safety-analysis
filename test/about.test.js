@@ -13,8 +13,8 @@ const ROOT = path.join(__dirname, '..');
 const UI = path.join(ROOT, 'js', 'ui');
 for (const m of ['version', 'i18n', 'lang_en', 'license', 'about', 'help']) require(path.join(UI, m + '.js'));
 
-test('sürüm: uygulama 1.5.1, sürüm tarihi ISO biçiminde, derleme zamanı kaynakta boş', () => {
-  assert.equal(LE.APP_VERSION, '1.5.1');
+test('sürüm: uygulama 1.5.2, sürüm tarihi ISO biçiminde, derleme zamanı kaynakta boş', () => {
+  assert.equal(LE.APP_VERSION, '1.5.2');
   assert.match(LE.APP_DATE, /^\d{4}-\d{2}-\d{2}$/);
   assert.equal(LE.BUILD_TIME, null);
 });
@@ -28,7 +28,7 @@ test('Hakkında: geliştirici S.OCAL, GNU GPL v3 (ya da sonrası), sürüm, tari
   assert.match(h, /GNU Genel Kamu Lisansı/);
   assert.match(h, /3\. sürümü ya da/);
   assert.match(h, /GPL-3\.0-or-later/);
-  assert.ok(h.includes('1.5.1'));
+  assert.ok(h.includes('1.5.2'));
   assert.ok(h.includes(LE.APP_DATE.split('-').reverse().join('.')), 'Türkçe tarih GG.AA.YYYY');
   assert.ok(h.includes(LE.analysis.ENGINE_VERSION));
   assert.match(h, /64\/64/);
@@ -92,7 +92,7 @@ test('tek dosya derlemesi: dış kaynak yok, derleme zamanı ve sürüm başlı�
   try {
     execFileSync(process.execPath, [path.join(ROOT, 'tools', 'build-single.js'), out], { stdio: 'pipe' });
     const html = fs.readFileSync(out, 'utf8');
-    assert.match(html, /<!-- Lazer Emniyet Analizi 1\.5\.1, motor v\d+\.\d+\.\d+, tek dosya derlemesi \d{4}-/);
+    assert.match(html, /<!-- Lazer Emniyet Analizi 1\.5\.2, motor v\d+\.\d+\.\d+, tek dosya derlemesi \d{4}-/);
     assert.match(html, /LE\.BUILD_TIME = '\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d/);
     assert.doesNotMatch(html, /<script src=|<link rel="stylesheet"/);
     assert.match(html, /GNU GENERAL PUBLIC LICENSE/);

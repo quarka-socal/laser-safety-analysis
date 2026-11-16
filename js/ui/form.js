@@ -555,9 +555,20 @@
     return JSON.parse(JSON.stringify(state));
   }
 
+  /**
+   * Durumu yükler (oturum, envanter, içe aktarılan JSON). Yalnız tanımlı alanlar ve basit değerler alınır:
+   * "__proto__" gibi anahtarlar ya da bilinmeyen alanlar durumu kirletemez.
+   */
   function setState(s) {
     const d = defaultState();
-    state = { v: Object.assign(d.v, (s && s.v) || {}), u: Object.assign(d.u, (s && s.u) || {}) };
+    const own = (o, k) => !!o && typeof o === 'object' && Object.prototype.hasOwnProperty.call(o, k);
+    const plain = (x) => x === null || ['string', 'number', 'boolean'].indexOf(typeof x) >= 0;
+    const src = s && typeof s === 'object' ? s : {};
+    for (const id in FIELDS) {
+      if (own(src.v, id) && plain(src.v[id])) d.v[id] = src.v[id];
+      if (own(src.u, id) && own(d.u, id) && typeof src.u[id] === 'string') d.u[id] = src.u[id];
+    }
+    state = d;
     // içe aktarılan JSON'da tür farkları: onay kutusu boolean, seçim değeri metin olmalı
     for (const id in FIELDS) {
       const f = FIELDS[id];

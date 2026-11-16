@@ -83,6 +83,9 @@ android {
 
     buildTypes {
         release {
+            // Dağıtım derlemesi: hata ayıklanamaz (WebView uzaktan hata ayıklaması ve run-as kapalı).
+            // Kurulu sürümle aynı anahtarla imzalanır; böylece telefonda üzerine kurulur, veriler korunur.
+            signingConfig = signingConfigs.getByName("debug")
             optimization {
                 enable = false
             }

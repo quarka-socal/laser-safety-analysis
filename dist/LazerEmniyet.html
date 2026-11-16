@@ -1,8 +1,9 @@
 <!doctype html>
 <html lang="tr">
 <head>
-  <!-- Lazer Emniyet Analizi 1.5.1, motor v1.3.1, tek dosya derlemesi 2026-11-16T15:57:12Z -->
+  <!-- Lazer Emniyet Analizi 1.5.2, motor v1.3.1, tek dosya derlemesi 2026-11-16T17:07:03Z -->
   <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-65GZBVBNgl4HEQWTlbrf4mUxX5NcicyRewLbkfxZCWo=' 'sha256-rS2X365pE9Chf6h1VPgBzlsoP9J7u4/T+9VZqyWEoAM=' 'sha256-Dz+YbZK/41RLO3XFtbw1i7MmUQXqBapGZqLiqz2S1e0=' 'sha256-POKwsSv9f7b2Wp5/L0URWCHleppwY6G6qpOynUOz2vc=' 'sha256-Oc1E+7+ebJNPFzrUzrDGSrenuc2Xjy3byw5GpGBv16U=' 'sha256-7npXC9S6Oj8bz0PKCemUU73We9buDLGFeb+hZ0oRzxU=' 'sha256-kEfHb9F9YjTlHYKJtwe0JTwEgw2bv6XaIi/5we3pOiA=' 'sha256-Y6P0ymBYGX1JgTTkv2hW+pW4Qi7fQSWTzNyzwFjhpgk=' 'sha256-H0PT0ygMoVejeTlht8sF7TI6fInZFUSa+BJJ4wAA0XQ=' 'sha256-FpmaP6+4JWR8e4rjwI7JN70pU6bkxZbJH1/VkrLheJo=' 'sha256-Ayf2GcRHjK8zWl/p9yaoBh1/JBCXN1MZEwMahe5kgNc=' 'sha256-oVgzi9ZhVZGreAz/OwmWf7Q2M6P46xp6z7MaeNPbDew=' 'sha256-pt07iuow4IvT40pucIeiRkSaAI4OuTzm0FGP3T0Qz2E=' 'sha256-TU7yO41/HMZZb6oCrmRQ6JwcBKPBaIDN9HeYZL+FT1s=' 'sha256-wHCgAKpl2k4w5NkYBcv3eHOwf3sfPx03Tj1TI+j+MZc=' 'sha256-K7qEtYHwh7Yxnp85SQhsg0UMz7CffE1dxVUyfbwJCdk=' 'sha256-N9HAkYUZs39Rj2ybUGMo9h+tKC+q2hDGY7lhoRUveuE=' 'sha256-5LA2Y95XT7Q6ztEL8RyJTsgER9YHvw1cpa4AyKSZdXE=' 'sha256-Sgpp+sHrqaPwJ2VOivvd7bV/gOaQ7OvwkwTAty1qJ8k=' 'sha256-Nvf0Ms47L1uZRMrwn0TddOL3tKOG3UcTFpnT85oPsFg=' 'sha256-WClfXWu38uyIkOCZYrFids4tNqF4ngq691ZBod2I5DI='; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Lazer Emniyet Analizi</title>
   <meta name="description" content="Lazer tehlike analizi: MPE, NOHD, OD, EN 207/EN 208 göz koruyucu seçimi (ICNIRP 2013 · IEC 60825-1:2014 · 2006/25/AT · ANSI Z136.1-2014).">
@@ -2756,9 +2757,9 @@ div.license {
 (function (root) {
   'use strict';
   const LE = (root.LE = root.LE || {});
-  LE.APP_VERSION = '1.5.1';
+  LE.APP_VERSION = '1.5.2';
   LE.APP_DATE = '2026-11-16'; // sürüm tarihi
-  LE.BUILD_TIME = '2026-11-16T15:57:12Z'; // tek dosya derlemesinde tools/build-single.js yazar
+  LE.BUILD_TIME = '2026-11-16T17:07:03Z'; // tek dosya derlemesinde tools/build-single.js yazar
   LE.APP_AUTHOR = 'S.OCAL';
   LE.APP_LICENSE = 'GPL-3.0-or-later';
 })(typeof globalThis !== 'undefined' ? globalThis : this);
@@ -4273,9 +4274,20 @@ div.license {
     return JSON.parse(JSON.stringify(state));
   }
 
+  /**
+   * Durumu yükler (oturum, envanter, içe aktarılan JSON). Yalnız tanımlı alanlar ve basit değerler alınır:
+   * "__proto__" gibi anahtarlar ya da bilinmeyen alanlar durumu kirletemez.
+   */
   function setState(s) {
     const d = defaultState();
-    state = { v: Object.assign(d.v, (s && s.v) || {}), u: Object.assign(d.u, (s && s.u) || {}) };
+    const own = (o, k) => !!o && typeof o === 'object' && Object.prototype.hasOwnProperty.call(o, k);
+    const plain = (x) => x === null || ['string', 'number', 'boolean'].indexOf(typeof x) >= 0;
+    const src = s && typeof s === 'object' ? s : {};
+    for (const id in FIELDS) {
+      if (own(src.v, id) && plain(src.v[id])) d.v[id] = src.v[id];
+      if (own(src.u, id) && own(d.u, id) && typeof src.u[id] === 'string') d.u[id] = src.u[id];
+    }
+    state = d;
     // içe aktarılan JSON'da tür farkları: onay kutusu boolean, seçim değeri metin olmalı
     for (const id in FIELDS) {
       const f = FIELDS[id];
@@ -5163,8 +5175,14 @@ div.license {
     return { added, updated, skipped, list };
   }
 
+  /**
+   * CSV hücresi. Formül enjeksiyonu (CWE-1236): =, +, -, @, sekme ya da satır başıyla başlayan metin
+   * Excel/LibreOffice'te formül olarak çalışmasın diye tek tırnakla başlatılır; yalnız sayı olan metin
+   * (ör. "-12,5") değişmez.
+   */
   function csvCell(v) {
-    const s = v === null || v === undefined ? '' : String(v);
+    let s = v === null || v === undefined ? '' : String(v);
+    if (/^[=+\-@\t\r]/.test(s) && !/^[-+]?\d+(?:[.,]\d+)?$/.test(s)) s = "'" + s;
     return /[;"\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
   }
 
@@ -5377,7 +5395,9 @@ div.license {
   function standaloneHTML(body, title) {
     const css = Array.from(document.styleSheets).map((s) => { try { return Array.from(s.cssRules).map((r) => r.cssText).join('\n'); } catch (e) { return ''; } }).join('\n');
     const lang = (typeof document !== 'undefined' && document.documentElement.lang) || 'tr';
-    return '<!doctype html><html lang="' + lang + '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>' + LE.render.esc(title) + '</title><style>' + css +
+    return '<!doctype html><html lang="' + lang + '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">' +
+      '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; style-src \'unsafe-inline\'; img-src data:">' +
+      '<title>' + LE.render.esc(title) + '</title><style>' + css +
       '\nbody{background:#fff;padding:18px} #report-print{display:block}</style></head><body><div id="report-print" class="report" style="max-width:900px;margin:0 auto">' + body + '</div></body></html>';
   }
 
