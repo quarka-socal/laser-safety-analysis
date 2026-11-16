@@ -17,7 +17,7 @@
   'use strict';
   const LE = (root.LE = root.LE || {});
 
-  const ENGINE_VERSION = '1.3.0';
+  const ENGINE_VERSION = '1.3.1';
 
   function defaultExposure(l) {
     if (l < 400) return 3e4;

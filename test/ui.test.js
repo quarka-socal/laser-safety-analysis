@@ -30,11 +30,16 @@ test('1250–1400 nm: ikili sınır bilgisi doğru ve uyarı değil not olarak',
   assert.match(n, /2 × deri/);
 });
 
-test('2006/25/AT T_min: tam 400 ve 1400 nm\'de uygulanan sınırın grubu (daha koruyucu)', () => {
-  assert.equal(LE.aord.Tmin(400), 18e-6, '400 nm retina sınırıyla değerlendirilir');
-  assert.equal(LE.aord.Tmin(1400), 1e-3, '1400 nm kornea (IR) sınırıyla değerlendirilir');
-  assert.equal(LE.aord.Tmin(399.9), 1e-9);
-  assert.equal(LE.aord.Tmin(1399.9), 50e-6);
+test('2006/25/AT T_min: Tablo 2.6 aralıkları harfiyen (üstten kapalı); komşu grubun T_min\'i daha koruyucu değil', () => {
+  assert.equal(LE.aord.Tmin(400), 1e-9, '315 < λ ≤ 400 nm');
+  assert.equal(LE.aord.Tmin(1400), 50e-6, '1050 < λ ≤ 1400 nm');
+  assert.equal(LE.aord.Tmin(400.1), 18e-6);
+  assert.equal(LE.aord.Tmin(1400.1), 1e-3);
+  // 400 nm, 1 ps, 1 MHz: 18 µs gruplaması seçilseydi NOHD 436 m yerine 224 m olurdu (Kural 3 daha gevşek)
+  const inp = { limits: 'aord', lambda: 400, mode: 'rp', Q: 1e-6, tau: 1e-12, f: 1e6, T: 0.25, beam: gauss(2e-3, 1e-3) };
+  const lit = LE.analysis.analyze(inp).eye.nohd;
+  const near400 = LE.analysis.analyze(Object.assign({}, inp, { lambda: 400.1 })).eye.nohd;
+  assert.ok(lit > 1.5 * near400, 'tam 400 nm (1 ns gruplama) 400,1 nm\'den (18 µs) daha koruyucu');
 });
 
 test('rapor: yalnız 2006/25/AT modunda bu setin faktörleri yazılır', () => {
