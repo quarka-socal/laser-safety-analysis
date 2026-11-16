@@ -1,8 +1,9 @@
 # Laser Safety Analysis · Lazer Emniyet Analizi
 
-Çevrimdışı lazer tehlike analizi ve sahada hızlı göz kontrolü: **MPE**, **NOHD / ENOHD**, gerekli **optik yoğunluk (OD)**,
-**EN 207 / EN 208** göz koruyucu seviyesi, yaygın yansıma, deri, mercek ve fiber tehlikeleri; **Amsler Grid testi**.
-Android uygulaması ve tek dosyalık PC sürümü aynı, doğrulanmış koddur.
+Lazer hasar analizi için çevrimdışı kullanılabilen Android uygulaması ve tek dosyalık PC sürümü.Android uygulaması ve tek dosyalık PC sürümü birebir aynıdır.
+**MPE**, **NOHD / ENOHD**, **optik yoğunluk (OD)**, **EN 207 / EN 208** hesaplarını yapar.
+Lazer emniyet gözlük seçimi, deri korumasının belirlenmesi ve lazer kaynaklı göz hasarının ilk tespitini yönelik **Amsler Grid testi** için laboratuvar ve sahada kullanılabilir.
+
 
 > Sonuçlar girilen verilere dayanır ve yetkin bir lazer güvenlik sorumlusunun değerlendirmesinin yerine geçmez.
 
