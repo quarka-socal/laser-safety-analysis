@@ -753,8 +753,8 @@
     const allCrit = out.eye.criteria.concat(out.skin.criteria);
     if (allCrit.some((c) => c.subNs)) w.push('1 ns altı darbe: ICNIRP bu bölgede sınır vermiyor; muhafazakâr geçici yaklaşım (1 ns sınırının %10\'u veya ışınım sınırı) uygulandı.');
     if (allCrit.some((c) => c.subFs)) w.push('100 fs altı darbe: tepe ışınımı 100 fs sınırıyla sınırlandırıldı (ICNIRP önerisi).');
-    if (l >= 1250 && l < 1400) w.push('1250–1400 nm: C_C çok büyüdüğü için ön göz segmenti ikili sınırı (2 × deri MPE) uygulanıyor; IEC 60825-1:2014 Tablo A.1 notunu ve güncel literatürü dikkate alın.');
-    if (l >= 400 && l < 700 && s.mode !== 'sp' && s.T > 0.25) n.push('Görünür bölgede 0,25 s kazara bakışa karşılık gelir; ' + s.T + ' s kasıtlı/uzun bakış varsayımıdır.');
+    if (l >= 1200 && l < 1400 && out.sets.indexOf('ICNIRP') >= 0) n.push('1200–1400 nm: retina sınırına ek olarak göz ön bölümü için ikili sınırlar uygulandı — ANSI Z136.1-2014 kornea/lens sınırı (K_λ) ve ICNIRP 2013 2 × deri MPE; en düşüğü belirler.');
+    if (l >= 400 && l < 700 && s.mode !== 'sp' && s.T > 0.25) n.push('Görünür bölgede 0,25 s kazara bakışa karşılık gelir; ' + LE.units.fmtTime(s.T) + ' kasıtlı/uzun bakış varsayımıdır.');
     if (l >= 400 && l < 700 && s.mode !== 'sp' && s.T < 0.25) w.push('Görünür bölgede maruziyet süresi 0,25 s\'den kısa seçildi; bu, göz kırpma tepkisi süresinden kısa ve muhafazakâr değildir.');
     if (l >= 700 && s.mode !== 'sp' && s.T < 10 && l < 1e6) w.push('Görünmez ışın için önerilen en kısa maruziyet süresi 10 s; daha kısa süre muhafazakâr değildir.');
     const both = out.sets.length > 1;
@@ -769,7 +769,7 @@
       const g = out.eye.at0.crit || out.eye.worst.crit;
       if (g && g.set === 'AB' && out.eye.odWorst > 0) n.push('Belirleyici sınır 2006/25/AT\'den geliyor (AB/Türkiye işyeri maruziyet sınır değerleri ICNIRP 2013\'ten daha kısıtlayıcı).');
     }
-    if (s.alpha > LE.mpe.ALPHA_MIN) n.push('Genişletilmiş kaynak: α = ' + s.alpha + ' mrad, C_E = ' + LE.mpe.CE(s.alpha, s.T).toFixed(2).replace('.', ',') + ' (ICNIRP, t = T)' + (out.sets.indexOf('AB') >= 0 ? ', ' + LE.aord.CE(s.alpha).toFixed(2).replace('.', ',') + ' (2006/25/AT)' : '') + '.');
+    if (s.alpha > LE.mpe.ALPHA_MIN) n.push('Genişletilmiş kaynak: α = ' + LE.units.fmt(s.alpha, 4) + ' mrad, C_E = ' + LE.mpe.CE(s.alpha, s.T).toFixed(2).replace('.', ',') + ' (ICNIRP, t = T)' + (out.sets.indexOf('AB') >= 0 ? ', ' + LE.aord.CE(s.alpha).toFixed(2).replace('.', ',') + ' (2006/25/AT)' : '') + '.');
     const minD = Math.min(beam.dx, beam.dy);
     if ((l < 400 || l >= 1400) && minD < 1e-3 && out.sets.indexOf('ICNIRP') >= 0) n.push('Işın çapı 1 mm\'den küçük: UV/IR göz (t < 0,35 s) ve deri değerlendirmesinde açıklık ortalaması yerine tepe değer kullanıldı (ICNIRP Tablo 5/7 dipnotları).');
     if (out.eye.nohdInf) w.push('Iraksama sıfır (veya çok küçük) ve atmosferik zayıflama yok: NOHD pratikte sonsuz. Işın yolu tamamen kontrol altına alınmalı.');

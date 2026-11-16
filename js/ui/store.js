@@ -65,6 +65,16 @@
     return { ok, list };
   }
 
+  /** Kaydın kopyası (yeni kimlik, "(kopya)" ekli ad). Özeti olmayan içe aktarılmış kayıtlarda da çalışır. */
+  function duplicate(rec) {
+    const c = JSON.parse(JSON.stringify(rec));
+    c.id = newId();
+    c.savedAt = new Date().toISOString();
+    c.state.v.name = (c.state.v.name || '') + ' (kopya)';
+    c.summary = Object.assign({}, c.summary || {}, { name: c.state.v.name });
+    return c;
+  }
+
   function remove(id) {
     const list = loadInventory().filter((r) => r.id !== id);
     saveInventory(list);
@@ -145,7 +155,7 @@
   }
 
   LE.store = {
-    loadInventory, saveInventory, upsert, remove, newId, summarize, saveSession, loadSession,
+    loadInventory, saveInventory, upsert, remove, duplicate, newId, summarize, saveSession, loadSession,
     exportJSON, importJSON, exportCSV, download, isPersistent: () => persistent,
   };
 })(typeof globalThis !== 'undefined' ? globalThis : this);

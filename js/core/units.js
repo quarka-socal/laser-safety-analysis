@@ -136,5 +136,10 @@
     return x.toFixed(2).replace('.', ',');
   }
 
-  LE.units = { UNITS, parseNumber, toSI, fromSI, fmt, fmtPrefixed, fmtTime, fmtDist, fmtOD, supExp };
+  /** Oranı Türkçe yüzde yazımıyla verir: 0,9 → "%90". */
+  function fmtPct(frac, sig) {
+    return '%' + fmt(frac * 100, sig || 3);
+  }
+
+  LE.units = { UNITS, parseNumber, toSI, fromSI, fmt, fmtPrefixed, fmtTime, fmtDist, fmtOD, fmtPct, supExp };
 })(typeof globalThis !== 'undefined' ? globalThis : this);

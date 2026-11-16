@@ -53,11 +53,14 @@
   }
 
   // --- Tablo 2.6: T_min (bu sürede gelen darbeler tek darbe sayılır) ------------
+  // Tablo 2.6 aralıkları üstten kapalıdır (315 < λ ≤ 400 …), göz tabloları ise 400 nm'yi retina,
+  // 1400 nm'yi IR (kornea) satırına koyar. Tam sınırda, uygulanan sınır değerinin grubu alınır
+  // (400 nm → 18 µs, 1400 nm → 1 ms); bu, daha fazla darbeyi gruplayarak daha koruyucudur.
   function Tmin(l) {
     if (l <= 315) return NaN;
-    if (l <= 400) return 1e-9;
+    if (l < 400) return 1e-9;
     if (l <= 1050) return 18e-6;
-    if (l <= 1400) return 50e-6;
+    if (l < 1400) return 50e-6;
     if (l <= 1500) return 1e-3;
     if (l <= 1800) return 10;
     if (l <= 2600) return 1e-3;

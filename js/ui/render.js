@@ -92,7 +92,15 @@
       lines.push('Maruziyet, MPE\'nin <b>' + U.fmt(worstRatio, 3) + ' katına</b> kadar çıkabilir' + (worstRatio < 2 ? ' (sınırda aşım — yine de kontrol önlemi gerekir)' : '') + '.');
       lines.push('Göz tehlike mesafesi (NOHD): <b>' + distOrNone(e.nohd, e.nohdInf) + '</b>' + (e.enohd !== null ? ' · dürbünle (ENOHD): <b>' + distOrNone(e.enohd, e.enohdInf) + '</b>' : '') + '.');
       if (e.oav.notApplicable) lines.push('Dürbünle bakış seçildi ancak bu dalga boyunda hesaba katılmadı (cam optikler 302,5 nm altını ve 4 µm üstünü geçirmez).');
-      lines.push('Bu mesafe içinde lazer kontrollü alan ve uygun göz koruyucu gereklidir' + (o.eyewear ? ': <b class="mono">' + esc(o.eyewear.marking) + '</b>' : '') + ' (en az OD ' + LE.eyewear.recommendedOD(e.odWorst) + ').');
+      const ewTxt = (o.eyewear ? ': <b class="mono">' + esc(o.eyewear.marking) + '</b>' : '') + ' (en az OD ' + LE.eyewear.recommendedOD(e.odWorst) + ')';
+      if (e.nohd > 0 || e.nohdInf) {
+        lines.push('Bu mesafe içinde lazer kontrollü alan ve uygun göz koruyucu gereklidir' + ewTxt + '.');
+      } else if (e.enohd > 0 || e.enohdInf) {
+        lines.push('Çıplak gözle doğrudan bakışta MPE aşılmıyor; dürbünle bakışta ENOHD içinde aşılır. Bu mesafe içinde optik destekli bakış engellenmeli ya da göz koruyucu kullanılmalıdır' + ewTxt + '.');
+      } else {
+        // en kötü durum (tüm güç ölçüm açıklığında) MPE'yi aşıyor, gerçek ışın aşmıyor
+        lines.push('Işın ölçüm açıklığından (göz bebeğinden) geniş olduğu için çıplak gözle doğrudan bakışta MPE aşılmıyor; ışın daraltılır ya da odaklanırsa (tüm güç göz bebeğine girerse) aşılır. Bu durumlar için göz koruyucu' + ewTxt + '.');
+      }
       if (e.scint) lines.push('Atmosferik türbülans (sintilasyon) payıyla (+' + e.scint.odPlus + ' OD): önerilen en az <b>OD ' + e.scint.recOD + '</b>' + (o.eyewear && o.eyewear.markingScint ? ', EN 207 <b class="mono">' + esc(o.eyewear.markingScint) + '</b>' : '') + '; tehlike mesafesi <b>' + distOrNone(e.scint.nohd, e.scint.nohdInf) + '</b>' + (e.scint.enohd !== null ? ' (dürbünle ' + distOrNone(e.scint.enohd, e.scint.enohdInf) + ')' : '') + '.');
       const gc = e.worst.ratio >= e.at0.ratio ? e.worst.crit : e.at0.crit;
       if (o.sets.length > 1 && gc) {
@@ -112,7 +120,7 @@
     }
     if (o.diffuse && o.diffuse.eye.nhz > 0) {
       if (cls === 'ok') cls = 'warn';
-      lines.push('Yaygın yansımalar <b>' + distOrNone(o.diffuse.eye.nhz, o.diffuse.eye.inf) + '</b> mesafeye kadar göz için tehlikeli (ρ = %' + U.fmt(o.diffuse.rho * 100, 3) + ', ' + U.fmtTime(o.diffuse.T) + ').');
+      lines.push('Yaygın yansımalar <b>' + distOrNone(o.diffuse.eye.nhz, o.diffuse.eye.inf) + '</b> mesafeye kadar göz için tehlikeli (ρ = ' + U.fmtPct(o.diffuse.rho) + ', ' + U.fmtTime(o.diffuse.T) + ').');
     }
     if (o.skin.timesMPE > 1) {
       if (cls === 'ok') cls = 'warn';
@@ -533,7 +541,7 @@
       '<tr><td>' + U.fmtDist(d.r) + '\'den bakışta gerekli OD</td><td>' + U.fmtOD(d.eye.odAtR) + '</td></tr>' +
       '<tr><td>Göz MPE (' + U.fmtTime(d.T) + ')</td><td>' + U.fmt(gs.perPulseH) + ' J/m²' + (o.input.mode === 'rp' ? ' / darbe' : '') + '</td></tr>' +
       '<tr><td>Deri tehlike mesafesi</td><td>' + distOrNone(d.skin.nhz, d.skin.inf) + '</td></tr>' +
-      '<tr><td>Yansıtma · açı</td><td>%' + U.fmt(d.rho * 100, 3) + ' · ' + U.fmt(d.thetaDeg, 3) + '°</td></tr>' +
+      '<tr><td>Yansıtma · açı</td><td>' + U.fmtPct(d.rho) + ' · ' + U.fmt(d.thetaDeg, 3) + '°</td></tr>' +
       '<tr><td>Kaynak modeli</td><td>' + (d.extended ? 'Genişletilmiş (α = ' + U.fmt(d.alphaAtR, 3) + ' mrad @ ' + U.fmtDist(d.r) + ')' : 'Nokta kaynak (muhafazakâr)') + '</td></tr>' +
       '</tbody></table><p class="note">E = ρ·P·cos θ / (π·r²). Aynasal (parlak) yüzeyler doğrudan ışın gibi değerlendirilmelidir.</p></div></div>';
   }
@@ -611,7 +619,7 @@
     if (d.P !== null) add('Ortalama güç', U.fmtPrefixed(d.P, 'W', 4));
     if (d.Q !== null) add('Darbe enerjisi', U.fmtPrefixed(d.Q, 'J', 4));
     if (d.Ppeak !== null) add('Tepe güç', U.fmtPrefixed(d.Ppeak, 'W', 4));
-    if (d.duty !== null) add('Görev oranı', U.fmt(d.duty * 100, 3) + ' %');
+    if (d.duty !== null) add('Görev oranı', U.fmtPct(d.duty));
     if (o.eye.info.N) add('T içindeki darbe sayısı', U.fmt(o.eye.info.N, 4));
     add('Göz maruziyet süresi', U.fmtTime(d.T) + (inp.mode !== 'sp' && Math.abs(d.T - d.Tdefault) > 1e-12 ? ' <span class="muted">(standart ' + U.fmtTime(d.Tdefault) + ')</span>' : ''));
     const sec = LE.beam.sectionAt(inp.beam, inp.range || 0, inp.model);
@@ -627,7 +635,7 @@
     else a.push('Sınır değerler: ICNIRP 2013 (IEC 60825-1:2014 / ANSI Z136.1-2014) ve 2006/25/AT Ek II birlikte; her setin kuralları kendi açıklığıyla uygulanır, en kısıtlayıcı olan belirler.');
     a.push(o.input.alpha > 1.5 ? 'Işın içi bakışta genişletilmiş kaynak: α = ' + U.fmt(o.input.alpha, 3) + ' mrad.' : 'Işın içi bakış: nokta kaynak (α ≤ 1,5 mrad) — en muhafazakâr durum.');
     a.push('Işın merkezine bakış; çap ve ıraksama 1/e ölçütüne çevrildi; büyüme modeli: ' + (o.input.model === 'linear' ? 'doğrusal (IEC TR 60825-14).' : 'karesel toplam (ANSI).'));
-    if (o.eye.oav.on) a.push('Dürbünle bakış: objektif ' + U.fmt(o.eye.oav.D * 1e3, 3) + ' mm, büyütme ' + U.fmt(o.eye.oav.M, 3) + '×, geçirgenlik %' + U.fmt(o.eye.oav.tau * 100, 3) + '; optik, girişte M·(ölçüm açıklığı) çaplı bölgeyi göze taşır (retina için etkin giriş = objektif, IEC Koşul 1 ile tutarlı).');
+    if (o.eye.oav.on) a.push('Dürbünle bakış: objektif ' + U.fmt(o.eye.oav.D * 1e3, 3) + ' mm, büyütme ' + U.fmt(o.eye.oav.M, 3) + '×, geçirgenlik ' + U.fmtPct(o.eye.oav.tau) + '; optik, girişte M·(ölçüm açıklığı) çaplı bölgeyi göze taşır (retina için etkin giriş = objektif, IEC Koşul 1 ile tutarlı).');
     a.push(o.input.mu > 0 ? 'Atmosferik zayıflama: μ = ' + U.fmt(o.input.mu * 1e3, 3) + ' 1/km.' : 'Atmosferik zayıflama yok sayıldı (muhafazakâr).');
     a.push(o.eye.scint ? 'Atmosferik türbülans (sintilasyon) payı: ışınım ×' + o.eye.scint.factor + ' (+' + o.eye.scint.odPlus + ' OD), ayrı NOHD ve gözlük önerisi olarak verildi; standart değerler payısızdır.' : 'Atmosferik türbülans (sintilasyon) payı uygulanmadı.');
     if (o.input.mode === 'rp') a.push('Tekrarlı darbe: Kural 1, Kural 2 (tüm alt gruplar) ve retina için Kural 3 birlikte uygulanır; en kısıtlayıcı olan belirler.');
@@ -646,5 +654,5 @@
       '<p class="note">Bu yazılım yetkin bir lazer güvenlik sorumlusunun değerlendirmesinin yerine geçmez; sonuçlar girilen parametreler kadar doğrudur.</p></div></div>';
   }
 
-  LE.render = { render, chart, chartReadout, chartRange, attachChart, assumptions, mech, RULE, esc, limitText, ansi, distOrNone, setName };
+  LE.render = { render, verdict, derivedCard, chart, chartReadout, chartRange, attachChart, assumptions, mech, RULE, esc, limitText, ansi, distOrNone, setName };
 })(typeof globalThis !== 'undefined' ? globalThis : this);

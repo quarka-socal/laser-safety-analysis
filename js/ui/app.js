@@ -154,6 +154,7 @@
       if (!list.length) return toast('Envanter boş.');
       LE.store.exportCSV(list);
     });
+    $('inv-import').addEventListener('click', () => $('inv-import-file').click());
     $('inv-import-file').addEventListener('change', (e) => {
       const file = e.target.files && e.target.files[0];
       if (!file) return;
@@ -298,12 +299,7 @@
       b.addEventListener('click', () => {
         const r = LE.store.loadInventory().find((x) => x.id === b.dataset.dup);
         if (!r) return;
-        const c = JSON.parse(JSON.stringify(r));
-        c.id = LE.store.newId();
-        c.savedAt = new Date().toISOString();
-        c.state.v.name = (c.state.v.name || '') + ' (kopya)';
-        c.summary.name = c.state.v.name;
-        LE.store.upsert(c);
+        LE.store.upsert(LE.store.duplicate(r));
         renderInventory();
       });
     }

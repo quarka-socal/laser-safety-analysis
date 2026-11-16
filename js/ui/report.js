@@ -79,7 +79,12 @@
     prm.push(row('Göz maruziyet süresi', U.fmtTime(d.T)));
     prm.push(row('Işın çapı / ıraksama (1/e)', U.fmt(inp.beam.dx * 1e3, 4) + (inp.beam.dy !== inp.beam.dx ? ' × ' + U.fmt(inp.beam.dy * 1e3, 4) : '') + ' mm · ' + U.fmt(inp.beam.phix * 1e3, 4) + (inp.beam.phiy !== inp.beam.phix ? ' × ' + U.fmt(inp.beam.phiy * 1e3, 4) : '') + ' mrad'));
     prm.push(row('Profil · girişte ölçüt', esc({ gauss: 'Gauss', 'tophat-ellipse': 'Düz tepe (elips)', 'tophat-rect': 'Düz tepe (dikdörtgen)' }[inp.beam.profile]) + ' · ' + esc(v.spec === '1/e2' ? '1/e² verildi' : '1/e verildi')));
-    if (inp.oav && inp.oav.on) prm.push(row('Optik destekli bakış', 'Evet, ' + U.fmt((inp.oav.D || 0.05) * 1e3, 3) + ' mm objektif'));
+    if (inp.oav && inp.oav.on) {
+      const ov = o.eye.oav;
+      prm.push(row('Optik destekli bakış', ov.on
+        ? 'Evet: ' + U.fmt(ov.D * 1e3, 3) + ' mm objektif, ' + U.fmt(ov.M, 3) + '× büyütme, geçirgenlik ' + U.fmtPct(ov.tau)
+        : 'İstendi; bu dalga boyunda uygulanmadı (cam optikler 302,5 nm altını ve 4 µm üstünü geçirmez)'));
+    }
     if (inp.mu > 0) prm.push(row('Atmosferik zayıflama', U.fmt(inp.mu * 1e3, 3) + ' 1/km'));
     parts.push('<h2>2. Lazer ve ışın parametreleri</h2><table><tbody>' + prm.join('') + '</tbody></table>');
 
@@ -88,13 +93,13 @@
     const box = (k, val, s) => sum.push('<div>' + k + '<b>' + val + '</b>' + (s ? '<span>' + s + '</span>' : '') + '</div>');
     box('Göz NOHD', LE.render.distOrNone(e.nohd, e.nohdInf), e.enohd !== null ? 'ENOHD ' + LE.render.distOrNone(e.enohd, e.enohdInf) : '');
     box('Gerekli OD (en kötü)', U.fmtOD(e.odWorst), 'öneri ≥ OD ' + LE.eyewear.recommendedOD(e.odWorst));
-    box('OD @ ' + U.fmtDist(e.atRange.r), U.fmtOD(e.odAtRange), '');
+    box('OD @ ' + U.fmtDist(e.atRange.r) + (e.atRange.viaOptics ? ' (dürbünle)' : ''), U.fmtOD(e.odAtRange), '');
     if (e.scint) box('Türbülans payıyla (+' + e.scint.odPlus + ' OD)', 'OD ' + e.scint.recOD, 'NOHD ' + LE.render.distOrNone(e.scint.nohd, e.scint.nohdInf) + (o.eyewear && o.eyewear.markingScint ? ' · ' + esc(o.eyewear.markingScint) : ''));
     box('EN 207', o.eyewear ? esc(o.eyewear.marking) : '—', '');
     box('EN 208', o.eyewear && o.eyewear.en208 ? (o.eyewear.en208.applicable ? 'RB' + o.eyewear.en208.rb : 'uygun değil') : '—', '');
     const g = e.summary.governing;
     box('Göz MPE', U.fmt(g.perPulseH) + ' J/m²', esc(LE.render.RULE[g.rule]) + (inp.mode === 'rp' ? ' (darbe başına)' : '') + ' · ' + LE.render.setName(g.crit.set));
-    if (o.diffuse) box('Yaygın yansıma NHZ', LE.render.distOrNone(o.diffuse.eye.nhz, o.diffuse.eye.inf), 'ρ = %' + U.fmt(o.diffuse.rho * 100, 3));
+    if (o.diffuse) box('Yaygın yansıma NHZ', LE.render.distOrNone(o.diffuse.eye.nhz, o.diffuse.eye.inf), 'ρ = ' + U.fmtPct(o.diffuse.rho));
     box('Deri', U.fmt(o.skin.timesMPE, 3) + ' × MPE', 'NSHD ' + LE.render.distOrNone(o.skin.nshd, o.skin.nshdInf));
     if (o.lens) box('Mercek NHZ (odaktan)', LE.render.distOrNone(o.lens.nohd, o.lens.inf), '');
     if (o.fiber) box('Fiber NOHD', LE.render.distOrNone(o.fiber.nohd, o.fiber.inf), '');
@@ -114,22 +119,29 @@
       }
     }
     parts.push('<h2>4. MPE ayrıntıları</h2><table><thead><tr><th>Set</th><th>Kural</th><th>' + (inp.mode === 'rp' ? 'Darbe başına MPE' : 'MPE') + '</th><th>Zaman tabanı</th><th>Açıklık</th><th>Mekanizma</th><th>Formül</th></tr></thead><tbody>' + mrows.join('') + '</tbody></table>');
-    const f = o.factors;
-    const fx = [];
-    if (f.CA !== null) fx.push('C_A = ' + U.fmt(f.CA, 4));
-    if (f.CB !== null) fx.push('C_B = ' + U.fmt(f.CB, 4));
-    if (f.CC !== null) fx.push('C_C = ' + U.fmt(f.CC, 4));
-    if (f.CE !== null) fx.push('C_E = ' + U.fmt(f.CE, 4));
-    if (f.CP !== undefined) fx.push('C_P = ' + U.fmt(f.CP, 4));
-    if (f.T2 !== null) fx.push('T₂ = ' + U.fmtTime(f.T2));
-    if (f.Ti !== null) fx.push('Tᵢ = ' + U.fmtTime(f.Ti));
-    fx.push('göz açıklığı ' + U.fmt(f.apertureEye * 1e3, 3) + ' mm');
-    parts.push('<p class="mono" style="font-size:9pt">' + fx.join(' · ') + '</p>');
+    // her setin kendi faktörleri (yalnız kullanılan setler)
+    const fline = (name, f, ab) => {
+      const fx = [];
+      const has = (x) => x !== null && x !== undefined && !Number.isNaN(x);
+      if (has(f.CA)) fx.push('C_A = ' + U.fmt(f.CA, 4));
+      if (has(f.CB)) fx.push('C_B = ' + U.fmt(f.CB, 4));
+      if (has(f.CC)) fx.push('C_C = ' + U.fmt(f.CC, 4));
+      if (has(f.CE)) fx.push('C_E = ' + U.fmt(f.CE, 4));
+      if (has(f.CP)) fx.push('C_P = ' + U.fmt(f.CP, 4));
+      if (has(f.T2)) fx.push('T₂ = ' + U.fmtTime(f.T2));
+      if (ab ? has(f.Tmin) : has(f.Ti)) fx.push((ab ? 'T_min = ' : 'Tᵢ = ') + U.fmtTime(ab ? f.Tmin : f.Ti));
+      fx.push('göz açıklığı ' + U.fmt(f.apertureEye * 1e3, 3) + ' mm');
+      return name + ': ' + fx.join(' · ');
+    };
+    const fl = [];
+    if (o.sets.indexOf('ICNIRP') >= 0) fl.push(fline('ICNIRP 2013', o.factors, false));
+    if (o.sets.indexOf('AB') >= 0 && o.factors.AB) fl.push(fline('2006/25/AT', o.factors.AB, true));
+    parts.push('<p class="mono" style="font-size:9pt">' + fl.join('<br>') + '</p>');
 
     if (o.eyewear) {
       const er = o.eyewear.en207.map((i) => '<tr><td>' + i.mode + '</td><td class="mono">' + U.fmt(i.density) + ' ' + i.unit + '</td><td>' + esc(i.basis) + '</td><td><b>LB' + i.lb + '</b></td></tr>').join('');
       parts.push('<h2>5. Göz koruyucu (EN 207 / EN 208)</h2><table><thead><tr><th>Mod</th><th>Yoğunluk</th><th>Esas</th><th>Seviye</th></tr></thead><tbody>' + er + '</tbody></table>' +
-        '<p>Gözlükteki ışın çapı: ' + U.fmt(o.eyewear.sec.dx * 1e3, 3) + ' mm (1/e). ' + (o.eyewear.en208 ? 'EN 208: ' + esc(o.eyewear.en208.applicable ? 'RB' + o.eyewear.en208.rb : 'uygun değil') + '.' : '') + (v.eyewearInfo ? ' Mevcut gözlük: ' + esc(v.eyewearInfo) : '') + '</p>');
+        '<p>Gözlükteki ışın çapı: ' + U.fmt(o.eyewear.sec.dx * 1e3, 3) + ' mm (1/e). ' + (o.eyewear.en208 ? 'EN 208: ' + esc(o.eyewear.en208.applicable ? 'RB' + o.eyewear.en208.rb : 'uygun değil') + '.' : '') + '</p>');
     }
 
     parts.push('<h2>6. Önerilen kontrol önlemleri</h2><ol>' + controls(o, v).map((c) => '<li>' + c + '</li>').join('') + '</ol>');

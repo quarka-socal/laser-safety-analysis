@@ -342,7 +342,7 @@
     if (!r.ok) { errs[id] = r.error; return NaN; }
     if (r.value < min || r.value > max) { errs[id] = 'Değer ' + U.fmt(min) + ' ile ' + U.fmt(max) + ' arasında olmalı.'; return NaN; }
     if (r.warning) warns[id] = r.warning;
-    echo[id] = '= ' + U.fmt(r.value, 4) + (unitTxt ? ' ' + unitTxt : '');
+    echo[id] = unitTxt === '%' ? '= %' + U.fmt(r.value, 4) : '= ' + U.fmt(r.value, 4) + (unitTxt ? ' ' + unitTxt : '');
     return r.value;
   }
 
@@ -443,7 +443,7 @@
       if (lambda > 0) {
         if (lambda >= LE.analysis.OAV_MIN_NM && lambda < LE.analysis.OAV_MAX_NM) {
           const tAuto = lambda >= 400 && lambda < 700 ? 0.9 : 0.7;
-          echo.oav = 'Hesaplanıyor: M = ' + U.fmt(Math.max(1, (D > 0 ? D : 0.05) / 7e-3), 3) + '×, τ = %' + U.fmt((tau > 0 ? tau : tAuto) * 100, 3) + (tau > 0 ? '' : ' (otomatik)');
+          echo.oav = 'Hesaplanıyor: M = ' + U.fmt(Math.max(1, (D > 0 ? D : 0.05) / 7e-3), 3) + '×, τ = ' + U.fmtPct(tau > 0 ? tau : tAuto) + (tau > 0 ? '' : ' (otomatik)');
         } else {
           warns.oav = U.fmt(lambda, 5) + ' nm\'de dürbün etkisi hesaplanmaz: cam optikler 302,5 nm altını ve 4 µm üstünü geçirmez.';
         }
