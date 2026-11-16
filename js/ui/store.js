@@ -95,6 +95,12 @@
   }
 
   function download(name, text, mime) {
+    // Android uygulaması (WebView) blob indirmesini desteklemez: yerel köprü dosya seçiciyle kaydeder
+    const bridge = root.LazerAndroid;
+    if (bridge && typeof bridge.saveFile === 'function') {
+      bridge.saveFile(String(name), String(mime || 'application/octet-stream'), String(text));
+      return;
+    }
     const blob = new Blob([text], { type: mime || 'application/octet-stream' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');

@@ -114,6 +114,11 @@ Standart (paysız) sonuçlar değişmez. Ölçüm açıklığına giren enerji �
 paylı değerler "tüm güç göz bebeğinde" (en kötü durum) üst sınırıyla kırpılır; gözlük önerisindeki +1 ise bu sınırın üstünde
 ek güvenlik payıdır. Kapalı ortamdaki kısa ışın yollarında seçenek kapatılabilir.
 
+Pay çıkış açıklığında (r = 0) uygulanmaz, çünkü orada türbülanslı yol yoktur. Paylı NOHD/ENOHD araması bu yüzden çıkışın hemen
+ötesinden (r → 0⁺) başlar. Böylece çıkışta MPE'nin altında kalan, ama tüm gücü göz bebeğine girdiğinde tehlikeli olan geniş
+ışınlarda da paylı mesafe bulunur. Örnek: 532 nm, 5 mW, 20 mm ışında standart NOHD yoktur, türbülans paylı NOHD 45,5 m'dir.
+Motor 1.3.0'da bu vakalarda paylı mesafe 0 çıkıyordu; 1.3.1'de düzeltildi.
+
 Kaynaklar arasında bu konuda görüş birliği yoktur:
 
 | Kaynak | Sintilasyon için tutum |
@@ -145,7 +150,7 @@ Standart tablolarındaki yuvarlamadan doğan küçük basamaklar olduğu gibi uy
 elle hesaplanmış değerler, EasyHaz LSO örnek dosyalarındaki sonuçlar, yayımlanmış EN 207/208 örnekleri).
 Biri bile başarısız olursa kırmızı uyarı bandı çıkar. Başlıktaki yeşil rozete tıklayarak ayrıntıyı görebilirsiniz.
 
-**Geliştirme testleri** — `node --test test/*.test.js` (Node ≥ 18): 69 test.
+**Geliştirme testleri** — `node --test test/*.test.js` (Node ≥ 18; Node 18 ve 24 ile denenir): 88 test.
 
 - ICNIRP Tablo 5, 7, 8 satır noktaları; düzeltme faktörleri; ölçüm açıklıkları
 - Tüm dalga boylarında MPE'nin süreyle azalmadığı (bilinen tablo basamakları hariç) ve sürekliliği
@@ -158,6 +163,14 @@ Biri bile başarısız olursa kırmızı uyarı bandı çıkar. Başlıktaki ye�
   çizgisini bu mesafelerde kestiği (yeşil DPSS ve UV'de %0,5, He-Ne'de %2 içinde), gözlem noktasının motor değerinde
   durduğu, aralık dışı ve sonsuz değerlerin çizilmediği, eksen etiketlerinin kısa ve 10 000 km'lik eksenlerde çakışmadığı; değer okumanın motorla ve çizilen eğrilerle
   aynı olduğu, MPE'nin hemen altının "1 × MPE" diye yuvarlanmadığı
+- Türbülans payı: 400 rastgele girişte paylı NOHD/ENOHD'nin paylı eğrinin MPE çizgisini kestiği yer olduğu, çıkışta MPE altı
+  ama paylı tehlikeli ışında mesafenin 0 çıkmadığı
+- Form: içe aktarılan ya da eski oturumdan gelen bozuk durum (listede olmayan birim veya seçim, metin "false") istisna
+  atmaz, alan hatası verir, hesap yapılmaz; ekranda önceki girişin sonucu kalmaz
+- Rapor ve metinler: kullanılan her setin faktörleri ayrı yazılır (2006/25/AT'de T_min ve C_P), uygulanmayan dürbün
+  "Evet" diye yazılmaz, notlarda ondalık virgül, yüzde "%x" yazımı, NOHD yokken karar metni; Android köprüsüyle kaydetme
+- Stil sözleşmesi: telefon genişliğinde menü ve diyalog başlıkları ekrana sığar, başlık yapışkan değildir; koyu ve açık
+  temada vurgu rengi üstündeki yazının kontrastı ≥ 4,5:1 (WCAG AA). Yerleşim ayrıca tarayıcıda 375 px'te ölçüldü.
 
 **Kentek EasyHaz LSO 2014 (ANSI Z136.1-2014) ile çapraz doğrulama** — Kullanıcının EasyHaz çalışma kitabı
 LibreOffice'te **makrolar kapalıyken** salt okunur açıldı, hücre formülleri yeniden hesaplatıldı
@@ -246,6 +259,42 @@ node tools/build-single.js
 
 Hesap motorunda bir değişiklikten sonra testleri çalıştırın ve tek dosya sürümünü yeniden üretin.
 EasyHaz çapraz doğrulamasını yenilemek için `tools/easyhaz_oracle.py` dosyasının başındaki talimatlara bakın.
+
+Klasör bir git deposudur. İlk commit `1be12d6`, inceleme öncesi v1.3 durumudur. Her düzeltme ayrı bir commit'tir;
+`git log` ile görülebilir.
+
+## Sürüm notları
+
+**Motor 1.3.1 (16.11.2026)** — Satır satır inceleme. ICNIRP 2013 metniyle karşılaştırılanlar:
+Tablo 2, 3, 4, 5, 7, 8; Tablo 5'in c ve d dipnotları; Kural 1–3 ve C_P koşulları; 1 ns altı ara yaklaşım.
+Motorda tablo hatası bulunmadı. Düzeltilenler:
+
+- **Türbülans paylı NOHD/ENOHD** — çıkışta MPE altı, ama tüm güç göz bebeğinde tehlikeli ışınlarda 0 çıkıyordu.
+  Rastgele vakaların yaklaşık %2'si bu durumdaydı; ayrıntı "Atmosferik türbülans" bölümünde.
+- **Bozuk kayıt** — içe aktarılan ya da eski oturumdan gelen kayıtta listede olmayan bir birim veya seçim vardıysa
+  hesap sessizce duruyordu. Form yeni lazeri, sonuç alanı önceki lazerin sonucunu gösteriyordu. Artık alan hatası
+  verilir ve sonuç alanı temizlenir. Geçersiz ışın ölçütü de artık sessizce 1/e sayılmaz.
+- **Telefon genişliği** — Örnekler menüsü ve envanter düğmeleri ekrana sığar; başlık yapışkan değildir.
+- **Koyu tema** — mavi düğme yazısının kontrastı 2,5:1'den 7,7:1'e çıktı.
+- **Rapor** — yalnız 2006/25/AT seçiliyken artık bu setin faktörleri yazılır (T_min, C_P). Dürbün uygulanmayan
+  dalga boyunda "Evet" yazmaz. Dürbünle hesaplanan OD belirtilir.
+- **Metinler** — notlarda ondalık virgül, yüzde "%x" yazımı. 1200–1400 nm ikili sınır bilgisi doğru ve not
+  olarak verilir. NOHD yokken karar metni düzeltildi.
+- **Envanter** — özeti olmayan kayıt kopyalanabilir; JSON içe aktarma klavyeyle seçilebilir.
+- **Android** — WebView kabuğu için köprü: dosya kaydetme, PDF yazdırma, geri tuşu.
+
+Eski (1.3.0) ve yeni motor 3000 rastgele vakada karşılaştırıldı. Standart çıktılar birebir aynı: OD, NOHD, ENOHD,
+yaygın yansıma, deri, EN 207. Yalnız türbülans paylı NOHD (47 vaka) ve ENOHD (10 vaka) 0'dan doğru değere geçti.
+EasyHaz karşılaştırması standart çıktılar üzerindedir, bu yüzden sonucu değişmez. `easyhaz.test.js` kayıtlı EasyHaz
+verisiyle yeniden çalıştırıldı ve geçti: hiçbir vakada daha az koruyucu sonuç yok.
+
+İncelemede tam 400 ve 1400 nm için 2006/25/AT T_min değerinin komşu gruptan alınması da denendi. Bazı ultra kısa
+darbe vakalarında bu daha az koruyucu çıktı (400 nm, 1 ps, 1 MHz: NOHD 436 m → 224 m), bu yüzden geri alındı.
+Tablo 2.6'nın harfiyen aralıkları geçerlidir.
+
+Kaynakla teyit edilemeyenler (daha koruyucu yönde bırakıldı):
+- 2006/25/AT, 315–400 nm, t > 10³ s: kod 10⁴ J/m² sabit kullanır. Yalnız "Yalnız 2006/25/AT" modunu etkiler.
+- EN 208'de N^¼ için darbe sayım penceresi: EN 207 ile aynı pencere kullanılır.
 
 ## Kaynaklar
 

@@ -91,3 +91,19 @@ test('envanter: özeti olmayan (içe aktarılmış) kayıt kopyalanabilir', () =
   assert.equal(c.summary.name, 'X (kopya)');
   assert.equal(src.state.v.name, 'X', 'kaynak kayıt değişmez');
 });
+
+test('Android köprüsü: dosya kaydetme LazerAndroid.saveFile ile yapılır (blob indirme yok)', () => {
+  const calls = [];
+  globalThis.LazerAndroid = { saveFile: (n, m, t) => calls.push([n, m, t]) };
+  try {
+    LE.store.exportJSON([{ id: 'A1', state: { v: { name: 'X' }, u: {} }, summary: { name: 'X' } }]);
+    LE.store.download('rapor-x.html', '<p>x</p>', 'text/html;charset=utf-8');
+  } finally {
+    delete globalThis.LazerAndroid;
+  }
+  assert.equal(calls.length, 2);
+  assert.match(calls[0][0], /^lazer-envanter-\d{8}\.json$/);
+  assert.equal(calls[0][1], 'application/json');
+  assert.equal(JSON.parse(calls[0][2]).format, 'lazer-emniyet-envanter');
+  assert.deepEqual(calls[1], ['rapor-x.html', 'text/html;charset=utf-8', '<p>x</p>']);
+});

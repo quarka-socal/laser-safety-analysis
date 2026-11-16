@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="tr">
 <head>
-  <!-- Lazer Emniyet Analizi, motor v1.3.0, tek dosya derlemesi 2026-11-15T21:24:46.789Z -->
+  <!-- Lazer Emniyet Analizi, motor v1.3.1, tek dosya derlemesi 2026-11-16T10:05:23.212Z -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Lazer Emniyet Analizi</title>
@@ -19,6 +19,7 @@
   --line-strong: #c3cad6;
   --accent: #1c4fd8;
   --accent-soft: #e8eefd;
+  --on-accent: #ffffff;
   --danger: #b71c1c;
   --danger-bg: #fdecec;
   --warn: #9a5800;
@@ -49,6 +50,7 @@
     --line-strong: #3a4458;
     --accent: #7ea2ff;
     --accent-soft: #1d2a4a;
+    --on-accent: #0b1020;
     --danger: #ff8a80;
     --danger-bg: #3a1618;
     --warn: #ffc266;
@@ -65,7 +67,7 @@
 }
 :root[data-theme="dark"] {
   --bg: #0f131a; --panel: #171c25; --panel-2: #1c2230; --ink: #e6e9ef; --muted: #9aa3b3;
-  --line: #2a3242; --line-strong: #3a4458; --accent: #7ea2ff; --accent-soft: #1d2a4a;
+  --line: #2a3242; --line-strong: #3a4458; --accent: #7ea2ff; --accent-soft: #1d2a4a; --on-accent: #0b1020;
   --danger: #ff8a80; --danger-bg: #3a1618; --warn: #ffc266; --warn-bg: #3a2a10;
   --ok: #7fd99a; --ok-bg: #12301c; --info: #9cc2ff; --info-bg: #15243c; --head: #0b0e14; --scint: #d59cf0;
   --shadow: 0 1px 2px rgba(0, 0, 0, .4); color-scheme: dark;
@@ -162,7 +164,7 @@ details.sec > summary .hint { margin-left: auto; font-weight: 400; color: var(--
 .echo { font-size: 11.5px; color: var(--muted); font-family: var(--mono); min-height: 15px; }
 .echo.err { color: var(--danger); font-family: var(--sans); font-weight: 600; }
 .echo.warn { color: var(--warn); font-family: var(--sans); }
-.field.invalid input { border-color: var(--danger); background: var(--danger-bg); }
+.field.invalid input, .field.invalid select { border-color: var(--danger); background: var(--danger-bg); }
 .field.disabled { opacity: .55; }
 
 .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -173,7 +175,7 @@ details.sec > summary .hint { margin-left: auto; font-weight: 400; color: var(--
   flex: 1; border: 0; background: var(--panel); padding: 7px 6px; cursor: pointer; border-right: 1px solid var(--line-strong);
 }
 .seg button:last-child { border-right: 0; }
-.seg button[aria-pressed="true"] { background: var(--accent); color: #fff; font-weight: 600; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); font-weight: 600; }
 .chk { display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; }
 .chk input { width: 16px; height: 16px; accent-color: var(--accent); }
 .presets { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -274,7 +276,7 @@ dialog {
   width: min(1100px, calc(100vw - 32px)); max-height: calc(100vh - 32px); box-shadow: 0 20px 60px rgba(0,0,0,.3);
 }
 dialog::backdrop { background: rgba(10, 14, 22, .55); }
-.dlg-head { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--panel); z-index: 2; }
+.dlg-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--panel); z-index: 2; }
 .dlg-head h2 { margin: 0; font-size: 16px; }
 .dlg-head .sp { margin-left: auto; display: flex; gap: 6px; flex-wrap: wrap; }
 .dlg-body { padding: 14px 16px 18px; overflow: auto; }
@@ -282,9 +284,9 @@ dialog::backdrop { background: rgba(10, 14, 22, .55); }
   border: 1px solid var(--line-strong); background: var(--panel-2); border-radius: 7px; padding: 6px 12px; cursor: pointer;
 }
 .btn:hover { border-color: var(--accent); }
-.btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn.primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
 .btn.danger { color: var(--danger); }
-.search { padding: 7px 10px; border: 1px solid var(--line-strong); border-radius: 7px; min-width: 220px; background: var(--panel); }
+.search { padding: 7px 10px; border: 1px solid var(--line-strong); border-radius: 7px; min-width: 0; flex: 1 1 180px; background: var(--panel); }
 .help-doc h3 { margin: 18px 0 6px; font-size: 15px; }
 .help-doc p, .help-doc li { max-width: 80ch; }
 .help-doc dt { font-weight: 700; margin-top: 8px; }
@@ -305,6 +307,13 @@ dialog::backdrop { background: rgba(10, 14, 22, .55); }
 }
 .menu-list button:hover { background: var(--accent-soft); }
 .menu-list small { display: block; color: var(--muted); }
+/* telefon: başlık yapışkan değil (ekranın beşte birini kaplıyordu); Örnekler menüsü başlığın altında,
+   ekran genişliğinde açılır (sağa hizalı menü sol kenardan taşıyordu) */
+@media (max-width: 700px) {
+  .topbar { position: relative; }
+  .menu { position: static; }
+  .menu-list { left: 12px; right: 12px; top: calc(100% + 4px); min-width: 0; }
+}
 .hidden { display: none !important; }
 .muted { color: var(--muted); }
 .mono { font-family: var(--mono); }
@@ -377,7 +386,7 @@ dialog::backdrop { background: rgba(10, 14, 22, .55); }
       <div class="sp">
         <button class="btn" id="inv-export">JSON dışa aktar</button>
         <button class="btn" id="inv-csv">CSV (Excel)</button>
-        <label class="btn" for="inv-import-file">JSON içe aktar</label>
+        <button class="btn" id="inv-import" type="button">JSON içe aktar</button>
         <input type="file" id="inv-import-file" accept=".json,application/json" class="hidden">
         <button class="btn" data-close>Kapat</button>
       </div>
@@ -558,7 +567,12 @@ dialog::backdrop { background: rgba(10, 14, 22, .55); }
     return x.toFixed(2).replace('.', ',');
   }
 
-  LE.units = { UNITS, parseNumber, toSI, fromSI, fmt, fmtPrefixed, fmtTime, fmtDist, fmtOD, supExp };
+  /** Oranı Türkçe yüzde yazımıyla verir: 0,9 → "%90". */
+  function fmtPct(frac, sig) {
+    return '%' + fmt(frac * 100, sig || 3);
+  }
+
+  LE.units = { UNITS, parseNumber, toSI, fromSI, fmt, fmtPrefixed, fmtTime, fmtDist, fmtOD, fmtPct, supExp };
 })(typeof globalThis !== 'undefined' ? globalThis : this);
 
 </script>
@@ -1058,6 +1072,9 @@ dialog::backdrop { background: rgba(10, 14, 22, .55); }
   }
 
   // --- Tablo 2.6: T_min (bu sürede gelen darbeler tek darbe sayılır) ------------
+  // Aralıklar tablodaki gibi üstten kapalıdır (315 < λ ≤ 400 → 1 ns, 1050 < λ ≤ 1400 → 50 µs).
+  // Not: tam 400 / 1400 nm'de komşu grubun daha uzun T_min'i daha koruyucu DEĞİLDİR — çok kısa
+  // darbelerde grup, tek darbe süresi yerine T_min süresinin (daha yüksek) sınırıyla karşılaştırılır.
   function Tmin(l) {
     if (l <= 315) return NaN;
     if (l <= 400) return 1e-9;
@@ -1570,7 +1587,7 @@ dialog::backdrop { background: rgba(10, 14, 22, .55); }
   'use strict';
   const LE = (root.LE = root.LE || {});
 
-  const ENGINE_VERSION = '1.3.0';
+  const ENGINE_VERSION = '1.3.1';
 
   function defaultExposure(l) {
     if (l < 400) return 3e4;
@@ -1928,6 +1945,9 @@ dialog::backdrop { background: rgba(10, 14, 22, .55); }
     return ratio > 1 ? Math.log10(ratio) : 0;
   }
 
+  /** Türbülans paylı mesafe aramasının başlangıcı (m): payın uygulandığı en yakın nokta. */
+  const SCINT_R0 = 1e-9;
+
   // ---------------------------------------------------------------------------
   // Ana analiz
   // ---------------------------------------------------------------------------
@@ -2091,8 +2111,10 @@ dialog::backdrop { background: rgba(10, 14, 22, .55); }
     if (scintF > 1) {
       const ctxS = { beam, model, mu, oav: { on: false }, scint: scintF };
       const ctxSO = { beam, model, mu, oav, scint: scintF };
-      const nS = solveDistance((r) => intrabeamEval(eyeC.list, ctxS, r).ratio, 0);
-      const eS = oav.on ? solveDistance((r) => intrabeamEval(eyeC.list, ctxSO, r).ratio, 0) : null;
+      // Pay yalnız r > 0'da var (çıkışta ışın yolu yok); arama r → 0⁺'dan başlar. Aksi hâlde çıkışta
+      // MPE altında kalan ama paylı (tüm güç sınırına kadar) tehlikeli olan ışında mesafe 0 çıkardı.
+      const nS = solveDistance((r) => intrabeamEval(eyeC.list, ctxS, r).ratio, SCINT_R0);
+      const eS = oav.on ? solveDistance((r) => intrabeamEval(eyeC.list, ctxSO, r).ratio, SCINT_R0) : null;
       const atRS = intrabeamEval(eyeC.list, oav.on ? ctxSO : ctxS, range);
       const plus = Math.ceil(Math.log10(scintF) - 1e-9);
       const rec = Math.ceil(odWorst - 1e-9);
@@ -2301,8 +2323,8 @@ dialog::backdrop { background: rgba(10, 14, 22, .55); }
     const allCrit = out.eye.criteria.concat(out.skin.criteria);
     if (allCrit.some((c) => c.subNs)) w.push('1 ns altı darbe: ICNIRP bu bölgede sınır vermiyor; muhafazakâr geçici yaklaşım (1 ns sınırının %10\'u veya ışınım sınırı) uygulandı.');
     if (allCrit.some((c) => c.subFs)) w.push('100 fs altı darbe: tepe ışınımı 100 fs sınırıyla sınırlandırıldı (ICNIRP önerisi).');
-    if (l >= 1250 && l < 1400) w.push('1250–1400 nm: C_C çok büyüdüğü için ön göz segmenti ikili sınırı (2 × deri MPE) uygulanıyor; IEC 60825-1:2014 Tablo A.1 notunu ve güncel literatürü dikkate alın.');
-    if (l >= 400 && l < 700 && s.mode !== 'sp' && s.T > 0.25) n.push('Görünür bölgede 0,25 s kazara bakışa karşılık gelir; ' + s.T + ' s kasıtlı/uzun bakış varsayımıdır.');
+    if (l >= 1200 && l < 1400 && out.sets.indexOf('ICNIRP') >= 0) n.push('1200–1400 nm: retina sınırına ek olarak göz ön bölümü için ikili sınırlar uygulandı — ANSI Z136.1-2014 kornea/lens sınırı (K_λ) ve ICNIRP 2013 2 × deri MPE; en düşüğü belirler.');
+    if (l >= 400 && l < 700 && s.mode !== 'sp' && s.T > 0.25) n.push('Görünür bölgede 0,25 s kazara bakışa karşılık gelir; ' + LE.units.fmtTime(s.T) + ' kasıtlı/uzun bakış varsayımıdır.');
     if (l >= 400 && l < 700 && s.mode !== 'sp' && s.T < 0.25) w.push('Görünür bölgede maruziyet süresi 0,25 s\'den kısa seçildi; bu, göz kırpma tepkisi süresinden kısa ve muhafazakâr değildir.');
     if (l >= 700 && s.mode !== 'sp' && s.T < 10 && l < 1e6) w.push('Görünmez ışın için önerilen en kısa maruziyet süresi 10 s; daha kısa süre muhafazakâr değildir.');
     const both = out.sets.length > 1;
@@ -2317,7 +2339,7 @@ dialog::backdrop { background: rgba(10, 14, 22, .55); }
       const g = out.eye.at0.crit || out.eye.worst.crit;
       if (g && g.set === 'AB' && out.eye.odWorst > 0) n.push('Belirleyici sınır 2006/25/AT\'den geliyor (AB/Türkiye işyeri maruziyet sınır değerleri ICNIRP 2013\'ten daha kısıtlayıcı).');
     }
-    if (s.alpha > LE.mpe.ALPHA_MIN) n.push('Genişletilmiş kaynak: α = ' + s.alpha + ' mrad, C_E = ' + LE.mpe.CE(s.alpha, s.T).toFixed(2).replace('.', ',') + ' (ICNIRP, t = T)' + (out.sets.indexOf('AB') >= 0 ? ', ' + LE.aord.CE(s.alpha).toFixed(2).replace('.', ',') + ' (2006/25/AT)' : '') + '.');
+    if (s.alpha > LE.mpe.ALPHA_MIN) n.push('Genişletilmiş kaynak: α = ' + LE.units.fmt(s.alpha, 4) + ' mrad, C_E = ' + LE.mpe.CE(s.alpha, s.T).toFixed(2).replace('.', ',') + ' (ICNIRP, t = T)' + (out.sets.indexOf('AB') >= 0 ? ', ' + LE.aord.CE(s.alpha).toFixed(2).replace('.', ',') + ' (2006/25/AT)' : '') + '.');
     const minD = Math.min(beam.dx, beam.dy);
     if ((l < 400 || l >= 1400) && minD < 1e-3 && out.sets.indexOf('ICNIRP') >= 0) n.push('Işın çapı 1 mm\'den küçük: UV/IR göz (t < 0,35 s) ve deri değerlendirmesinde açıklık ortalaması yerine tepe değer kullanıldı (ICNIRP Tablo 5/7 dipnotları).');
     if (out.eye.nohdInf) w.push('Iraksama sıfır (veya çok küçük) ve atmosferik zayıflama yok: NOHD pratikte sonsuz. Işın yolu tamamen kontrol altına alınmalı.');
@@ -2685,6 +2707,9 @@ dialog::backdrop { background: rgba(10, 14, 22, .55); }
   const FIELDS = {};
   for (const s of SECTIONS) for (const f of s.fields) FIELDS[f.id] = f;
 
+  /** Hesaba giren seçim alanları (kimlik bölümündeki sınıf/durum hariç). */
+  const CALC_CHOICES = ['limits', 'mode', 'sp_kind', 'rp_kind', 'spec', 'profile', 'model', 'fiber', 'skinArea', 'ew_mode', 'ew_win'];
+
   // ---------------------------------------------------------------------------
   // Durum
   // ---------------------------------------------------------------------------
@@ -2875,6 +2900,9 @@ dialog::backdrop { background: rgba(10, 14, 22, .55); }
   // ---------------------------------------------------------------------------
   function readNum(id, errs, warns, echo) {
     const f = FIELDS[id];
+    const unit = state.u[id];
+    // İçe aktarılan / eski kayıtta listede olmayan birim: sessizce başka birimle yorumlanmaz
+    if (UL[f.units].indexOf(unit) < 0) { errs[id] = 'Bilinmeyen birim "' + String(unit) + '": listeden bir birim seçin.'; return NaN; }
     const r = U.parseNumber(state.v[id]);
     if (!r.ok) { errs[id] = r.error; return NaN; }
     const kind = KIND[f.units] || f.units;
@@ -2891,7 +2919,7 @@ dialog::backdrop { background: rgba(10, 14, 22, .55); }
     if (!r.ok) { errs[id] = r.error; return NaN; }
     if (r.value < min || r.value > max) { errs[id] = 'Değer ' + U.fmt(min) + ' ile ' + U.fmt(max) + ' arasında olmalı.'; return NaN; }
     if (r.warning) warns[id] = r.warning;
-    echo[id] = '= ' + U.fmt(r.value, 4) + (unitTxt ? ' ' + unitTxt : '');
+    echo[id] = unitTxt === '%' ? '= %' + U.fmt(r.value, 4) : '= ' + U.fmt(r.value, 4) + (unitTxt ? ' ' + unitTxt : '');
     return r.value;
   }
 
@@ -2921,6 +2949,11 @@ dialog::backdrop { background: rgba(10, 14, 22, .55); }
     const warns = {};
     const echo = {};
     const num = (id) => readNum(id, errs, warns, echo);
+    // hesaba giren seçimler listedeki bir değer olmalı (bozuk kayıt sessizce varsayılana dönmez)
+    for (const id of CALC_CHOICES) {
+      const f = FIELDS[id];
+      if (!f.options.some((o) => o[0] === state.v[id])) errs[id] = 'Geçersiz seçim "' + String(state.v[id]) + '": listeden seçin.';
+    }
     const mode = g('mode');
     const lambda = num('wl');
     const inp = { lambda, mode, limits: g('limits') || 'both' };
@@ -2987,7 +3020,7 @@ dialog::backdrop { background: rgba(10, 14, 22, .55); }
       if (lambda > 0) {
         if (lambda >= LE.analysis.OAV_MIN_NM && lambda < LE.analysis.OAV_MAX_NM) {
           const tAuto = lambda >= 400 && lambda < 700 ? 0.9 : 0.7;
-          echo.oav = 'Hesaplanıyor: M = ' + U.fmt(Math.max(1, (D > 0 ? D : 0.05) / 7e-3), 3) + '×, τ = %' + U.fmt((tau > 0 ? tau : tAuto) * 100, 3) + (tau > 0 ? '' : ' (otomatik)');
+          echo.oav = 'Hesaplanıyor: M = ' + U.fmt(Math.max(1, (D > 0 ? D : 0.05) / 7e-3), 3) + '×, τ = ' + U.fmtPct(tau > 0 ? tau : tAuto) + (tau > 0 ? '' : ' (otomatik)');
         } else {
           warns.oav = U.fmt(lambda, 5) + ' nm\'de dürbün etkisi hesaplanmaz: cam optikler 302,5 nm altını ve 4 µm üstünü geçirmez.';
         }
@@ -3035,7 +3068,11 @@ dialog::backdrop { background: rgba(10, 14, 22, .55); }
   function showMessages(errs, warns, echo) {
     for (const id in els) {
       const r = els[id];
-      if (!r.echo) continue;
+      if (!r.echo) {
+        // seçim kutuları: hata metni sonuç alanında listelenir, alan kırmızı çerçeveyle işaretlenir
+        r.wrap.classList.toggle('invalid', !!errs[id]);
+        continue;
+      }
       r.wrap.classList.toggle('invalid', !!errs[id]);
       if (errs[id]) { r.echo.textContent = errs[id]; r.echo.className = 'echo err'; }
       else if (warns[id]) { r.echo.textContent = (echo[id] ? echo[id] + ' — ' : '') + warns[id]; r.echo.className = 'echo warn'; }
@@ -3064,6 +3101,13 @@ dialog::backdrop { background: rgba(10, 14, 22, .55); }
   function setState(s) {
     const d = defaultState();
     state = { v: Object.assign(d.v, (s && s.v) || {}), u: Object.assign(d.u, (s && s.u) || {}) };
+    // içe aktarılan JSON'da tür farkları: onay kutusu boolean, seçim değeri metin olmalı
+    for (const id in FIELDS) {
+      const f = FIELDS[id];
+      const v = state.v[id];
+      if (f.type === 'check') state.v[id] = v === true || v === 'true';
+      else if ((f.type === 'select' || f.type === 'seg') && v !== undefined) state.v[id] = v === null ? f.value : String(v);
+    }
     syncDom();
   }
 
@@ -3171,7 +3215,15 @@ dialog::backdrop { background: rgba(10, 14, 22, .55); }
       lines.push('Maruziyet, MPE\'nin <b>' + U.fmt(worstRatio, 3) + ' katına</b> kadar çıkabilir' + (worstRatio < 2 ? ' (sınırda aşım — yine de kontrol önlemi gerekir)' : '') + '.');
       lines.push('Göz tehlike mesafesi (NOHD): <b>' + distOrNone(e.nohd, e.nohdInf) + '</b>' + (e.enohd !== null ? ' · dürbünle (ENOHD): <b>' + distOrNone(e.enohd, e.enohdInf) + '</b>' : '') + '.');
       if (e.oav.notApplicable) lines.push('Dürbünle bakış seçildi ancak bu dalga boyunda hesaba katılmadı (cam optikler 302,5 nm altını ve 4 µm üstünü geçirmez).');
-      lines.push('Bu mesafe içinde lazer kontrollü alan ve uygun göz koruyucu gereklidir' + (o.eyewear ? ': <b class="mono">' + esc(o.eyewear.marking) + '</b>' : '') + ' (en az OD ' + LE.eyewear.recommendedOD(e.odWorst) + ').');
+      const ewTxt = (o.eyewear ? ': <b class="mono">' + esc(o.eyewear.marking) + '</b>' : '') + ' (en az OD ' + LE.eyewear.recommendedOD(e.odWorst) + ')';
+      if (e.nohd > 0 || e.nohdInf) {
+        lines.push('Bu mesafe içinde lazer kontrollü alan ve uygun göz koruyucu gereklidir' + ewTxt + '.');
+      } else if (e.enohd > 0 || e.enohdInf) {
+        lines.push('Çıplak gözle doğrudan bakışta MPE aşılmıyor; dürbünle bakışta ENOHD içinde aşılır. Bu mesafe içinde optik destekli bakış engellenmeli ya da göz koruyucu kullanılmalıdır' + ewTxt + '.');
+      } else {
+        // en kötü durum (tüm güç ölçüm açıklığında) MPE'yi aşıyor, gerçek ışın aşmıyor
+        lines.push('Işın ölçüm açıklığından (göz bebeğinden) geniş olduğu için çıplak gözle doğrudan bakışta MPE aşılmıyor; ışın daraltılır ya da odaklanırsa (tüm güç göz bebeğine girerse) aşılır. Bu durumlar için göz koruyucu' + ewTxt + '.');
+      }
       if (e.scint) lines.push('Atmosferik türbülans (sintilasyon) payıyla (+' + e.scint.odPlus + ' OD): önerilen en az <b>OD ' + e.scint.recOD + '</b>' + (o.eyewear && o.eyewear.markingScint ? ', EN 207 <b class="mono">' + esc(o.eyewear.markingScint) + '</b>' : '') + '; tehlike mesafesi <b>' + distOrNone(e.scint.nohd, e.scint.nohdInf) + '</b>' + (e.scint.enohd !== null ? ' (dürbünle ' + distOrNone(e.scint.enohd, e.scint.enohdInf) + ')' : '') + '.');
       const gc = e.worst.ratio >= e.at0.ratio ? e.worst.crit : e.at0.crit;
       if (o.sets.length > 1 && gc) {
@@ -3191,7 +3243,7 @@ dialog::backdrop { background: rgba(10, 14, 22, .55); }
     }
     if (o.diffuse && o.diffuse.eye.nhz > 0) {
       if (cls === 'ok') cls = 'warn';
-      lines.push('Yaygın yansımalar <b>' + distOrNone(o.diffuse.eye.nhz, o.diffuse.eye.inf) + '</b> mesafeye kadar göz için tehlikeli (ρ = %' + U.fmt(o.diffuse.rho * 100, 3) + ', ' + U.fmtTime(o.diffuse.T) + ').');
+      lines.push('Yaygın yansımalar <b>' + distOrNone(o.diffuse.eye.nhz, o.diffuse.eye.inf) + '</b> mesafeye kadar göz için tehlikeli (ρ = ' + U.fmtPct(o.diffuse.rho) + ', ' + U.fmtTime(o.diffuse.T) + ').');
     }
     if (o.skin.timesMPE > 1) {
       if (cls === 'ok') cls = 'warn';
@@ -3612,7 +3664,7 @@ dialog::backdrop { background: rgba(10, 14, 22, .55); }
       '<tr><td>' + U.fmtDist(d.r) + '\'den bakışta gerekli OD</td><td>' + U.fmtOD(d.eye.odAtR) + '</td></tr>' +
       '<tr><td>Göz MPE (' + U.fmtTime(d.T) + ')</td><td>' + U.fmt(gs.perPulseH) + ' J/m²' + (o.input.mode === 'rp' ? ' / darbe' : '') + '</td></tr>' +
       '<tr><td>Deri tehlike mesafesi</td><td>' + distOrNone(d.skin.nhz, d.skin.inf) + '</td></tr>' +
-      '<tr><td>Yansıtma · açı</td><td>%' + U.fmt(d.rho * 100, 3) + ' · ' + U.fmt(d.thetaDeg, 3) + '°</td></tr>' +
+      '<tr><td>Yansıtma · açı</td><td>' + U.fmtPct(d.rho) + ' · ' + U.fmt(d.thetaDeg, 3) + '°</td></tr>' +
       '<tr><td>Kaynak modeli</td><td>' + (d.extended ? 'Genişletilmiş (α = ' + U.fmt(d.alphaAtR, 3) + ' mrad @ ' + U.fmtDist(d.r) + ')' : 'Nokta kaynak (muhafazakâr)') + '</td></tr>' +
       '</tbody></table><p class="note">E = ρ·P·cos θ / (π·r²). Aynasal (parlak) yüzeyler doğrudan ışın gibi değerlendirilmelidir.</p></div></div>';
   }
@@ -3690,7 +3742,7 @@ dialog::backdrop { background: rgba(10, 14, 22, .55); }
     if (d.P !== null) add('Ortalama güç', U.fmtPrefixed(d.P, 'W', 4));
     if (d.Q !== null) add('Darbe enerjisi', U.fmtPrefixed(d.Q, 'J', 4));
     if (d.Ppeak !== null) add('Tepe güç', U.fmtPrefixed(d.Ppeak, 'W', 4));
-    if (d.duty !== null) add('Görev oranı', U.fmt(d.duty * 100, 3) + ' %');
+    if (d.duty !== null) add('Görev oranı', U.fmtPct(d.duty));
     if (o.eye.info.N) add('T içindeki darbe sayısı', U.fmt(o.eye.info.N, 4));
     add('Göz maruziyet süresi', U.fmtTime(d.T) + (inp.mode !== 'sp' && Math.abs(d.T - d.Tdefault) > 1e-12 ? ' <span class="muted">(standart ' + U.fmtTime(d.Tdefault) + ')</span>' : ''));
     const sec = LE.beam.sectionAt(inp.beam, inp.range || 0, inp.model);
@@ -3706,7 +3758,7 @@ dialog::backdrop { background: rgba(10, 14, 22, .55); }
     else a.push('Sınır değerler: ICNIRP 2013 (IEC 60825-1:2014 / ANSI Z136.1-2014) ve 2006/25/AT Ek II birlikte; her setin kuralları kendi açıklığıyla uygulanır, en kısıtlayıcı olan belirler.');
     a.push(o.input.alpha > 1.5 ? 'Işın içi bakışta genişletilmiş kaynak: α = ' + U.fmt(o.input.alpha, 3) + ' mrad.' : 'Işın içi bakış: nokta kaynak (α ≤ 1,5 mrad) — en muhafazakâr durum.');
     a.push('Işın merkezine bakış; çap ve ıraksama 1/e ölçütüne çevrildi; büyüme modeli: ' + (o.input.model === 'linear' ? 'doğrusal (IEC TR 60825-14).' : 'karesel toplam (ANSI).'));
-    if (o.eye.oav.on) a.push('Dürbünle bakış: objektif ' + U.fmt(o.eye.oav.D * 1e3, 3) + ' mm, büyütme ' + U.fmt(o.eye.oav.M, 3) + '×, geçirgenlik %' + U.fmt(o.eye.oav.tau * 100, 3) + '; optik, girişte M·(ölçüm açıklığı) çaplı bölgeyi göze taşır (retina için etkin giriş = objektif, IEC Koşul 1 ile tutarlı).');
+    if (o.eye.oav.on) a.push('Dürbünle bakış: objektif ' + U.fmt(o.eye.oav.D * 1e3, 3) + ' mm, büyütme ' + U.fmt(o.eye.oav.M, 3) + '×, geçirgenlik ' + U.fmtPct(o.eye.oav.tau) + '; optik, girişte M·(ölçüm açıklığı) çaplı bölgeyi göze taşır (retina için etkin giriş = objektif, IEC Koşul 1 ile tutarlı).');
     a.push(o.input.mu > 0 ? 'Atmosferik zayıflama: μ = ' + U.fmt(o.input.mu * 1e3, 3) + ' 1/km.' : 'Atmosferik zayıflama yok sayıldı (muhafazakâr).');
     a.push(o.eye.scint ? 'Atmosferik türbülans (sintilasyon) payı: ışınım ×' + o.eye.scint.factor + ' (+' + o.eye.scint.odPlus + ' OD), ayrı NOHD ve gözlük önerisi olarak verildi; standart değerler payısızdır.' : 'Atmosferik türbülans (sintilasyon) payı uygulanmadı.');
     if (o.input.mode === 'rp') a.push('Tekrarlı darbe: Kural 1, Kural 2 (tüm alt gruplar) ve retina için Kural 3 birlikte uygulanır; en kısıtlayıcı olan belirler.');
@@ -3725,7 +3777,7 @@ dialog::backdrop { background: rgba(10, 14, 22, .55); }
       '<p class="note">Bu yazılım yetkin bir lazer güvenlik sorumlusunun değerlendirmesinin yerine geçmez; sonuçlar girilen parametreler kadar doğrudur.</p></div></div>';
   }
 
-  LE.render = { render, chart, chartReadout, chartRange, attachChart, assumptions, mech, RULE, esc, limitText, ansi, distOrNone, setName };
+  LE.render = { render, verdict, derivedCard, chart, chartReadout, chartRange, attachChart, assumptions, mech, RULE, esc, limitText, ansi, distOrNone, setName };
 })(typeof globalThis !== 'undefined' ? globalThis : this);
 
 </script>
@@ -3797,6 +3849,16 @@ dialog::backdrop { background: rgba(10, 14, 22, .55); }
     return { ok, list };
   }
 
+  /** Kaydın kopyası (yeni kimlik, "(kopya)" ekli ad). Özeti olmayan içe aktarılmış kayıtlarda da çalışır. */
+  function duplicate(rec) {
+    const c = JSON.parse(JSON.stringify(rec));
+    c.id = newId();
+    c.savedAt = new Date().toISOString();
+    c.state.v.name = (c.state.v.name || '') + ' (kopya)';
+    c.summary = Object.assign({}, c.summary || {}, { name: c.state.v.name });
+    return c;
+  }
+
   function remove(id) {
     const list = loadInventory().filter((r) => r.id !== id);
     saveInventory(list);
@@ -3817,6 +3879,12 @@ dialog::backdrop { background: rgba(10, 14, 22, .55); }
   }
 
   function download(name, text, mime) {
+    // Android uygulaması (WebView) blob indirmesini desteklemez: yerel köprü dosya seçiciyle kaydeder
+    const bridge = root.LazerAndroid;
+    if (bridge && typeof bridge.saveFile === 'function') {
+      bridge.saveFile(String(name), String(mime || 'application/octet-stream'), String(text));
+      return;
+    }
     const blob = new Blob([text], { type: mime || 'application/octet-stream' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -3877,7 +3945,7 @@ dialog::backdrop { background: rgba(10, 14, 22, .55); }
   }
 
   LE.store = {
-    loadInventory, saveInventory, upsert, remove, newId, summarize, saveSession, loadSession,
+    loadInventory, saveInventory, upsert, remove, duplicate, newId, summarize, saveSession, loadSession,
     exportJSON, importJSON, exportCSV, download, isPersistent: () => persistent,
   };
 })(typeof globalThis !== 'undefined' ? globalThis : this);
@@ -3965,7 +4033,12 @@ dialog::backdrop { background: rgba(10, 14, 22, .55); }
     prm.push(row('Göz maruziyet süresi', U.fmtTime(d.T)));
     prm.push(row('Işın çapı / ıraksama (1/e)', U.fmt(inp.beam.dx * 1e3, 4) + (inp.beam.dy !== inp.beam.dx ? ' × ' + U.fmt(inp.beam.dy * 1e3, 4) : '') + ' mm · ' + U.fmt(inp.beam.phix * 1e3, 4) + (inp.beam.phiy !== inp.beam.phix ? ' × ' + U.fmt(inp.beam.phiy * 1e3, 4) : '') + ' mrad'));
     prm.push(row('Profil · girişte ölçüt', esc({ gauss: 'Gauss', 'tophat-ellipse': 'Düz tepe (elips)', 'tophat-rect': 'Düz tepe (dikdörtgen)' }[inp.beam.profile]) + ' · ' + esc(v.spec === '1/e2' ? '1/e² verildi' : '1/e verildi')));
-    if (inp.oav && inp.oav.on) prm.push(row('Optik destekli bakış', 'Evet, ' + U.fmt((inp.oav.D || 0.05) * 1e3, 3) + ' mm objektif'));
+    if (inp.oav && inp.oav.on) {
+      const ov = o.eye.oav;
+      prm.push(row('Optik destekli bakış', ov.on
+        ? 'Evet: ' + U.fmt(ov.D * 1e3, 3) + ' mm objektif, ' + U.fmt(ov.M, 3) + '× büyütme, geçirgenlik ' + U.fmtPct(ov.tau)
+        : 'İstendi; bu dalga boyunda uygulanmadı (cam optikler 302,5 nm altını ve 4 µm üstünü geçirmez)'));
+    }
     if (inp.mu > 0) prm.push(row('Atmosferik zayıflama', U.fmt(inp.mu * 1e3, 3) + ' 1/km'));
     parts.push('<h2>2. Lazer ve ışın parametreleri</h2><table><tbody>' + prm.join('') + '</tbody></table>');
 
@@ -3974,13 +4047,13 @@ dialog::backdrop { background: rgba(10, 14, 22, .55); }
     const box = (k, val, s) => sum.push('<div>' + k + '<b>' + val + '</b>' + (s ? '<span>' + s + '</span>' : '') + '</div>');
     box('Göz NOHD', LE.render.distOrNone(e.nohd, e.nohdInf), e.enohd !== null ? 'ENOHD ' + LE.render.distOrNone(e.enohd, e.enohdInf) : '');
     box('Gerekli OD (en kötü)', U.fmtOD(e.odWorst), 'öneri ≥ OD ' + LE.eyewear.recommendedOD(e.odWorst));
-    box('OD @ ' + U.fmtDist(e.atRange.r), U.fmtOD(e.odAtRange), '');
+    box('OD @ ' + U.fmtDist(e.atRange.r) + (e.atRange.viaOptics ? ' (dürbünle)' : ''), U.fmtOD(e.odAtRange), '');
     if (e.scint) box('Türbülans payıyla (+' + e.scint.odPlus + ' OD)', 'OD ' + e.scint.recOD, 'NOHD ' + LE.render.distOrNone(e.scint.nohd, e.scint.nohdInf) + (o.eyewear && o.eyewear.markingScint ? ' · ' + esc(o.eyewear.markingScint) : ''));
     box('EN 207', o.eyewear ? esc(o.eyewear.marking) : '—', '');
     box('EN 208', o.eyewear && o.eyewear.en208 ? (o.eyewear.en208.applicable ? 'RB' + o.eyewear.en208.rb : 'uygun değil') : '—', '');
     const g = e.summary.governing;
     box('Göz MPE', U.fmt(g.perPulseH) + ' J/m²', esc(LE.render.RULE[g.rule]) + (inp.mode === 'rp' ? ' (darbe başına)' : '') + ' · ' + LE.render.setName(g.crit.set));
-    if (o.diffuse) box('Yaygın yansıma NHZ', LE.render.distOrNone(o.diffuse.eye.nhz, o.diffuse.eye.inf), 'ρ = %' + U.fmt(o.diffuse.rho * 100, 3));
+    if (o.diffuse) box('Yaygın yansıma NHZ', LE.render.distOrNone(o.diffuse.eye.nhz, o.diffuse.eye.inf), 'ρ = ' + U.fmtPct(o.diffuse.rho));
     box('Deri', U.fmt(o.skin.timesMPE, 3) + ' × MPE', 'NSHD ' + LE.render.distOrNone(o.skin.nshd, o.skin.nshdInf));
     if (o.lens) box('Mercek NHZ (odaktan)', LE.render.distOrNone(o.lens.nohd, o.lens.inf), '');
     if (o.fiber) box('Fiber NOHD', LE.render.distOrNone(o.fiber.nohd, o.fiber.inf), '');
@@ -4000,22 +4073,29 @@ dialog::backdrop { background: rgba(10, 14, 22, .55); }
       }
     }
     parts.push('<h2>4. MPE ayrıntıları</h2><table><thead><tr><th>Set</th><th>Kural</th><th>' + (inp.mode === 'rp' ? 'Darbe başına MPE' : 'MPE') + '</th><th>Zaman tabanı</th><th>Açıklık</th><th>Mekanizma</th><th>Formül</th></tr></thead><tbody>' + mrows.join('') + '</tbody></table>');
-    const f = o.factors;
-    const fx = [];
-    if (f.CA !== null) fx.push('C_A = ' + U.fmt(f.CA, 4));
-    if (f.CB !== null) fx.push('C_B = ' + U.fmt(f.CB, 4));
-    if (f.CC !== null) fx.push('C_C = ' + U.fmt(f.CC, 4));
-    if (f.CE !== null) fx.push('C_E = ' + U.fmt(f.CE, 4));
-    if (f.CP !== undefined) fx.push('C_P = ' + U.fmt(f.CP, 4));
-    if (f.T2 !== null) fx.push('T₂ = ' + U.fmtTime(f.T2));
-    if (f.Ti !== null) fx.push('Tᵢ = ' + U.fmtTime(f.Ti));
-    fx.push('göz açıklığı ' + U.fmt(f.apertureEye * 1e3, 3) + ' mm');
-    parts.push('<p class="mono" style="font-size:9pt">' + fx.join(' · ') + '</p>');
+    // her setin kendi faktörleri (yalnız kullanılan setler)
+    const fline = (name, f, ab) => {
+      const fx = [];
+      const has = (x) => x !== null && x !== undefined && !Number.isNaN(x);
+      if (has(f.CA)) fx.push('C_A = ' + U.fmt(f.CA, 4));
+      if (has(f.CB)) fx.push('C_B = ' + U.fmt(f.CB, 4));
+      if (has(f.CC)) fx.push('C_C = ' + U.fmt(f.CC, 4));
+      if (has(f.CE)) fx.push('C_E = ' + U.fmt(f.CE, 4));
+      if (has(f.CP)) fx.push('C_P = ' + U.fmt(f.CP, 4));
+      if (has(f.T2)) fx.push('T₂ = ' + U.fmtTime(f.T2));
+      if (ab ? has(f.Tmin) : has(f.Ti)) fx.push((ab ? 'T_min = ' : 'Tᵢ = ') + U.fmtTime(ab ? f.Tmin : f.Ti));
+      fx.push('göz açıklığı ' + U.fmt(f.apertureEye * 1e3, 3) + ' mm');
+      return name + ': ' + fx.join(' · ');
+    };
+    const fl = [];
+    if (o.sets.indexOf('ICNIRP') >= 0) fl.push(fline('ICNIRP 2013', o.factors, false));
+    if (o.sets.indexOf('AB') >= 0 && o.factors.AB) fl.push(fline('2006/25/AT', o.factors.AB, true));
+    parts.push('<p class="mono" style="font-size:9pt">' + fl.join('<br>') + '</p>');
 
     if (o.eyewear) {
       const er = o.eyewear.en207.map((i) => '<tr><td>' + i.mode + '</td><td class="mono">' + U.fmt(i.density) + ' ' + i.unit + '</td><td>' + esc(i.basis) + '</td><td><b>LB' + i.lb + '</b></td></tr>').join('');
       parts.push('<h2>5. Göz koruyucu (EN 207 / EN 208)</h2><table><thead><tr><th>Mod</th><th>Yoğunluk</th><th>Esas</th><th>Seviye</th></tr></thead><tbody>' + er + '</tbody></table>' +
-        '<p>Gözlükteki ışın çapı: ' + U.fmt(o.eyewear.sec.dx * 1e3, 3) + ' mm (1/e). ' + (o.eyewear.en208 ? 'EN 208: ' + esc(o.eyewear.en208.applicable ? 'RB' + o.eyewear.en208.rb : 'uygun değil') + '.' : '') + (v.eyewearInfo ? ' Mevcut gözlük: ' + esc(v.eyewearInfo) : '') + '</p>');
+        '<p>Gözlükteki ışın çapı: ' + U.fmt(o.eyewear.sec.dx * 1e3, 3) + ' mm (1/e). ' + (o.eyewear.en208 ? 'EN 208: ' + esc(o.eyewear.en208.applicable ? 'RB' + o.eyewear.en208.rb : 'uygun değil') + '.' : '') + '</p>');
     }
 
     parts.push('<h2>6. Önerilen kontrol önlemleri</h2><ol>' + controls(o, v).map((c) => '<li>' + c + '</li>').join('') + '</ol>');
@@ -4228,21 +4308,32 @@ seviyeleri (+1). Standart (paysız) sonuçlar değişmez.</p>
   }
 
   function recalc() {
-    const r = LE.form.read();
-    const formErrors = Object.keys(r.errs).map((id) => label(id) + ': ' + r.errs[id]);
-    const formWarnings = Object.keys(r.warns).map((id) => label(id) + ': ' + r.warns[id]);
+    // Hiçbir hata durumunda ekranda önceki girişin sonuçları kalmamalı: okuma, hesap ve çizimdeki
+    // her istisna sonuç alanını hata kutusuyla değiştirir.
+    let r = null;
     let out = null;
-    if (r.ok) {
-      try {
-        out = LE.analysis.analyze(r.inp);
-      } catch (e) {
-        out = { ok: false, errors: ['Beklenmeyen hesap hatası: ' + e.message] };
-        if (root.console) console.error(e);
-      }
+    let formErrors = [];
+    let formWarnings = [];
+    try {
+      r = LE.form.read();
+      formErrors = Object.keys(r.errs).map((id) => label(id) + ': ' + r.errs[id]);
+      formWarnings = Object.keys(r.warns).map((id) => label(id) + ': ' + r.warns[id]);
+      if (r.ok) out = LE.analysis.analyze(r.inp);
+    } catch (e) {
+      out = { ok: false, errors: ['Beklenmeyen hata: ' + e.message] };
+      if (root.console) console.error(e);
     }
     lastOut = out && out.ok ? out : null;
-    LE.render.render($('results'), out || { ok: false, errors: [] }, { formErrors, formWarnings });
-    hints(r, out);
+    try {
+      LE.render.render($('results'), out || { ok: false, errors: [] }, { formErrors, formWarnings });
+    } catch (e) {
+      lastOut = null;
+      $('results').innerHTML = '<div class="verdict err"><h2>Hesap yapılamadı</h2><p>Beklenmeyen gösterim hatası: ' + esc(e.message) + '</p></div>';
+      if (root.console) console.error(e);
+    }
+    if (r) {
+      try { hints(r, lastOut); } catch (e) { if (root.console) console.error(e); }
+    }
     const st = LE.form.getState();
     st.currentId = currentId;
     LE.store.saveSession(st);
@@ -4307,6 +4398,7 @@ seviyeleri (+1). Standart (paysız) sonuçlar değişmez.</p>
       if (!list.length) return toast('Envanter boş.');
       LE.store.exportCSV(list);
     });
+    $('inv-import').addEventListener('click', () => $('inv-import-file').click());
     $('inv-import-file').addEventListener('change', (e) => {
       const file = e.target.files && e.target.files[0];
       if (!file) return;
@@ -4325,7 +4417,10 @@ seviyeleri (+1). Standart (paysız) sonuçlar değişmez.</p>
     });
     $('rep-print').addEventListener('click', () => {
       $('report-print').innerHTML = $('rep-body').innerHTML;
-      root.print();
+      // Android uygulamasında window.print() çalışmaz: yerel köprü sistem yazdırma (PDF) ekranını açar
+      const bridge = root.LazerAndroid;
+      if (bridge && typeof bridge.print === 'function') bridge.print('Lazer tehlike analizi - ' + (LE.form.get('name') || 'adsız lazer'));
+      else root.print();
     });
     $('rep-html').addEventListener('click', () => {
       const name = (LE.form.get('name') || 'lazer').replace(/[^\p{L}\p{N}_-]+/gu, '_').slice(0, 40);
@@ -4451,12 +4546,7 @@ seviyeleri (+1). Standart (paysız) sonuçlar değişmez.</p>
       b.addEventListener('click', () => {
         const r = LE.store.loadInventory().find((x) => x.id === b.dataset.dup);
         if (!r) return;
-        const c = JSON.parse(JSON.stringify(r));
-        c.id = LE.store.newId();
-        c.savedAt = new Date().toISOString();
-        c.state.v.name = (c.state.v.name || '') + ' (kopya)';
-        c.summary.name = c.state.v.name;
-        LE.store.upsert(c);
+        LE.store.upsert(LE.store.duplicate(r));
         renderInventory();
       });
     }
@@ -4489,6 +4579,23 @@ seviyeleri (+1). Standart (paysız) sonuçlar değişmez.</p>
       '<b>' + selftest.passed + '/' + selftest.total + '</b> test geçti.</p><div class="tablewrap"><table class="t"><thead><tr><th></th><th>Test</th><th>Beklenen</th><th>Hesaplanan</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
     $('dlg-selftest').showModal();
   }
+
+  /**
+   * Geri tuşu (Android): açık diyaloğu ya da Örnekler menüsünü kapatır.
+   * @returns {boolean} bir şey kapatıldıysa true; false ise uygulama kapanabilir.
+   */
+  function back() {
+    const open = document.querySelector('dialog[open]');
+    if (open) { open.close(); return true; }
+    const m = $('menu-examples');
+    if (m && !m.classList.contains('hidden')) {
+      m.classList.add('hidden');
+      $('btn-examples').setAttribute('aria-expanded', 'false');
+      return true;
+    }
+    return false;
+  }
+  LE.app = { back };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();

@@ -173,7 +173,10 @@
     });
     $('rep-print').addEventListener('click', () => {
       $('report-print').innerHTML = $('rep-body').innerHTML;
-      root.print();
+      // Android uygulamasında window.print() çalışmaz: yerel köprü sistem yazdırma (PDF) ekranını açar
+      const bridge = root.LazerAndroid;
+      if (bridge && typeof bridge.print === 'function') bridge.print('Lazer tehlike analizi - ' + (LE.form.get('name') || 'adsız lazer'));
+      else root.print();
     });
     $('rep-html').addEventListener('click', () => {
       const name = (LE.form.get('name') || 'lazer').replace(/[^\p{L}\p{N}_-]+/gu, '_').slice(0, 40);
@@ -332,6 +335,23 @@
       '<b>' + selftest.passed + '/' + selftest.total + '</b> test geçti.</p><div class="tablewrap"><table class="t"><thead><tr><th></th><th>Test</th><th>Beklenen</th><th>Hesaplanan</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
     $('dlg-selftest').showModal();
   }
+
+  /**
+   * Geri tuşu (Android): açık diyaloğu ya da Örnekler menüsünü kapatır.
+   * @returns {boolean} bir şey kapatıldıysa true; false ise uygulama kapanabilir.
+   */
+  function back() {
+    const open = document.querySelector('dialog[open]');
+    if (open) { open.close(); return true; }
+    const m = $('menu-examples');
+    if (m && !m.classList.contains('hidden')) {
+      m.classList.add('hidden');
+      $('btn-examples').setAttribute('aria-expanded', 'false');
+      return true;
+    }
+    return false;
+  }
+  LE.app = { back };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
