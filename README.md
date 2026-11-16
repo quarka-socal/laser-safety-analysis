@@ -1,8 +1,8 @@
 # Laser Safety Analysis · Lazer Emniyet Analizi
 
-Lazer hasar analizi için çevrimdışı kullanılabilen Android uygulaması ve tek dosyalık PC sürümü.Android uygulaması ve tek dosyalık PC sürümü birebir aynıdır.
+Lazer hasar analizi için çevrimdışı kullanılabilen Android uygulaması ve tek dosyalık PC sürümü. Android uygulaması ve tek dosyalık PC sürümü birebir aynıdır.
 **MPE**, **NOHD / ENOHD**, **optik yoğunluk (OD)**, **EN 207 / EN 208** hesaplarını yapar.
-Lazer emniyet gözlük seçimi, deri korumasının belirlenmesi ve lazer kaynaklı göz hasarının ilk tespitini yönelik **Amsler Grid testi** için laboratuvar ve sahada kullanılabilir.
+Lazer emniyet gözlüğü seçimi, deri korumasının belirlenmesi ve lazer kaynaklı göz hasarının ilk tespitine yönelik **Amsler Grid testi** için laboratuvar ve sahada kullanılabilir.
 
 
 > Sonuçlar girilen verilere dayanır ve yetkin bir lazer güvenlik sorumlusunun değerlendirmesinin yerine geçmez.
