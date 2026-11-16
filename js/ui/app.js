@@ -111,11 +111,11 @@
     const b = $('selftest');
     if (!selftest.total) return;
     const ok = selftest.passed === selftest.total;
-    // telefonda yalnız "✓ 64/64" görünür (.st-word gizlenir); tam metin başlıkta ve ekran okuyucuda
     b.innerHTML = (ok ? '✓' : '✗') + ' <span class="st-word">' + esc(T('Öz-denetim')) + ' </span>' + selftest.passed + '/' + selftest.total;
     b.setAttribute('aria-label', T('Öz-denetim {0}/{1}', selftest.passed, selftest.total));
     b.title = T('Hesap motoru öz-denetimi') + ': ' + selftest.passed + '/' + selftest.total;
     b.classList.toggle('fail', !ok);
+    $('btn-menu').classList.toggle('alert', !ok);
     if (!ok) {
       const bn = $('selftest-banner');
       bn.textContent = T('UYARI: Hesap motoru öz-denetimi başarısız ({0} test). Program dosyaları değişmiş veya bozulmuş olabilir — sonuçları güvenlik kararı için KULLANMAYIN.', selftest.failed.length);
@@ -131,7 +131,7 @@
       selftest = { passed: 0, total: 1, failed: [{ name: 'Öz-denetim çalıştırılamadı', error: String(e) }], results: [] };
     }
     applyPrefs(true);
-    $('selftest').addEventListener('click', () => showSelftest());
+    $('selftest').addEventListener('click', () => { closeDrawer(); showSelftest(); });
 
     LE.form.build($('inputs'), schedule);
     const ses = LE.store.loadSession();
@@ -165,6 +165,7 @@
     try {
       r = LE.form.read();
       formErrors = Object.keys(r.errs).map((id) => label(id) + ': ' + r.errs[id]);
+      openErrorSections(Object.keys(r.errs));
       formWarnings = Object.keys(r.warns).map((id) => label(id) + ': ' + r.warns[id]);
       if (r.ok) out = LE.analysis.analyze(r.inp);
     } catch (e) {
@@ -185,6 +186,15 @@
     const st = LE.form.getState();
     st.currentId = currentId;
     LE.store.saveSession(st);
+  }
+
+  /** Kapalı bir bölümdeki alanda hata varsa o bölüm açılır (hata görünmeden kalmasın). */
+  function openErrorSections(ids) {
+    for (const id of ids) {
+      const el = $('in-' + id);
+      const sec = el && el.closest('details.sec');
+      if (sec && !sec.open) sec.open = true;
+    }
   }
 
   function hints(r, out) {

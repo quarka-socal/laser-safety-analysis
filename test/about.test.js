@@ -11,22 +11,24 @@ const { execFileSync } = require('child_process');
 const { LE } = require('./helpers');
 const ROOT = path.join(__dirname, '..');
 const UI = path.join(ROOT, 'js', 'ui');
-for (const m of ['version', 'i18n', 'lang_en', 'license', 'about']) require(path.join(UI, m + '.js'));
+for (const m of ['version', 'i18n', 'lang_en', 'license', 'about', 'help']) require(path.join(UI, m + '.js'));
 
-test('sürüm: uygulama 1.5.0, sürüm tarihi ISO biçiminde, derleme zamanı kaynakta boş', () => {
-  assert.equal(LE.APP_VERSION, '1.5.0');
+test('sürüm: uygulama 1.5.1, sürüm tarihi ISO biçiminde, derleme zamanı kaynakta boş', () => {
+  assert.equal(LE.APP_VERSION, '1.5.1');
   assert.match(LE.APP_DATE, /^\d{4}-\d{2}-\d{2}$/);
   assert.equal(LE.BUILD_TIME, null);
 });
 
-test('Hakkında: geliştirici S.ÖCAL, GNU GPL v3 (ya da sonrası), sürüm, tarih ve motor', () => {
+test('Hakkında: geliştirici S.OCAL, GNU GPL v3 (ya da sonrası), sürüm, tarih ve motor', () => {
   const h = LE.about.html({ passed: 64, total: 64 });
-  assert.match(h, /S\.ÖCAL/);
-  assert.match(h, /Copyright © 20\d\d S\.ÖCAL/);
+  assert.equal(LE.APP_AUTHOR, 'S.OCAL');
+  assert.match(h, /<b>S\.OCAL<\/b>/);
+  assert.match(h, /Copyright © 20\d\d S\.OCAL/);
+  assert.doesNotMatch(h, /ÖCAL/);
   assert.match(h, /GNU Genel Kamu Lisansı/);
   assert.match(h, /3\. sürümü ya da/);
   assert.match(h, /GPL-3\.0-or-later/);
-  assert.ok(h.includes('1.5.0'));
+  assert.ok(h.includes('1.5.1'));
   assert.ok(h.includes(LE.APP_DATE.split('-').reverse().join('.')), 'Türkçe tarih GG.AA.YYYY');
   assert.ok(h.includes(LE.analysis.ENGINE_VERSION));
   assert.match(h, /64\/64/);
@@ -58,7 +60,7 @@ test('Hakkında İngilizce: resmî GPL bildirimi, tarih YYYY-AA-GG', () => {
     assert.match(h, /This program is free software: you can redistribute it and\/or modify/);
     assert.match(h, /WITHOUT ANY WARRANTY/);
     assert.ok(h.includes(LE.APP_DATE));
-    const text = h.replace(/<[^>]+>/g, ' ').replace(/S\.ÖCAL/g, '');
+    const text = h.replace(/<[^>]+>/g, ' ');
     assert.doesNotMatch(text, /[çğıöşüÇĞİÖŞÜ]/);
   } finally {
     LE.i18n.setLang('tr');
@@ -90,7 +92,7 @@ test('tek dosya derlemesi: dış kaynak yok, derleme zamanı ve sürüm başlı�
   try {
     execFileSync(process.execPath, [path.join(ROOT, 'tools', 'build-single.js'), out], { stdio: 'pipe' });
     const html = fs.readFileSync(out, 'utf8');
-    assert.match(html, /<!-- Lazer Emniyet Analizi 1\.5\.0, motor v\d+\.\d+\.\d+, tek dosya derlemesi \d{4}-/);
+    assert.match(html, /<!-- Lazer Emniyet Analizi 1\.5\.1, motor v\d+\.\d+\.\d+, tek dosya derlemesi \d{4}-/);
     assert.match(html, /LE\.BUILD_TIME = '\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d/);
     assert.doesNotMatch(html, /<script src=|<link rel="stylesheet"/);
     assert.match(html, /GNU GENERAL PUBLIC LICENSE/);
@@ -108,4 +110,14 @@ test('lisans ekranda paragraflara göre akar; sözcükler ve paragraf sayısı k
   assert.equal(r.split('\n\n').length, t.split(/\n[ \t]*\n/).filter((p) => p.trim()).length);
   assert.ok(!/[^\n]\n[^\n]/.test(r), 'paragraf içinde satır kırılması kalmadı');
   assert.match(r, /^GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007\n\n/);
+});
+
+test('kaynak dosyalardaki telif satırları ve yardım metni: geliştirici S.OCAL, veriler "bu cihazda"', () => {
+  for (const f of ['js/ui/version.js', 'js/ui/about.js', 'js/ui/amsler.js', 'android/app/src/main/java/com/quarka/lazeremniyet/MainActivity.kt', 'OKUBENI.md']) {
+    const src = fs.readFileSync(path.join(ROOT, f), 'utf8');
+    assert.doesNotMatch(src, /ÖCAL/, f);
+  }
+  const help = LE.help.html({ passed: 64, total: 64 });
+  assert.match(help, /veriler yalnız bu cihazda saklanır/);
+  assert.doesNotMatch(help, /bilgisayar/);
 });

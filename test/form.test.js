@@ -48,3 +48,7 @@ test('onay kutusu değerleri boolean\'a çevrilir ("false" metni açık sayılma
   assert.equal(r.inp.T, 2);
   F.setState(F.defaultState());
 });
+
+test('açılışta bütün giriş bölümleri kapalı (sade ekran); başlıktaki özet görünür', () => {
+  assert.deepEqual(LE.form.SECTIONS.filter((s) => s.open).map((s) => s.id), []);
+});

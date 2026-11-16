@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="tr">
 <head>
-  <!-- Lazer Emniyet Analizi 1.5.0, motor v1.3.1, tek dosya derlemesi 2026-11-16T15:21:51Z -->
+  <!-- Lazer Emniyet Analizi 1.5.1, motor v1.3.1, tek dosya derlemesi 2026-11-16T15:57:12Z -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Lazer Emniyet Analizi</title>
@@ -119,15 +119,20 @@ a { color: var(--accent); }
 .tbtn.icon:hover, .tbtn.icon[aria-expanded="true"] { background: #2f384a; }
 .tbtn:focus-visible, .ditem:focus-visible, .menu-list button:focus-visible { outline: 2px solid var(--laser); outline-offset: -2px; }
 .selftest {
-  flex: none; font-size: 12px; padding: 4px 9px; border-radius: 999px; cursor: pointer; border: 1px solid transparent;
-  background: #1f3a26; color: #a9f0bd; border-color: #2f5a3a; white-space: nowrap;
+  font-size: 12.5px; padding: 6px 12px; border-radius: 999px; cursor: pointer; border: 1px solid transparent;
+  background: #1f3a26; color: #a9f0bd; border-color: #2f5a3a; white-space: nowrap; margin-top: 10px;
 }
 .selftest.fail { background: #4a1414; color: #ffb4ab; border-color: #7a2020; }
-/* telefon: tek satır; standart listesi ve "Öz-denetim" sözcüğü gizlenir (çekmecede ve Hakkında'da görünür) */
+/* öz-denetim başarısızsa ☰ düğmesinde kırmızı nokta (ayrıca sayfada kırmızı uyarı şeridi) */
+.tbtn.icon.alert { position: relative; }
+.tbtn.icon.alert::after {
+  content: ""; position: absolute; top: 8px; right: 8px; width: 9px; height: 9px; border-radius: 50%;
+  background: #ff5449; box-shadow: 0 0 0 2px var(--head);
+}
+/* telefon: tek satır; standart listesi gizlenir (çekmecede ve Hakkında'da görünür) */
 @media (max-width: 560px) {
   .brand .std { display: none; }
   .brand h1 { font-size: 16px; }
-  .selftest .st-word { display: none; }
 }
 @media (max-width: 380px) {
   .brand > svg { display: none; }
@@ -152,17 +157,17 @@ details.sec {
   background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
   box-shadow: var(--shadow); overflow: hidden;
 }
-details.sec > summary {
+details.sec > summary, details.fold > summary {
   list-style: none; cursor: pointer; padding: 11px 14px; font-weight: 650;
   display: flex; align-items: center; gap: 8px; user-select: none;
 }
-details.sec > summary::-webkit-details-marker { display: none; }
-details.sec > summary::before {
+details.sec > summary::-webkit-details-marker, details.fold > summary::-webkit-details-marker { display: none; }
+details.sec > summary::before, details.fold > summary::before {
   content: ""; width: 7px; height: 7px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted);
   transform: rotate(-45deg); transition: transform .15s; margin-right: 4px; flex: none;
 }
-details.sec[open] > summary::before { transform: rotate(45deg); }
-details.sec > summary .hint { margin-left: auto; font-weight: 400; color: var(--muted); font-size: 12px; text-align: right; }
+details.sec[open] > summary::before, details.fold[open] > summary::before { transform: rotate(45deg); }
+details.sec > summary .hint, details.fold > summary .hint { margin-left: auto; font-weight: 400; color: var(--muted); font-size: 12px; text-align: right; }
 .sec-body { padding: 4px 14px 14px; display: grid; gap: 10px; }
 
 .field { display: grid; gap: 4px; }
@@ -268,6 +273,15 @@ details.more > .note:first-of-type, details.more > ul { margin-top: 4px; }
 .card > h3 { margin: 0; padding: 11px 14px 0; font-size: 14.5px; }
 .card > .body { padding: 10px 14px 14px; }
 .card .note { color: var(--muted); font-size: 12px; margin: 6px 0 0; }
+/* grafiğin altındaki ayrıntılar: katlanır kartlar (başlıkta özet), uyarılar açık kutuda */
+.folds { display: grid; gap: 8px; }
+details.fold > summary h3 { margin: 0; font-size: 14px; font-weight: 650; min-width: 0; }
+details.fold > summary .hint { white-space: nowrap; }
+details.fold > .body { padding-top: 2px; }
+.card.warnbox { border-color: var(--warn); background: var(--warn-bg); box-shadow: none; }
+.card.warnbox > h3 { color: var(--warn); }
+.card.warnbox .msgs li.warn { background: transparent; padding: 2px 0; }
+.disclaimer { text-align: center; font-size: 11.5px; color: var(--muted); margin: 2px 8px 8px; }
 
 .tablewrap { overflow-x: auto; }
 table.t { width: 100%; border-collapse: collapse; font-size: 12.5px; }
@@ -509,7 +523,6 @@ div.license {
         <div class="std" data-i18n="ICNIRP 2013 · IEC 60825-1:2014 · 2006/25/AT · ANSI Z136.1-2014 · EN 207 / EN 208">ICNIRP 2013 · IEC 60825-1:2014 · 2006/25/AT · ANSI Z136.1-2014 · EN 207 / EN 208</div>
       </div>
     </div>
-    <button class="selftest" id="selftest" type="button" title="Hesap motoru öz-denetimi" data-i18n-title="Hesap motoru öz-denetimi">…</button>
     <div class="menu">
       <button class="tbtn icon" id="btn-more" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="menu-more" title="Diğer seçenekler" aria-label="Diğer seçenekler" data-i18n-title="Diğer seçenekler" data-i18n-aria="Diğer seçenekler"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5.5" r="1.9" fill="currentColor"/><circle cx="12" cy="12" r="1.9" fill="currentColor"/><circle cx="12" cy="18.5" r="1.9" fill="currentColor"/></svg></button>
       <div class="menu-list hidden" id="menu-more" role="menu" aria-labelledby="btn-more">
@@ -534,6 +547,7 @@ div.license {
         <div class="drawer-title" id="drawer-title" data-i18n="Lazer Emniyet Analizi">Lazer Emniyet Analizi</div>
         <div class="std" data-i18n="ICNIRP 2013 · IEC 60825-1:2014 · 2006/25/AT · ANSI Z136.1-2014 · EN 207 / EN 208">ICNIRP 2013 · IEC 60825-1:2014 · 2006/25/AT · ANSI Z136.1-2014 · EN 207 / EN 208</div>
         <div class="std" id="drawer-ver"></div>
+        <button class="selftest" id="selftest" type="button" title="Hesap motoru öz-denetimi" data-i18n-title="Hesap motoru öz-denetimi">…</button>
       </div>
     </div>
     <nav class="drawer-nav" aria-label="Komutlar" data-i18n-aria="Komutlar">
@@ -2737,15 +2751,15 @@ div.license {
 /*
  * Lazer Emniyet — uygulama (arayüz) sürümü. Hesap motorunun sürümü ayrıdır:
  * js/core/analysis.js → ENGINE_VERSION. Android sürüm numarası bu dosyadan türetilir.
- * Copyright © 2026 S.ÖCAL — SPDX-License-Identifier: GPL-3.0-or-later
+ * Copyright © 2026 S.OCAL — SPDX-License-Identifier: GPL-3.0-or-later
  */
 (function (root) {
   'use strict';
   const LE = (root.LE = root.LE || {});
-  LE.APP_VERSION = '1.5.0';
+  LE.APP_VERSION = '1.5.1';
   LE.APP_DATE = '2026-11-16'; // sürüm tarihi
-  LE.BUILD_TIME = '2026-11-16T15:21:51Z'; // tek dosya derlemesinde tools/build-single.js yazar
-  LE.APP_AUTHOR = 'S.ÖCAL';
+  LE.BUILD_TIME = '2026-11-16T15:57:12Z'; // tek dosya derlemesinde tools/build-single.js yazar
+  LE.APP_AUTHOR = 'S.OCAL';
   LE.APP_LICENSE = 'GPL-3.0-or-later';
 })(typeof globalThis !== 'undefined' ? globalThis : this);
 
@@ -3620,6 +3634,10 @@ div.license {
     "Ölçek: {0} CSS piksel/mm": "Scale: {0} CSS px/mm",
     "{0} kare işaretli": "{0} squares marked",
     "İşaret yok": "No marks",
+    // --- 1.5.1: sade sonuç ekranı
+    "Uyarılar": "Warnings",
+    "Notlar ve varsayımlar": "Notes and assumptions",
+    "{0} sınır": "{0} limits",
   });
 })(typeof globalThis !== 'undefined' ? globalThis : this);
 
@@ -3727,7 +3745,7 @@ div.license {
   /** Alan tanımları. min/max SI birimindedir. */
   const SECTIONS = [
     {
-      id: 'laser', title: 'Lazer parametreleri', open: true,
+      id: 'laser', title: 'Lazer parametreleri', open: false,
       fields: [
         { id: 'limits', type: 'select', label: 'Sınır değer seti', value: 'both', options: [['both', 'En koruyucu: ICNIRP 2013 + 2006/25/AT (önerilen)'], ['icnirp', 'Yalnız ICNIRP 2013 / IEC 60825-1:2014 Ek A'], ['aord', 'Yalnız 2006/25/AT Ek II (AB / Türkiye işyeri)']], help: 'Önerilen ayarda iki setin her kuralı kendi açıklığıyla ayrı uygulanır ve en kısıtlayıcı olanı belirler. 2006/25/AT, Türkiye\'de işyeri risk değerlendirmesinde esas alınan AB maruziyet sınır değerleridir.' },
         { id: 'wl', type: 'num', label: 'Dalga boyu', units: 'wavelength', unit: 'nm', value: '532', min: 180, max: 1e6, help: 'Çok dalga boylu lazerlerde her bant için ayrı analiz yapın; ayarlanabilir lazerde en kısa dalga boyunu girin.' },
@@ -3746,7 +3764,7 @@ div.license {
       ],
     },
     {
-      id: 'beam', title: 'Işın', open: true,
+      id: 'beam', title: 'Işın', open: false,
       fields: [
         { id: 'spec', type: 'select', label: 'Çap ve ıraksama ölçütü', value: '1/e2', options: [['1/e2', '1/e² (%86,5 — çoğu üretici verisi)'], ['1/e', '1/e (%63 — standart hesap ölçütü)']], help: 'Gauss ışında 1/e² değerleri √2\'ye bölünerek 1/e\'ye çevrilir.' },
         { id: 'profile', type: 'select', label: 'Işın profili', value: 'gauss', options: [['gauss', 'Gauss'], ['tophat-ellipse', 'Düz tepe — dairesel/eliptik'], ['tophat-rect', 'Düz tepe — dikdörtgen']] },
@@ -3880,12 +3898,19 @@ div.license {
     return e;
   }
 
+  /**
+   * Bölümler açılışta kapalıdır (başlıkta özet görünür, dokununca açılır). Form yeniden kurulurken
+   * (ör. dil değişince) kullanıcının açtığı bölümler açık kalır.
+   */
   function build(container, changeCb) {
     onChange = changeCb || onChange;
+    const wasOpen = new Set(Array.from(container.querySelectorAll ? container.querySelectorAll('details.sec[open]') : []).map((d) => d.id));
+    const rebuilt = !!container.querySelector && !!container.querySelector('details.sec');
     container.innerHTML = '';
     for (const k in els) delete els[k];
     for (const s of SECTIONS) {
-      const det = h('details', { class: 'sec', id: 'sec-' + s.id, open: s.open ? true : null });
+      const id = 'sec-' + s.id;
+      const det = h('details', { class: 'sec', id, open: (rebuilt ? wasOpen.has(id) : s.open) ? true : null });
       det.appendChild(h('summary', null, [T(s.title), h('span', { class: 'hint', id: 'hint-' + s.id })]));
       const body = h('div', { class: 'sec-body' });
       for (const f of s.fields) body.appendChild(buildField(f));
@@ -4323,6 +4348,27 @@ div.license {
     return '<details class="more"' + (open ? ' open' : '') + '><summary>' + (summary || T('Açıklama')) + '</summary>' + html + '</details>';
   }
 
+  /**
+   * Grafiğin altındaki ayrıntı kartları katlanır: başlıkta kısa özet, içerik dokununca açılır.
+   * Kullanıcının açtığı kartlar her yeniden hesapta (her girişte) açık kalır.
+   */
+  const folds = new Set();
+  function fold(key, title, hint, body) {
+    return '<details class="card fold" data-fold="' + key + '"' + (folds.has(key) ? ' open' : '') + '><summary><h3>' + title + '</h3>' +
+      (hint ? '<span class="hint">' + hint + '</span>' : '') + '</summary><div class="body">' + body + '</div></details>';
+  }
+  function trackFolds(container) {
+    if (!container || container._foldsTracked || typeof container.addEventListener !== 'function') return;
+    container._foldsTracked = true;
+    container.addEventListener('toggle', (e) => {
+      const d = e.target;
+      const key = d && d.getAttribute && d.getAttribute('data-fold');
+      if (!key) return;
+      if (d.open) folds.add(key);
+      else folds.delete(key);
+    }, true); // toggle kabarcıklanmaz: yakalama evresinde dinlenir
+  }
+
   /** H (J/m²) ve süre t için "H J/m² (E W/m²)" ve ANSI karşılığı. */
   function limitText(H, t) {
     const E = H / t;
@@ -4356,10 +4402,12 @@ div.license {
     parts.push(verdict(o));
     parts.push(tiles(o));
     parts.push('<div class="card chart"><h3>' + T('Mesafeye göre gerekli optik yoğunluk (OD)') + '</h3><div class="body">' + chart(o) + '</div></div>');
-    parts.push('<div class="grid2">' + eyewearCard(o) + mpeCard(o) + '</div>');
-    parts.push(criteriaCard(o));
-    parts.push('<div class="grid2">' + diffuseCard(o) + skinCard(o) + (o.lens ? lensCard(o) : '') + (o.fiber ? fiberCard(o) : '') + factorsCard(o) + derivedCard(o) + '</div>');
-    parts.push(messagesCard(o, ctx));
+    // grafiğin altı: uyarılar her zaman görünür; ayrıntılar katlanır
+    parts.push(warningsBox(o, ctx));
+    parts.push('<div class="folds">' + eyewearCard(o) + mpeCard(o) + criteriaCard(o) + diffuseCard(o) + skinCard(o) + (o.lens ? lensCard(o) : '') + (o.fiber ? fiberCard(o) : '') +
+      factorsCard(o) + derivedCard(o) + notesCard(o) + '</div>');
+    parts.push('<p class="note disclaimer">' + T('Bu yazılım yetkin bir lazer güvenlik sorumlusunun değerlendirmesinin yerine geçmez; sonuçlar girilen parametreler kadar doğrudur.') + '</p>');
+    trackFolds(container);
     container.innerHTML = parts.join('');
     attachChart(container.querySelector('.chart .body'), o);
   }
@@ -4755,7 +4803,8 @@ div.license {
     }
     const odW = o.eye.odWorst;
     const where = w.dGiven ? T('elle girilen çap') : (w.r > 0 ? T('{0} mesafedeki çap', U.fmtDist(w.r)) : T('çıkış çapı'));
-    return '<div class="card"><h3>' + T('Göz koruyucu seçimi') + '</h3><div class="body">' +
+    const over = w.en207.some((i) => i.over);
+    return fold('eyewear', T('Göz koruyucu seçimi'), '<span class="mono">' + esc(w.marking) + '</span>' + (over ? ' ⚠' : ''), '' +
       '<div><span class="marking">' + esc(w.marking) + '</span></div>' +
       more('<p class="note">' + T('EN 207 işaretlemesi: mod harfi, dalga boyu (nm), koruma seviyesi. Gözlük ve çerçeve bu değerlerin <b>tümünü</b> sağlamalıdır.') + '</p>') +
       '<div class="tablewrap"><table class="t"><thead><tr><th>' + T('Mod') + '</th><th>' + T('Yoğunluk') + '</th><th>' + T('Esas') + '</th><th>' + T('Seviye') + '</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
@@ -4769,8 +4818,7 @@ div.license {
       '</tbody></table>' +
       (w.markingScint ? '<p class="note">' + T('Türbülans payıyla EN 207: <b class="mono">{0}</b> (yoğunluk ×10 → her seviye +1).', esc(w.markingScint)) + '</p>' : '') +
       (o.eye.scint ? more('<p class="note">' + T('Türbülans payı açık havada uzun ışın yolu için muhafazakâr bir eklemedir; ICNIRP 2013 ve ANSI Z136.6-2015 zorunlu tutmaz, İngiltere JSP 390 tehlike mesafesini en çok 2,66 katına çıkarır (≈ +0,85 OD). Ölçüm açıklığına giren güç, ışının toplam gücünü aşamayacağı için mesafeye bağlı değerler bu üst sınırla kırpılır.') + '</p>', T('Türbülans payı hakkında')) : '') +
-      w.warnings.concat(w.notes).map((m) => '<p class="note">⚠ ' + esc(X(m)) + '</p>').join('') +
-      '</div></div>';
+      w.notes.map((m) => '<p class="note">⚠ ' + esc(X(m)) + '</p>').join('')); // uyarılar grafiğin altındaki kutuda
   }
 
   function mpeCard(o) {
@@ -4795,8 +4843,9 @@ div.license {
     let extra = '';
     if (mode === 'rp') extra = '<p class="note">' + T('Ortalama ışınım cinsinden: {0} W/m² ({1} W/cm²). Belirleyici: <b>{2} · {3}</b>.', U.fmt(s.Eavg), U.fmt(s.Eavg * 1e-4), rule(s.governing.rule), setName(s.governing.crit.set)) + '</p>';
     if (mode === 'cw') extra = '<p class="note">' + T('{0} için ışınım maruziyeti {1} J/m² ({2} J/cm²) · {3}.', U.fmtTime(o.derived.T), U.fmt(s.H), U.fmt(s.H * 1e-4), setName(s.governing.crit.set)) + '</p>';
-    return '<div class="card"><h3>' + T('Göz MPE — kurallara göre') + '</h3><div class="body"><div class="tablewrap"><table class="t"><thead><tr><th>' + T('Kural') + '</th><th>' + head + ' (J/m²)</th><th>(J/cm²)</th><th>' + T('Mekanizma') + '</th></tr></thead><tbody>' + rows.join('') + '</tbody></table></div>' + extra +
-      more('<p class="note">' + T('Farklı kurallar ve setler farklı ölçüm açıklıkları kullanabilir (UV/IR); tehlike değerlendirmesi her sınırı kendi açıklığıyla ayrı ayrı uygular.') + '</p>') + '</div></div>';
+    const hint = mode === 'cw' ? U.fmt(s.E) + ' W/m²' : U.fmt(s.H) + ' J/m²' + (mode === 'rp' ? T(' / darbe') : '');
+    return fold('mpe', T('Göz MPE — kurallara göre'), hint, '<div class="tablewrap"><table class="t"><thead><tr><th>' + T('Kural') + '</th><th>' + head + ' (J/m²)</th><th>(J/cm²)</th><th>' + T('Mekanizma') + '</th></tr></thead><tbody>' + rows.join('') + '</tbody></table></div>' + extra +
+      more('<p class="note">' + T('Farklı kurallar ve setler farklı ölçüm açıklıkları kullanabilir (UV/IR); tehlike değerlendirmesi her sınırı kendi açıklığıyla ayrı ayrı uygular.') + '</p>'));
   }
 
   function criteriaCard(o) {
@@ -4827,16 +4876,16 @@ div.license {
         '<td class="num r">' + U.fmt(ratio, 3) + '</td>' +
         '<td class="num">' + U.fmtOD(LE.analysis.od(ratio)) + '</td></tr>');
     }
-    return '<div class="card"><h3>' + T('Ayrıntılı değerlendirme — her sınır ayrı (lazer çıkışında)') + '</h3><div class="body"><div class="tablewrap"><table class="t"><thead><tr>' + (multi ? '<th>Set</th>' : '') + '<th>' + T('Kural') + '</th><th>' + T('Mekanizma') + '</th><th>' + T('Zaman tabanı') + '</th><th>' + T('Sınır H (J/m²)') + '</th><th>' + T('Açıklık') + '</th><th>' + T('Formül') + '</th><th>' + T('Maruziyet / MPE') + '</th><th>OD</th></tr></thead><tbody>' +
-      rows.join('') + '</tbody></table></div>' + more('<p class="note">' + T('Vurgulu satır çıkışta belirleyici olan sınırdır. Oran &gt; 1 ise o sınır aşılmaktadır.') + '</p>') + '</div></div>';
+    return fold('criteria', T('Ayrıntılı değerlendirme — her sınır ayrı (lazer çıkışında)'), T('{0} sınır', seen.size), '<div class="tablewrap"><table class="t"><thead><tr>' + (multi ? '<th>Set</th>' : '') + '<th>' + T('Kural') + '</th><th>' + T('Mekanizma') + '</th><th>' + T('Zaman tabanı') + '</th><th>' + T('Sınır H (J/m²)') + '</th><th>' + T('Açıklık') + '</th><th>' + T('Formül') + '</th><th>' + T('Maruziyet / MPE') + '</th><th>OD</th></tr></thead><tbody>' +
+      rows.join('') + '</tbody></table></div>' + more('<p class="note">' + T('Vurgulu satır çıkışta belirleyici olan sınırdır. Oran &gt; 1 ise o sınır aşılmaktadır.') + '</p>'));
   }
 
   function diffuseCard(o) {
     const d = o.diffuse;
-    if (!d) return '<div class="card"><h3>' + T('Yaygın yansıma') + '</h3><div class="body"><p class="muted">' + T('Hesaplanmadı (ilgili bölümden açabilirsiniz).') + '</p></div></div>';
+    if (!d) return fold('diffuse', T('Yaygın yansıma'), T('kapalı'), '<p class="muted">' + T('Hesaplanmadı (ilgili bölümden açabilirsiniz).') + '</p>');
     const gs = d.eye.summary.governing;
     const perPulse = o.input.mode === 'rp' ? T(' / darbe') : '';
-    return '<div class="card"><h3>' + T('Yaygın (Lambert) yansıma') + '</h3><div class="body"><table class="t kv"><tbody>' +
+    return fold('diffuse', T('Yaygın (Lambert) yansıma'), 'NHZ ' + distOrNone(d.eye.nhz, d.eye.inf), '<table class="t kv"><tbody>' +
       '<tr><td>' + T('Göz tehlike mesafesi (NHZ)') + '</td><td><b>' + distOrNone(d.eye.nhz, d.eye.inf) + '</b></td></tr>' +
       '<tr><td>' + T('{0}\'den bakışta gerekli OD', U.fmtDist(d.r)) + '</td><td>' + U.fmtOD(d.eye.odAtR) + '</td></tr>' +
       '<tr><td>' + T('Göz MPE ({0})', U.fmtTime(d.T)) + '</td><td>' + U.fmt(gs.perPulseH) + ' J/m²' + perPulse + '</td></tr>' +
@@ -4844,39 +4893,39 @@ div.license {
       '<tr><td>' + T('Yansıtma · açı') + '</td><td>' + U.fmtPct(d.rho) + ' · ' + U.fmt(d.thetaDeg, 3) + '°</td></tr>' +
       '<tr><td>' + T('Kaynak modeli') + '</td><td>' + (d.extended ? T('Genişletilmiş (α = {0} mrad @ {1})', U.fmt(d.alphaAtR, 3), U.fmtDist(d.r)) : T('Nokta kaynak (muhafazakâr)')) + '</td></tr>' +
       '</tbody></table><p class="note">' + T('Aynasal (parlak) yüzeyler doğrudan ışın gibi değerlendirilmelidir.') + '</p>' +
-      more('<p class="note">E = ρ·P·cos θ / (π·r²)</p>', T('Yöntem')) + '</div></div>';
+      more('<p class="note">E = ρ·P·cos θ / (π·r²)</p>', T('Yöntem')));
   }
 
   function skinCard(o) {
     const s = o.skin;
     const g = s.summary.governing;
     const perPulse = o.input.mode === 'rp' ? T(' / darbe') : '';
-    return '<div class="card"><h3>' + T('Deri') + '</h3><div class="body"><table class="t kv"><tbody>' +
+    return fold('skin', T('Deri'), 'NSHD ' + distOrNone(s.nshd, s.nshdInf), '<table class="t kv"><tbody>' +
       '<tr><td>' + T('Deri MPE ({0})', rule(g.rule)) + '</td><td>' + U.fmt(g.perPulseH) + ' J/m²' + perPulse + '</td></tr>' +
       '<tr><td>' + T('MPE katı (en kötü)') + '</td><td><b>' + U.fmt(s.timesMPE, 3) + '</b></td></tr>' +
       '<tr><td>' + T('Deri tehlike mesafesi (NSHD)') + '</td><td>' + distOrNone(s.nshd, s.nshdInf) + '</td></tr>' +
       '<tr><td>' + T('Maruziyet süresi') + '</td><td>' + U.fmtTime(s.T) + '</td></tr>' +
       '<tr><td>' + T('Ölçüm açıklığı') + '</td><td>' + U.fmt(o.factors.apertureSkin * 1e3, 3) + ' mm</td></tr>' +
-      '</tbody></table></div></div>';
+      '</tbody></table>');
   }
 
   function lensCard(o) {
     const L = o.lens;
-    return '<div class="card"><h3>' + T('Mercek (lens-on-laser)') + '</h3><div class="body"><table class="t kv"><tbody>' +
+    return fold('lens', T('Mercek (lens-on-laser)'), 'NOHD ' + distOrNone(L.nohd, L.inf), '<table class="t kv"><tbody>' +
       '<tr><td>' + T('Odaktan tehlike mesafesi') + '</td><td><b>' + distOrNone(L.nohd, L.inf) + '</b></td></tr>' +
       '<tr><td>' + T('{0}\'de gerekli OD', U.fmtDist(L.range)) + '</td><td>' + U.fmtOD(L.odAtRange) + '</td></tr>' +
       '<tr><td>' + T('Odaktan sonra ıraksama') + '</td><td>' + U.fmt(L.beam.phix * 1e3, 4) + ' mrad (1/e)</td></tr>' +
       '<tr><td>' + T('Odak lekesi (≈)') + '</td><td>' + U.fmt(L.beam.dx * 1e6, 3) + ' µm</td></tr>' +
-      '</tbody></table><p class="note">' + (L.negative ? T('Iraksak mercek: mesafe sanal odak noktasından ölçülür.') : T('Mesafe odak noktasından ölçülür.')) + '</p></div></div>';
+      '</tbody></table><p class="note">' + (L.negative ? T('Iraksak mercek: mesafe sanal odak noktasından ölçülür.') : T('Mesafe odak noktasından ölçülür.')) + '</p>');
   }
 
   function fiberCard(o) {
     const F = o.fiber;
-    return '<div class="card"><h3>' + T('Fiber optik çıkış') + '</h3><div class="body"><table class="t kv"><tbody>' +
+    return fold('fiber', T('Fiber optik çıkış'), 'NOHD ' + distOrNone(F.nohd, F.inf), '<table class="t kv"><tbody>' +
       '<tr><td>' + T('Fiber ucundan NOHD') + '</td><td><b>' + distOrNone(F.nohd, F.inf) + '</b></td></tr>' +
       '<tr><td>' + T('{0}\'de gerekli OD', U.fmtDist(F.range)) + '</td><td>' + U.fmtOD(F.odAtRange) + '</td></tr>' +
       '<tr><td>' + T('Iraksama (1/e tam açı)') + '</td><td>' + U.fmt(F.beam.phix * 1e3, 4) + ' mrad</td></tr>' +
-      '</tbody></table>' + more('<p class="note">' + (F.type === 'multi' ? T('Çok modlu: ANSI yaklaşımı, NA %5 yoğunluk noktasında (φ₆₃ = 2·NA/1,7).') : T('Tek modlu: Gauss uzak alan, θ = λ/(π·w₀).')) + '</p>', T('Yöntem')) + '</div></div>';
+      '</tbody></table>' + more('<p class="note">' + (F.type === 'multi' ? T('Çok modlu: ANSI yaklaşımı, NA %5 yoğunluk noktasında (φ₆₃ = 2·NA/1,7).') : T('Tek modlu: Gauss uzak alan, θ = λ/(π·w₀).')) + '</p>', T('Yöntem')));
   }
 
   function factorsCard(o) {
@@ -4909,7 +4958,7 @@ div.license {
     if (f.apertureEyePulse !== null) add(T('Göz ölçüm açıklığı (τ)'), U.fmt(f.apertureEyePulse * 1e3, 3) + ' mm', null);
     add(T('Deri ölçüm açıklığı'), U.fmt(f.apertureSkin * 1e3, 3) + ' mm', ab ? U.fmt(A.apertureSkin * 1e3, 3) + ' mm' : null);
     const head = two ? '<thead><tr><th>' + T('Parametre') + '</th><th>ICNIRP 2013</th><th>' + setName('AB') + '</th></tr></thead>' : '';
-    return '<div class="card"><h3>' + T('Düzeltme faktörleri ve parametreler') + '</h3><div class="body"><table class="t kv">' + head + '<tbody>' + rows.join('') + '</tbody></table></div></div>';
+    return fold('factors', T('Düzeltme faktörleri ve parametreler'), '', '<table class="t kv">' + head + '<tbody>' + rows.join('') + '</tbody></table>');
   }
 
   function derivedCard(o) {
@@ -4927,7 +4976,8 @@ div.license {
     const sec = LE.beam.sectionAt(inp.beam, inp.range || 0, inp.model);
     add(T('Çıkış çapı / ıraksama (1/e)'), U.fmt(inp.beam.dx * 1e3, 4) + ' mm · ' + U.fmt(inp.beam.phix * 1e3, 4) + ' mrad');
     if (inp.range > 0) add(T('{0}\'de çap (1/e)', U.fmtDist(inp.range)), U.fmt(sec.dx * 1e3, 4) + (sec.dy !== sec.dx ? ' × ' + U.fmt(sec.dy * 1e3, 4) : '') + ' mm');
-    return '<div class="card"><h3>' + T('Lazer ve ışın değerleri') + '</h3><div class="body"><table class="t kv"><tbody>' + rows.join('') + '</tbody></table></div></div>';
+    const hint = d.P !== null ? U.fmtPrefixed(d.P, 'W', 3) : d.Q !== null ? U.fmtPrefixed(d.Q, 'J', 3) : '';
+    return fold('derived', T('Lazer ve ışın değerleri'), U.fmt(inp.lambda, 5) + ' nm' + (hint ? ' · ' + hint : ''), '<table class="t kv"><tbody>' + rows.join('') + '</tbody></table>');
   }
 
   function assumptions(o) {
@@ -4948,21 +4998,25 @@ div.license {
     return a;
   }
 
-  function messagesCard(o, ctx) {
-    // Uyarılar her zaman görünür; notlar ve varsayımlar dokununca açılır.
+  /** Uyarılar her zaman görünür (grafiğin hemen altında); gözlük uyarıları da buradadır. */
+  function warningsBox(o, ctx) {
     const warns = [];
     for (const e of (ctx.formWarnings || [])) warns.push('<li class="warn">' + esc(e) + '</li>');
     for (const w of o.warnings) warns.push('<li class="warn">' + esc(X(w)) + '</li>');
+    if (o.eyewear) for (const w of o.eyewear.warnings) warns.push('<li class="warn">' + esc(X(w)) + '</li>');
+    if (!warns.length) return '';
+    return '<div class="card warnbox"><h3>' + T('Uyarılar') + '</h3><div class="body"><ul class="msgs">' + warns.join('') + '</ul></div></div>';
+  }
+
+  /** Notlar ve varsayımlar: katlanır kart. */
+  function notesCard(o) {
     const info = [];
     for (const n of o.notes) info.push('<li class="note">' + esc(X(n)) + '</li>');
     for (const a of assumptions(o)) info.push('<li class="asm">' + esc(a) + '</li>');
-    return '<div class="card"><h3>' + T('Uyarılar, notlar ve varsayımlar') + '</h3><div class="body">' +
-      (warns.length ? '<ul class="msgs">' + warns.join('') + '</ul>' : '') +
-      more('<ul class="msgs">' + info.join('') + '</ul>', T('Notlar ve varsayımlar ({0})', info.length)) +
-      '<p class="note">' + T('Bu yazılım yetkin bir lazer güvenlik sorumlusunun değerlendirmesinin yerine geçmez; sonuçlar girilen parametreler kadar doğrudur.') + '</p></div></div>';
+    return fold('notes', T('Notlar ve varsayımlar'), String(info.length), '<ul class="msgs">' + info.join('') + '</ul>');
   }
 
-  LE.render = { render, verdict, derivedCard, chart, chartReadout, chartRange, attachChart, assumptions, mech, rule, RULE, esc, limitText, ansi, distOrNone, setName, more };
+  LE.render = { render, verdict, derivedCard, chart, chartReadout, chartRange, attachChart, assumptions, mech, rule, RULE, esc, limitText, ansi, distOrNone, setName, more, folds };
 })(typeof globalThis !== 'undefined' ? globalThis : this);
 
 </script>
@@ -4970,7 +5024,7 @@ div.license {
 /*
  * Lazer Emniyet — envanter ve oturum kaydı (tarayıcı yerel deposu + dosya)
  *
- * Veriler yalnız bu bilgisayarda, tarayıcının yerel deposunda tutulur.
+ * Veriler yalnız bu cihazda, tarayıcının (ya da Android uygulamasının) yerel deposunda tutulur.
  * Kalıcı yedek için "JSON dışa aktar" kullanın.
  */
 (function (root) {
@@ -5344,7 +5398,7 @@ div.license {
     return `
 <p><b>Lazer Emniyet Analizi</b>, bir lazerin göz ve deri için tehlikesini hesaplar: maksimum izin verilen maruziyet (MPE),
 göz tehlike mesafesi (NOHD), gerekli optik yoğunluk (OD), EN 207 / EN 208 göz koruyucu seviyeleri, yaygın yansıma,
-mercek ve fiber çıkışı tehlikeleri. İnternet bağlantısı gerektirmez; veriler yalnız bu bilgisayarda saklanır.</p>
+mercek ve fiber çıkışı tehlikeleri. İnternet bağlantısı gerektirmez; veriler yalnız bu cihazda saklanır.</p>
 
 <h3>Hızlı kullanım</h3>
 <ol>
@@ -6263,7 +6317,7 @@ levels (+1). The standard results without margin are unchanged.</p>
   <script>/* js/ui/about.js */
 /*
  * Lazer Emniyet — Hakkında: geliştirici, sürüm ve tarih, lisans (GNU GPL v3 ya da sonrası).
- * Copyright © 2026 S.ÖCAL — SPDX-License-Identifier: GPL-3.0-or-later
+ * Copyright © 2026 S.OCAL — SPDX-License-Identifier: GPL-3.0-or-later
  */
 (function (root) {
   'use strict';
@@ -6305,7 +6359,7 @@ levels (+1). The standard results without margin are unchanged.</p>
   function html(selftest) {
     const st = selftest || { passed: 0, total: 0 };
     const A = LE.analysis;
-    const author = LE.APP_AUTHOR || 'S.ÖCAL';
+    const author = LE.APP_AUTHOR || 'S.OCAL';
     const rows = [
       [T('Geliştirici'), '<b>' + esc(author) + '</b>'],
       [T('Uygulama sürümü'), esc(LE.APP_VERSION || '—')],
@@ -6359,7 +6413,7 @@ levels (+1). The standard results without margin are unchanged.</p>
   <script>/* js/ui/amsler.js */
 /*
  * Lazer Emniyet — Amsler Grid testi (sahada hızlı ilk göz kontrolü)
- * Copyright © 2026 S.ÖCAL — SPDX-License-Identifier: GPL-3.0-or-later
+ * Copyright © 2026 S.OCAL — SPDX-License-Identifier: GPL-3.0-or-later
  *
  * Standart ızgara (Amsler M. Br J Ophthalmol 1953;37:521–537, DOI 10.1136/bjo.37.9.521): 10 cm × 10 cm,
  * 20 × 20 kare, kare 5 mm; ~30 cm'den her kare ≈ 1°, toplam ≈ 20° merkezi görme alanı.
@@ -7266,11 +7320,11 @@ levels (+1). The standard results without margin are unchanged.</p>
     const b = $('selftest');
     if (!selftest.total) return;
     const ok = selftest.passed === selftest.total;
-    // telefonda yalnız "✓ 64/64" görünür (.st-word gizlenir); tam metin başlıkta ve ekran okuyucuda
     b.innerHTML = (ok ? '✓' : '✗') + ' <span class="st-word">' + esc(T('Öz-denetim')) + ' </span>' + selftest.passed + '/' + selftest.total;
     b.setAttribute('aria-label', T('Öz-denetim {0}/{1}', selftest.passed, selftest.total));
     b.title = T('Hesap motoru öz-denetimi') + ': ' + selftest.passed + '/' + selftest.total;
     b.classList.toggle('fail', !ok);
+    $('btn-menu').classList.toggle('alert', !ok);
     if (!ok) {
       const bn = $('selftest-banner');
       bn.textContent = T('UYARI: Hesap motoru öz-denetimi başarısız ({0} test). Program dosyaları değişmiş veya bozulmuş olabilir — sonuçları güvenlik kararı için KULLANMAYIN.', selftest.failed.length);
@@ -7286,7 +7340,7 @@ levels (+1). The standard results without margin are unchanged.</p>
       selftest = { passed: 0, total: 1, failed: [{ name: 'Öz-denetim çalıştırılamadı', error: String(e) }], results: [] };
     }
     applyPrefs(true);
-    $('selftest').addEventListener('click', () => showSelftest());
+    $('selftest').addEventListener('click', () => { closeDrawer(); showSelftest(); });
 
     LE.form.build($('inputs'), schedule);
     const ses = LE.store.loadSession();
@@ -7320,6 +7374,7 @@ levels (+1). The standard results without margin are unchanged.</p>
     try {
       r = LE.form.read();
       formErrors = Object.keys(r.errs).map((id) => label(id) + ': ' + r.errs[id]);
+      openErrorSections(Object.keys(r.errs));
       formWarnings = Object.keys(r.warns).map((id) => label(id) + ': ' + r.warns[id]);
       if (r.ok) out = LE.analysis.analyze(r.inp);
     } catch (e) {
@@ -7340,6 +7395,15 @@ levels (+1). The standard results without margin are unchanged.</p>
     const st = LE.form.getState();
     st.currentId = currentId;
     LE.store.saveSession(st);
+  }
+
+  /** Kapalı bir bölümdeki alanda hata varsa o bölüm açılır (hata görünmeden kalmasın). */
+  function openErrorSections(ids) {
+    for (const id of ids) {
+      const el = $('in-' + id);
+      const sec = el && el.closest('details.sec');
+      if (sec && !sec.open) sec.open = true;
+    }
   }
 
   function hints(r, out) {

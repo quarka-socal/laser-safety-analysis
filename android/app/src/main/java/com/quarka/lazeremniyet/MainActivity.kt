@@ -47,7 +47,7 @@ import java.io.File
  *  - kalıcı localStorage (envanter, son oturum, Amsler test geçmişi), açık/koyu tema
  *  - Amsler Grid testi: fiziksel ekran yoğunluğu (5 mm kare), test sırasında ekran açık ve parlak
  *
- * Copyright © 2026 S.ÖCAL — SPDX-License-Identifier: GPL-3.0-or-later
+ * Copyright © 2026 S.OCAL — SPDX-License-Identifier: GPL-3.0-or-later
  *
  * Sayfa, ağa hiç çıkmayan sabit bir https kökenden sunulur (shouldInterceptRequest); uygulamanın
  * INTERNET izni yoktur.

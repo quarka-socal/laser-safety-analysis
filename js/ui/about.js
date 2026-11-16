@@ -1,6 +1,6 @@
 /*
  * Lazer Emniyet — Hakkında: geliştirici, sürüm ve tarih, lisans (GNU GPL v3 ya da sonrası).
- * Copyright © 2026 S.ÖCAL — SPDX-License-Identifier: GPL-3.0-or-later
+ * Copyright © 2026 S.OCAL — SPDX-License-Identifier: GPL-3.0-or-later
  */
 (function (root) {
   'use strict';
@@ -42,7 +42,7 @@
   function html(selftest) {
     const st = selftest || { passed: 0, total: 0 };
     const A = LE.analysis;
-    const author = LE.APP_AUTHOR || 'S.ÖCAL';
+    const author = LE.APP_AUTHOR || 'S.OCAL';
     const rows = [
       [T('Geliştirici'), '<b>' + esc(author) + '</b>'],
       [T('Uygulama sürümü'), esc(LE.APP_VERSION || '—')],

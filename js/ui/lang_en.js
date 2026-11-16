@@ -662,5 +662,9 @@
     "Ölçek: {0} CSS piksel/mm": "Scale: {0} CSS px/mm",
     "{0} kare işaretli": "{0} squares marked",
     "İşaret yok": "No marks",
+    // --- 1.5.1: sade sonuç ekranı
+    "Uyarılar": "Warnings",
+    "Notlar ve varsayımlar": "Notes and assumptions",
+    "{0} sınır": "{0} limits",
   });
 })(typeof globalThis !== 'undefined' ? globalThis : this);

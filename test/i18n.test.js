@@ -128,7 +128,7 @@ test('İngilizce: Amsler testi ekranları, rapor ve Hakkında Türkçe metin iç
       intro: AM.html.intro(), calib: AM.html.calib(), testR: AM.html.test('R'), testL: AM.html.test('L'),
       resultBad: AM.html.result(bad, null, true), resultOk: AM.html.result(ok, bad, false), resultUnsaved: AM.html.result(bad, ok, null),
       history: AM.html.history([ok, bad]), historyEmpty: AM.html.history([]), report: AM.html.report(bad, ok), reportOk: AM.html.report(ok, null), paper: AM.html.paper(),
-      about: LE.about.html({ passed: 64, total: 64 }).replace(/S\.ÖCAL/g, ''),
+      about: LE.about.html({ passed: 64, total: 64 }),
     };
     for (const [k, h] of Object.entries(pages)) assert.deepEqual(englishProblems(h), [], k);
     assert.deepEqual(I.missing().filter((k) => /[A-Za-zÇĞİÖŞÜçğıöşü]/.test(k)), [], 'çalışırken karşılığı bulunmayan anahtar');

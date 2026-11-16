@@ -52,7 +52,7 @@ test('dar ekran: diyalog başlığı sarar, arama kutusu ekranı taşırmaz', ()
   assert.match(s, /flex:/);
 });
 
-test('üst çubuk tek satır: ☰ solda, başlık kısalabilir, öz-denetim ve ⋮ sağda; ⋮ menüsü ekran içinde', () => {
+test('üst çubuk tek satır: ☰ solda, başlık kısalabilir, ⋮ sağda; ⋮ menüsü ekran içinde', () => {
   const tb = decl('.topbar');
   assert.match(tb, /flex-wrap:\s*nowrap/);
   assert.match(tb, /position:\s*sticky/);
@@ -64,19 +64,20 @@ test('üst çubuk tek satır: ☰ solda, başlık kısalabilir, öz-denetim ve �
   const m = media('max-width: 700px');
   assert.ok(!m || !decl('.menu-list', m), 'eski tam genişlik menü kuralı kalmamalı (⋮ menüsü sağa hizalı)');
   const head = html.slice(html.indexOf('<header'), html.indexOf('</header>'));
-  const order = ['id="btn-menu"', 'class="brand"', 'id="selftest"', 'id="btn-more"'].map((s) => head.indexOf(s));
-  assert.ok(order.every((i) => i >= 0), 'başlıkta ☰, marka, öz-denetim, ⋮');
-  assert.deepEqual([...order].sort((a, b) => a - b), order, 'sıra: ☰ · marka · öz-denetim · ⋮');
+  const order = ['id="btn-menu"', 'class="brand"', 'id="btn-more"'].map((s) => head.indexOf(s));
+  assert.ok(order.every((i) => i >= 0), 'başlıkta ☰, marka, ⋮');
+  assert.deepEqual([...order].sort((a, b) => a - b), order, 'sıra: ☰ · marka · ⋮');
+  assert.ok(!head.includes('id="selftest"'), 'öz-denetim rozeti başlıkta değil, ☰ çekmecesinde');
   const n = media('max-width: 560px');
   assert.ok(n, 'telefon: 560 px medya sorgusu');
   assert.match(decl('.brand .std', n), /display:\s*none/);
 });
 
-test('menüler: ☰ çekmecesinde komutlar ve Amsler Grid testi; ⋮ menüsünde Yardım, Ayarlar, Hakkında', () => {
+test('menüler: ☰ çekmecesinde öz-denetim, komutlar ve Amsler Grid testi; ⋮ menüsünde Yardım, Ayarlar, Hakkında', () => {
   const i = html.indexOf('<dialog id="drawer"');
   assert.ok(i >= 0, 'çekmece bir <dialog>');
   const drawer = html.slice(i, html.indexOf('</dialog>', i));
-  for (const id of ['btn-new', 'btn-examples', 'menu-examples', 'btn-save', 'btn-inventory', 'btn-report', 'btn-amsler']) {
+  for (const id of ['selftest', 'drawer-ver', 'btn-new', 'btn-examples', 'menu-examples', 'btn-save', 'btn-inventory', 'btn-report', 'btn-amsler']) {
     assert.ok(drawer.includes('id="' + id + '"'), id);
   }
   const j = html.indexOf('id="menu-more"');

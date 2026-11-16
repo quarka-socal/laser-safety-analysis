@@ -101,15 +101,20 @@ a { color: var(--accent); }
 .tbtn.icon:hover, .tbtn.icon[aria-expanded="true"] { background: #2f384a; }
 .tbtn:focus-visible, .ditem:focus-visible, .menu-list button:focus-visible { outline: 2px solid var(--laser); outline-offset: -2px; }
 .selftest {
-  flex: none; font-size: 12px; padding: 4px 9px; border-radius: 999px; cursor: pointer; border: 1px solid transparent;
-  background: #1f3a26; color: #a9f0bd; border-color: #2f5a3a; white-space: nowrap;
+  font-size: 12.5px; padding: 6px 12px; border-radius: 999px; cursor: pointer; border: 1px solid transparent;
+  background: #1f3a26; color: #a9f0bd; border-color: #2f5a3a; white-space: nowrap; margin-top: 10px;
 }
 .selftest.fail { background: #4a1414; color: #ffb4ab; border-color: #7a2020; }
-/* telefon: tek satır; standart listesi ve "Öz-denetim" sözcüğü gizlenir (çekmecede ve Hakkında'da görünür) */
+/* öz-denetim başarısızsa ☰ düğmesinde kırmızı nokta (ayrıca sayfada kırmızı uyarı şeridi) */
+.tbtn.icon.alert { position: relative; }
+.tbtn.icon.alert::after {
+  content: ""; position: absolute; top: 8px; right: 8px; width: 9px; height: 9px; border-radius: 50%;
+  background: #ff5449; box-shadow: 0 0 0 2px var(--head);
+}
+/* telefon: tek satır; standart listesi gizlenir (çekmecede ve Hakkında'da görünür) */
 @media (max-width: 560px) {
   .brand .std { display: none; }
   .brand h1 { font-size: 16px; }
-  .selftest .st-word { display: none; }
 }
 @media (max-width: 380px) {
   .brand > svg { display: none; }
@@ -134,17 +139,17 @@ details.sec {
   background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
   box-shadow: var(--shadow); overflow: hidden;
 }
-details.sec > summary {
+details.sec > summary, details.fold > summary {
   list-style: none; cursor: pointer; padding: 11px 14px; font-weight: 650;
   display: flex; align-items: center; gap: 8px; user-select: none;
 }
-details.sec > summary::-webkit-details-marker { display: none; }
-details.sec > summary::before {
+details.sec > summary::-webkit-details-marker, details.fold > summary::-webkit-details-marker { display: none; }
+details.sec > summary::before, details.fold > summary::before {
   content: ""; width: 7px; height: 7px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted);
   transform: rotate(-45deg); transition: transform .15s; margin-right: 4px; flex: none;
 }
-details.sec[open] > summary::before { transform: rotate(45deg); }
-details.sec > summary .hint { margin-left: auto; font-weight: 400; color: var(--muted); font-size: 12px; text-align: right; }
+details.sec[open] > summary::before, details.fold[open] > summary::before { transform: rotate(45deg); }
+details.sec > summary .hint, details.fold > summary .hint { margin-left: auto; font-weight: 400; color: var(--muted); font-size: 12px; text-align: right; }
 .sec-body { padding: 4px 14px 14px; display: grid; gap: 10px; }
 
 .field { display: grid; gap: 4px; }
@@ -250,6 +255,15 @@ details.more > .note:first-of-type, details.more > ul { margin-top: 4px; }
 .card > h3 { margin: 0; padding: 11px 14px 0; font-size: 14.5px; }
 .card > .body { padding: 10px 14px 14px; }
 .card .note { color: var(--muted); font-size: 12px; margin: 6px 0 0; }
+/* grafiğin altındaki ayrıntılar: katlanır kartlar (başlıkta özet), uyarılar açık kutuda */
+.folds { display: grid; gap: 8px; }
+details.fold > summary h3 { margin: 0; font-size: 14px; font-weight: 650; min-width: 0; }
+details.fold > summary .hint { white-space: nowrap; }
+details.fold > .body { padding-top: 2px; }
+.card.warnbox { border-color: var(--warn); background: var(--warn-bg); box-shadow: none; }
+.card.warnbox > h3 { color: var(--warn); }
+.card.warnbox .msgs li.warn { background: transparent; padding: 2px 0; }
+.disclaimer { text-align: center; font-size: 11.5px; color: var(--muted); margin: 2px 8px 8px; }
 
 .tablewrap { overflow-x: auto; }
 table.t { width: 100%; border-collapse: collapse; font-size: 12.5px; }

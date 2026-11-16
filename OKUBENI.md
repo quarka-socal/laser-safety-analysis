@@ -4,7 +4,7 @@ Lazer tehlike analizi yazılımı: **MPE**, **NOHD / ENOHD**, gerekli **optik yo
 **EN 207 / EN 208** göz koruyucu seviyeleri, **yaygın yansıma**, **deri**, **mercek (lens-on-laser)**
 ve **fiber optik** tehlikeleri; envanter ve yazdırılabilir rapor. Sahada maruziyet şüphesi için **Amsler Grid testi**.
 Türkçe ve İngilizce arayüz, internet gerektirmez, kurulum gerektirmez. Lisans: **GNU GPL v3 ya da sonrası**
-(`LICENSE`). Geliştirici: S.ÖCAL.
+(`LICENSE`). Geliştirici: S.OCAL.
 
 Sınır değerler iki set hâlinde uygulanır ve varsayılan olarak **en koruyucusu** belirler:
 
@@ -39,13 +39,21 @@ Klasör istenen yere taşınabilir; tüm dosyalar göreli yollarla bağlıdır.
    deri maruziyet süresi, gözlükteki ışın çapı, lazer kimliği.
 4. Sonuçlar her değişiklikte anında güncellenir. Komutlar sol üstteki **☰** menüsündedir: **Yeni analiz**,
    **Örnekler** (12 tipik lazer), **Envantere kaydet** (Ctrl+S), **Envanter**, **Rapor** (yazdırılabilir, PDF) ve
-   **Amsler Grid testi**. Sağ üstteki **⋮** menüsünde **Yardım**, **Ayarlar** ve **Hakkında** vardır.
+   **Amsler Grid testi**. Hesap motoru sürümü ve açılış öz-denetimi (**✓ 64/64**) de bu menünün başındadır; dokununca
+   test listesi açılır. Sağ üstteki **⋮** menüsünde **Yardım**, **Ayarlar** ve **Hakkında** vardır.
+
+**Sade ekran.** Giriş bölümleri açılışta kapalıdır; başlıklarında özet görünür (ör. "532 nm · Sürekli · 1 W"),
+dokununca açılır. Bir alanda hata olursa o bölüm kendiliğinden açılır. Sonuç tarafında karar kutusu, özet kutucukları ve
+mesafe–OD grafiği her zaman görünür. Grafiğin altındaki ayrıntılar (göz koruyucu, MPE tablosu, ayrıntılı değerlendirme,
+yaygın yansıma, deri, mercek, fiber, düzeltme faktörleri, lazer ve ışın değerleri, notlar ve varsayımlar) katlanır kartlardır;
+başlıkta kısa özet vardır (ör. "D 532 LB5", "NHZ 17,8 cm"). Açılan kart, girişler değişse de açık kalır. **Uyarılar**
+(gözlükte LB10'un aşılması dahil) her zaman grafiğin hemen altında, açık bir kutuda gösterilir.
 
 Sayı girişi: ondalık için virgül veya nokta (`1,5` = `1.5`), bilimsel gösterim `1e-9`, `2x10^-4`.
 Binlik ayırıcı kullanılmaz; `1.000` gibi belirsiz girişler uyarı verir. Her alanın altındaki satır
 girdinin nasıl yorumlandığını gösterir (ör. `= 1064 nm`).
 
-Envanter bu bilgisayarda tarayıcının yerel deposunda tutulur. Yedek için **Envanter → JSON dışa aktar**;
+Envanter bu cihazda, tarayıcının yerel deposunda tutulur. Yedek için **Envanter → JSON dışa aktar**;
 Excel için **CSV**.
 
 ### Ayarlar (⋮ → Ayarlar)
@@ -174,7 +182,7 @@ Standart tablolarındaki yuvarlamadan doğan küçük basamaklar olduğu gibi uy
 elle hesaplanmış değerler, EasyHaz LSO örnek dosyalarındaki sonuçlar, yayımlanmış EN 207/208 örnekleri).
 Biri bile başarısız olursa kırmızı uyarı bandı çıkar. Başlıktaki yeşil rozete tıklayarak ayrıntıyı görebilirsiniz.
 
-**Geliştirme testleri** — `node --test test/*.test.js` (Node ≥ 18; Node 18 ve 24 ile denenir): 114 test.
+**Geliştirme testleri** — `node --test test/*.test.js` (Node ≥ 18; Node 18 ve 24 ile denenir): 117 test.
 
 - ICNIRP Tablo 5, 7, 8 satır noktaları; düzeltme faktörleri; ölçüm açıklıkları
 - Tüm dalga boylarında MPE'nin süreyle azalmadığı (bilinen tablo basamakları hariç) ve sürekliliği
@@ -297,12 +305,12 @@ mesafeye dayanır; mesafe ölçülmez, kullanıcıya söylenir.
 
 ## Hakkında ve lisans
 
-⋮ → **Hakkında**: geliştirici (S.ÖCAL), uygulama sürümü ve sürüm tarihi (`js/ui/version.js`: `APP_VERSION`,
+⋮ → **Hakkında**: geliştirici (S.OCAL), uygulama sürümü ve sürüm tarihi (`js/ui/version.js`: `APP_VERSION`,
 `APP_DATE`), hesap motoru sürümü, öz-denetim sonucu, derleme zamanı (`tools/build-single.js` tek dosyaya yazar) ve
 Android'de uygulama sürüm kodu, cihaz, Android ve WebView sürümü.
 
 Lisans: **GNU Genel Kamu Lisansı sürüm 3 ya da (seçiminize bağlı olarak) daha sonraki bir sürüm**
-(SPDX: `GPL-3.0-or-later`). Copyright © 2026 S.ÖCAL. Lisansın tam metni kök klasördeki `LICENSE` dosyasındadır ve
+(SPDX: `GPL-3.0-or-later`). Copyright © 2026 S.OCAL. Lisansın tam metni kök klasördeki `LICENSE` dosyasındadır ve
 uygulamanın içinde Hakkında penceresinden okunabilir (`js/ui/license.js`; test, iki metnin aynı olduğunu denetler).
 Kaynak kodu HTML/JS dosyaları ve `android/` klasörüdür; tek dosya sürümü de küçültülmemiş, okunur kaynak içerir.
 
@@ -327,7 +335,7 @@ içine gömen çevrimdışı bir **WebView kabuğudur**. Hesap motoru, arayüz, 
 | Hakkında | Uygulama sürümü ve sürüm kodu, cihaz, Android ve WebView sürümü (`appInfo`) |
 
 Gereksinim: Android 11 veya üstü (minSdk 30); hedef Android 15 (targetSdk 35). Uygulama kimliği `com.quarka.lazeremniyet`.
-Sürüm numarası `js/ui/version.js` dosyasındaki uygulama sürümünden otomatik alınır: 1.5.0 → versionName 1.5.0, versionCode 10500.
+Sürüm numarası `js/ui/version.js` dosyasındaki uygulama sürümünden otomatik alınır: 1.5.1 → versionName 1.5.1, versionCode 10501.
 Hesap motorunun sürümü ayrıdır: `js/core/analysis.js` → `ENGINE_VERSION`, şu an 1.3.1.
 
 ### Derleme
@@ -404,7 +412,12 @@ Uygulama 1.5.0 (aynı gün, aynı emülatör: 1080 × 2400, 420 dpi):
 - Test sonucu → Save as PDF: 1 sayfa A4; kişi, olay, belirti, iki göz ızgarası, test koşulu, imza alanları.
 - İngilizce seçiliyken Android onay penceresinin başlığı "Laser Safety Analysis".
 
-Gerçek telefon (Honor 400, MagicOS): APK dosya aktarımıyla İndirilenler klasörüne kopyalandı (1.3.1, 1.4.0, sonra 1.5.0).
+Uygulama 1.5.1 (aynı emülatör): 1.5.0 kurulup envanter kaydı ve Amsler testi oluşturuldu, 1.5.1 üzerine kuruldu
+(`adb install -r`): envanter, Amsler geçmişi ve son oturum korundu. Açılışta bütün giriş bölümleri kapalı; grafiğin
+altındaki kartlar kapalı ve özetli; öz-denetim rozeti ☰ çekmecesinde (✓ 64/64); Hakkında'da geliştirici S.OCAL.
+
+Gerçek telefon (Honor 400, MagicOS): APK dosya aktarımıyla İndirilenler klasörüne kopyalandı (1.3.1, 1.4.0, 1.5.0, sonra
+`LaserSafetyAnalysis-1.5.1.apk`).
 Kurulum ve deneme kullanıcıda. USB hata ayıklama açılırsa yukarıdaki otomatik doğrulama telefonda da çalıştırılabilir.
 Üreticinin yazdırma ve dosya seçici ekranları farklı görünebilir; akış aynıdır.
 
@@ -457,12 +470,21 @@ Klasör bir git deposudur. İlk commit `1be12d6`, inceleme öncesi v1.3 durumudu
 
 ## Sürüm notları
 
+**Uygulama 1.5.1 (16.11.2026, motor 1.3.1 değişmedi)**
+- Geliştirici adı "S.OCAL" olarak düzeltildi (Hakkında, telif satırları).
+- Yardım: "veriler yalnız bu cihazda saklanır" (önce "bu bilgisayarda").
+- Sade ekran: bütün giriş bölümleri açılışta kapalı; grafiğin altındaki sonuç ayrıntıları başlıkta özetli katlanır kartlar.
+  Uyarılar grafiğin altında her zaman açık; gözlükte LB10 aşımı uyarısı da burada.
+- Öz-denetim rozeti (✓ 64/64) ve motor sürümü üst çubuktan ☰ çekmecesine taşındı. Öz-denetim başarısızsa ☰ düğmesinde kırmızı
+  nokta ve sayfada kırmızı uyarı şeridi görünür.
+- Testler 117.
+
 **Uygulama 1.5.0 (16.11.2026, motor 1.3.1 değişmedi)**
 - Yeni üst çubuk: sol üstte **☰** çekmece (Yeni analiz, Örnekler, Envantere kaydet, Envanter, Rapor, Amsler Grid testi),
   sağ üstte **⋮** menü (Yardım, Ayarlar, Hakkında). Başlık tek satır ve yapışkan; telefonda öz-denetim rozeti "✓ 64/64".
 - **Amsler Grid testi**: gerçek 5 mm kareler, kartla ekran ayarı, iki göz, dokunarak işaretleme, belirtiler, sonuç önerisi,
   test geçmişi ve aynı kişinin önceki testiyle karşılaştırma, A4 rapor, gerçek boyutlu kâğıt ızgara.
-- **Hakkında**: geliştirici S.ÖCAL, sürüm ve tarih, derleme zamanı, GNU GPL v3+ bildirimi ve tam metni. `LICENSE` eklendi.
+- **Hakkında**: geliştirici S.OCAL, sürüm ve tarih, derleme zamanı, GNU GPL v3+ bildirimi ve tam metni. `LICENSE` eklendi.
 - Android: uygulama adı **Laser Safety Analysis**; köprüye `screenMetrics`, `testScreen`, `appInfo` eklendi (10500).
 - Testler 114 (yeni: amsler.test.js, about.test.js; css ve i18n testleri yeni menüleri ve Amsler ekranlarını kapsıyor).
 

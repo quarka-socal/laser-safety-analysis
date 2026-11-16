@@ -27,7 +27,7 @@
   /** Alan tanımları. min/max SI birimindedir. */
   const SECTIONS = [
     {
-      id: 'laser', title: 'Lazer parametreleri', open: true,
+      id: 'laser', title: 'Lazer parametreleri', open: false,
       fields: [
         { id: 'limits', type: 'select', label: 'Sınır değer seti', value: 'both', options: [['both', 'En koruyucu: ICNIRP 2013 + 2006/25/AT (önerilen)'], ['icnirp', 'Yalnız ICNIRP 2013 / IEC 60825-1:2014 Ek A'], ['aord', 'Yalnız 2006/25/AT Ek II (AB / Türkiye işyeri)']], help: 'Önerilen ayarda iki setin her kuralı kendi açıklığıyla ayrı uygulanır ve en kısıtlayıcı olanı belirler. 2006/25/AT, Türkiye\'de işyeri risk değerlendirmesinde esas alınan AB maruziyet sınır değerleridir.' },
         { id: 'wl', type: 'num', label: 'Dalga boyu', units: 'wavelength', unit: 'nm', value: '532', min: 180, max: 1e6, help: 'Çok dalga boylu lazerlerde her bant için ayrı analiz yapın; ayarlanabilir lazerde en kısa dalga boyunu girin.' },
@@ -46,7 +46,7 @@
       ],
     },
     {
-      id: 'beam', title: 'Işın', open: true,
+      id: 'beam', title: 'Işın', open: false,
       fields: [
         { id: 'spec', type: 'select', label: 'Çap ve ıraksama ölçütü', value: '1/e2', options: [['1/e2', '1/e² (%86,5 — çoğu üretici verisi)'], ['1/e', '1/e (%63 — standart hesap ölçütü)']], help: 'Gauss ışında 1/e² değerleri √2\'ye bölünerek 1/e\'ye çevrilir.' },
         { id: 'profile', type: 'select', label: 'Işın profili', value: 'gauss', options: [['gauss', 'Gauss'], ['tophat-ellipse', 'Düz tepe — dairesel/eliptik'], ['tophat-rect', 'Düz tepe — dikdörtgen']] },
@@ -180,12 +180,19 @@
     return e;
   }
 
+  /**
+   * Bölümler açılışta kapalıdır (başlıkta özet görünür, dokununca açılır). Form yeniden kurulurken
+   * (ör. dil değişince) kullanıcının açtığı bölümler açık kalır.
+   */
   function build(container, changeCb) {
     onChange = changeCb || onChange;
+    const wasOpen = new Set(Array.from(container.querySelectorAll ? container.querySelectorAll('details.sec[open]') : []).map((d) => d.id));
+    const rebuilt = !!container.querySelector && !!container.querySelector('details.sec');
     container.innerHTML = '';
     for (const k in els) delete els[k];
     for (const s of SECTIONS) {
-      const det = h('details', { class: 'sec', id: 'sec-' + s.id, open: s.open ? true : null });
+      const id = 'sec-' + s.id;
+      const det = h('details', { class: 'sec', id, open: (rebuilt ? wasOpen.has(id) : s.open) ? true : null });
       det.appendChild(h('summary', null, [T(s.title), h('span', { class: 'hint', id: 'hint-' + s.id })]));
       const body = h('div', { class: 'sec-body' });
       for (const f of s.fields) body.appendChild(buildField(f));

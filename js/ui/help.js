@@ -10,7 +10,7 @@
     return `
 <p><b>Lazer Emniyet Analizi</b>, bir lazerin göz ve deri için tehlikesini hesaplar: maksimum izin verilen maruziyet (MPE),
 göz tehlike mesafesi (NOHD), gerekli optik yoğunluk (OD), EN 207 / EN 208 göz koruyucu seviyeleri, yaygın yansıma,
-mercek ve fiber çıkışı tehlikeleri. İnternet bağlantısı gerektirmez; veriler yalnız bu bilgisayarda saklanır.</p>
+mercek ve fiber çıkışı tehlikeleri. İnternet bağlantısı gerektirmez; veriler yalnız bu cihazda saklanır.</p>
 
 <h3>Hızlı kullanım</h3>
 <ol>

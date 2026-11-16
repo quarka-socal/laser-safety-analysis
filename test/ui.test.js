@@ -107,3 +107,37 @@ test('Android köprüsü: dosya kaydetme LazerAndroid.saveFile ile yapılır (bl
   assert.equal(JSON.parse(calls[0][2]).format, 'lazer-emniyet-envanter');
   assert.deepEqual(calls[1], ['rapor-x.html', 'text/html;charset=utf-8', '<p>x</p>']);
 });
+
+test('sonuç ekranı sade: grafiğin altındaki ayrıntı kartları kapalı gelir, uyarılar görünür kalır', () => {
+  const inp = { lambda: 532, mode: 'cw', P: 1, T: 0.25, beam: gauss(2e-3, 1e-3), range: 10, alpha: 0.5, diffuse: { rho: 0.9, thetaDeg: 10, r: 0.5, T: 600, extended: false, spotD: 5e-3 } };
+  const o = LE.analysis.analyze(inp);
+  const box = { innerHTML: '', querySelector: () => null };
+  const ctx = { formErrors: [], formWarnings: ['Test uyarısı'] };
+  LE.render.render(box, o, ctx);
+  const h = box.innerHTML;
+  const iChart = h.indexOf('class="card chart"');
+  assert.ok(iChart > 0, 'grafik kartı var');
+  assert.doesNotMatch(h.slice(0, iChart), /<details class="card/, 'grafiğin üstünde katlanan kart yok');
+  const after = h.slice(iChart);
+  const folds = [...after.matchAll(/<details class="card fold"[^>]*data-fold="([a-z]+)"([^>]*)>/g)];
+  assert.ok(folds.length >= 7, 'katlanan kart sayısı ' + folds.length);
+  for (const f of folds) assert.doesNotMatch(f[2], /\bopen\b/, f[1] + ' kapalı gelmeli');
+  for (const k of ['eyewear', 'mpe', 'criteria', 'diffuse', 'skin', 'factors', 'derived', 'notes']) assert.ok(folds.some((f) => f[1] === k), k);
+  assert.doesNotMatch(after, /<div class="card">/, 'grafiğin altında katlanmayan düz kart kalmadı');
+  // uyarılar katlanan bir kutunun içinde değil
+  const iWarn = h.indexOf('Test uyarısı');
+  assert.ok(iWarn > 0);
+  const before = h.slice(0, iWarn);
+  assert.equal((before.match(/<details/g) || []).length, (before.match(/<\/details>/g) || []).length, 'uyarı açık bir <details> içinde değil');
+  // özet başlıkta görünür: göz koruyucu işareti, yaygın yansıma NHZ
+  assert.match(after, /data-fold="eyewear"[^>]*><summary><h3>[^<]+<\/h3><span class="hint"><span class="mono">D 532 LB/);
+  // kullanıcının açtığı kart yeniden hesapta açık kalır
+  LE.render.folds.add('mpe');
+  try {
+    LE.render.render(box, o, ctx);
+    assert.match(box.innerHTML, /data-fold="mpe" open>/);
+    assert.match(box.innerHTML, /data-fold="eyewear">/);
+  } finally {
+    LE.render.folds.delete('mpe');
+  }
+});

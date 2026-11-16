@@ -1,6 +1,6 @@
 /*
  * Lazer Emniyet — Amsler Grid testi (sahada hızlı ilk göz kontrolü)
- * Copyright © 2026 S.ÖCAL — SPDX-License-Identifier: GPL-3.0-or-later
+ * Copyright © 2026 S.OCAL — SPDX-License-Identifier: GPL-3.0-or-later
  *
  * Standart ızgara (Amsler M. Br J Ophthalmol 1953;37:521–537, DOI 10.1136/bjo.37.9.521): 10 cm × 10 cm,
  * 20 × 20 kare, kare 5 mm; ~30 cm'den her kare ≈ 1°, toplam ≈ 20° merkezi görme alanı.

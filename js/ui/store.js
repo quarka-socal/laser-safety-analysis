@@ -1,7 +1,7 @@
 /*
  * Lazer Emniyet — envanter ve oturum kaydı (tarayıcı yerel deposu + dosya)
  *
- * Veriler yalnız bu bilgisayarda, tarayıcının yerel deposunda tutulur.
+ * Veriler yalnız bu cihazda, tarayıcının (ya da Android uygulamasının) yerel deposunda tutulur.
  * Kalıcı yedek için "JSON dışa aktar" kullanın.
  */
 (function (root) {
