@@ -18,6 +18,7 @@
 </head>
 <body>
   <header class="topbar">
+    <button class="tbtn icon" id="btn-menu" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="drawer" title="Menü" aria-label="Menü" data-i18n-title="Menü" data-i18n-aria="Menü"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5h16M4 12h16M4 17.5h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
     <div class="brand">
       <svg width="30" height="27" viewBox="0 0 64 58" aria-hidden="true"><path d="M32 3 61 55H3Z" fill="#ffd400" stroke="#111" stroke-width="4" stroke-linejoin="round"/><circle cx="32" cy="37" r="5" fill="#111"/><path d="M32 37 19 25M32 37l15-6M32 37l-2 12M32 37h-14" stroke="#111" stroke-width="3" stroke-linecap="round"/></svg>
       <div>
@@ -25,19 +26,15 @@
         <div class="std" data-i18n="ICNIRP 2013 · IEC 60825-1:2014 · 2006/25/AT · ANSI Z136.1-2014 · EN 207 / EN 208">ICNIRP 2013 · IEC 60825-1:2014 · 2006/25/AT · ANSI Z136.1-2014 · EN 207 / EN 208</div>
       </div>
     </div>
-    <nav class="toolbar" aria-label="Komutlar" data-i18n-aria="Komutlar">
-      <button class="tbtn" id="btn-new" title="Yeni analiz (varsayılan değerler)" data-i18n="Yeni" data-i18n-title="Yeni analiz (varsayılan değerler)">Yeni</button>
-      <div class="menu">
-        <button class="tbtn" id="btn-examples" aria-haspopup="true" aria-expanded="false"><span data-i18n="Örnekler">Örnekler</span> ▾</button>
-        <div class="menu-list hidden" id="menu-examples" role="menu"></div>
+    <button class="selftest" id="selftest" type="button" title="Hesap motoru öz-denetimi" data-i18n-title="Hesap motoru öz-denetimi">…</button>
+    <div class="menu">
+      <button class="tbtn icon" id="btn-more" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="menu-more" title="Diğer seçenekler" aria-label="Diğer seçenekler" data-i18n-title="Diğer seçenekler" data-i18n-aria="Diğer seçenekler"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5.5" r="1.9" fill="currentColor"/><circle cx="12" cy="12" r="1.9" fill="currentColor"/><circle cx="12" cy="18.5" r="1.9" fill="currentColor"/></svg></button>
+      <div class="menu-list hidden" id="menu-more" role="menu" aria-labelledby="btn-more">
+        <button type="button" role="menuitem" id="btn-help"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.6 9.3a2.5 2.5 0 1 1 3.6 2.3c-.7.4-1.2 1-1.2 1.8v.6"/><circle cx="12" cy="12" r="9"/><circle cx="12" cy="17.2" r=".6" fill="currentColor"/></svg><span data-i18n="Yardım">Yardım</span></button>
+        <button type="button" role="menuitem" id="btn-settings"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M10.6 2h2.8l.5 2.6a7.6 7.6 0 0 1 1.9 1.1l2.5-.9 1.4 2.4-2 1.7a7.7 7.7 0 0 1 0 2.2l2 1.7-1.4 2.4-2.5-.9a7.6 7.6 0 0 1-1.9 1.1l-.5 2.6h-2.8l-.5-2.6a7.6 7.6 0 0 1-1.9-1.1l-2.5.9-1.4-2.4 2-1.7a7.7 7.7 0 0 1 0-2.2l-2-1.7 1.4-2.4 2.5.9a7.6 7.6 0 0 1 1.9-1.1ZM12 8.6a3.4 3.4 0 1 0 0 6.8 3.4 3.4 0 0 0 0-6.8Z"/></svg><span data-i18n="Ayarlar">Ayarlar</span></button>
+        <button type="button" role="menuitem" id="btn-about"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 11v6"/><circle cx="12" cy="12" r="9"/><circle cx="12" cy="7.6" r=".6" fill="currentColor"/></svg><span data-i18n="Hakkında">Hakkında</span></button>
       </div>
-      <button class="tbtn" id="btn-save" title="Envantere kaydet" data-i18n="Kaydet" data-i18n-title="Envantere kaydet">Kaydet</button>
-      <button class="tbtn" id="btn-inventory" data-i18n="Envanter">Envanter</button>
-      <button class="tbtn primary" id="btn-report" data-i18n="Rapor">Rapor</button>
-      <button class="tbtn" id="btn-help" data-i18n="Yardım">Yardım</button>
-      <button class="tbtn icon" id="btn-settings" title="Ayarlar: tema, dil, açıklamalar" aria-label="Ayarlar" data-i18n-title="Ayarlar: tema, dil, açıklamalar" data-i18n-aria="Ayarlar"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M10.6 2h2.8l.5 2.6a7.6 7.6 0 0 1 1.9 1.1l2.5-.9 1.4 2.4-2 1.7a7.7 7.7 0 0 1 0 2.2l2 1.7-1.4 2.4-2.5-.9a7.6 7.6 0 0 1-1.9 1.1l-.5 2.6h-2.8l-.5-2.6a7.6 7.6 0 0 1-1.9-1.1l-2.5.9-1.4-2.4 2-1.7a7.7 7.7 0 0 1 0-2.2l-2-1.7 1.4-2.4 2.5.9a7.6 7.6 0 0 1 1.9-1.1ZM12 8.6a3.4 3.4 0 1 0 0 6.8 3.4 3.4 0 0 0 0-6.8Z" transform="translate(0 2)"/></svg></button>
-      <button class="selftest" id="selftest" title="Hesap motoru öz-denetimi" data-i18n-title="Hesap motoru öz-denetimi">…</button>
-    </nav>
+    </div>
   </header>
   <div id="selftest-banner" class="banner fail hidden" role="alert"></div>
 
@@ -45,6 +42,28 @@
     <section class="col" id="inputs" aria-label="Girişler" data-i18n-aria="Girişler"></section>
     <section class="col" id="results" aria-label="Sonuçlar" aria-live="polite" data-i18n-aria="Sonuçlar"></section>
   </main>
+
+  <!-- ☰ Çekmece: komutlar ve Amsler Grid testi -->
+  <dialog id="drawer" class="drawer" aria-labelledby="drawer-title">
+    <div class="drawer-head">
+      <svg width="40" height="36" viewBox="0 0 64 58" aria-hidden="true"><path d="M32 3 61 55H3Z" fill="#ffd400" stroke="#111" stroke-width="4" stroke-linejoin="round"/><circle cx="32" cy="37" r="5" fill="#111"/><path d="M32 37 19 25M32 37l15-6M32 37l-2 12M32 37h-14" stroke="#111" stroke-width="3" stroke-linecap="round"/></svg>
+      <div>
+        <div class="drawer-title" id="drawer-title" data-i18n="Lazer Emniyet Analizi">Lazer Emniyet Analizi</div>
+        <div class="std" data-i18n="ICNIRP 2013 · IEC 60825-1:2014 · 2006/25/AT · ANSI Z136.1-2014 · EN 207 / EN 208">ICNIRP 2013 · IEC 60825-1:2014 · 2006/25/AT · ANSI Z136.1-2014 · EN 207 / EN 208</div>
+        <div class="std" id="drawer-ver"></div>
+      </div>
+    </div>
+    <nav class="drawer-nav" aria-label="Komutlar" data-i18n-aria="Komutlar">
+      <button type="button" class="ditem" id="btn-new"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V7zM14 3v4h4M12 11v6M9 14h6"/></svg><span data-i18n="Yeni analiz">Yeni analiz</span></button>
+      <button type="button" class="ditem" id="btn-examples" aria-expanded="false" aria-controls="menu-examples"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h10l4 4v12H5zM8 9h6M8 13h8M8 17h5"/></svg><span data-i18n="Örnekler">Örnekler</span><span class="chev" aria-hidden="true"></span></button>
+      <div class="dsub hidden" id="menu-examples" role="group" aria-label="Örnekler" data-i18n-aria="Örnekler"></div>
+      <button type="button" class="ditem" id="btn-save"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h11l3 3v15H5zM8 3v5h7V3M8 21v-7h8v7"/></svg><span data-i18n="Envantere kaydet">Envantere kaydet</span><kbd class="kbd">Ctrl+S</kbd></button>
+      <button type="button" class="ditem" id="btn-inventory"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18v4H3zM5 9v11h14V9M10 13h4"/></svg><span data-i18n="Envanter">Envanter</span></button>
+      <button type="button" class="ditem" id="btn-report"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l4 4v14H7zM14 3v4h4M10 11h5M10 14.5h5M10 18h3"/></svg><span data-i18n="Rapor">Rapor</span></button>
+      <hr>
+      <button type="button" class="ditem" id="btn-amsler"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4zM4 8h16M4 12h16M4 16h16M8 4v16M12 4v16M16 4v16"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg><span><span data-i18n="Amsler Grid testi">Amsler Grid testi</span><small data-i18n="Sahada hızlı ilk göz kontrolü">Sahada hızlı ilk göz kontrolü</small></span></button>
+    </nav>
+  </dialog>
 
   <!-- Envanter -->
   <dialog id="dlg-inventory" aria-labelledby="inv-title">
@@ -117,6 +136,24 @@
     </div>
   </dialog>
 
+  <!-- Hakkında -->
+  <dialog id="dlg-about" class="small" aria-labelledby="about-title">
+    <div class="dlg-head">
+      <h2 id="about-title" data-i18n="Hakkında">Hakkında</h2>
+      <div class="sp"><button class="btn" data-close data-i18n="Kapat">Kapat</button></div>
+    </div>
+    <div class="dlg-body about" id="about-body"></div>
+  </dialog>
+
+  <!-- Amsler Grid testi -->
+  <dialog id="dlg-amsler" aria-labelledby="amsler-title">
+    <div class="dlg-head">
+      <h2 id="amsler-title" data-i18n="Amsler Grid testi">Amsler Grid testi</h2>
+      <div class="sp"><button class="btn" data-close data-i18n="Kapat">Kapat</button></div>
+    </div>
+    <div class="dlg-body" id="amsler-body"></div>
+  </dialog>
+
   <!-- Öz-denetim ayrıntısı -->
   <dialog id="dlg-selftest" aria-labelledby="st-title">
     <div class="dlg-head">
@@ -145,6 +182,9 @@
   <script src="js/ui/store.js"></script>
   <script src="js/ui/report.js"></script>
   <script src="js/ui/help.js"></script>
+  <script src="js/ui/license.js"></script>
+  <script src="js/ui/about.js"></script>
+  <script src="js/ui/amsler.js"></script>
   <script src="js/ui/app.js"></script>
 </body>
 </html>

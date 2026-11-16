@@ -52,15 +52,58 @@ test('dar ekran: diyalog başlığı sarar, arama kutusu ekranı taşırmaz', ()
   assert.match(s, /flex:/);
 });
 
-test('dar ekran: Örnekler menüsü ekran içinde, başlık yapışkan değil', () => {
+test('üst çubuk tek satır: ☰ solda, başlık kısalabilir, öz-denetim ve ⋮ sağda; ⋮ menüsü ekran içinde', () => {
+  const tb = decl('.topbar');
+  assert.match(tb, /flex-wrap:\s*nowrap/);
+  assert.match(tb, /position:\s*sticky/);
+  assert.match(decl('.brand'), /min-width:\s*0/);
+  assert.match(decl('.brand h1'), /text-overflow:\s*ellipsis/);
+  const ml = decl('.menu-list');
+  assert.match(ml, /right:\s*0/);
+  assert.match(ml, /max-width:\s*calc\(100vw/);
   const m = media('max-width: 700px');
-  assert.ok(m, '700 px medya sorgusu');
-  assert.match(decl('.topbar', m), /position:\s*relative/);
-  assert.match(decl('.menu', m), /position:\s*static/);
-  const ml = decl('.menu-list', m);
-  assert.match(ml, /left:\s*\d+px/);
-  assert.match(ml, /right:\s*\d+px/);
-  assert.match(ml, /min-width:\s*0/);
+  assert.ok(!m || !decl('.menu-list', m), 'eski tam genişlik menü kuralı kalmamalı (⋮ menüsü sağa hizalı)');
+  const head = html.slice(html.indexOf('<header'), html.indexOf('</header>'));
+  const order = ['id="btn-menu"', 'class="brand"', 'id="selftest"', 'id="btn-more"'].map((s) => head.indexOf(s));
+  assert.ok(order.every((i) => i >= 0), 'başlıkta ☰, marka, öz-denetim, ⋮');
+  assert.deepEqual([...order].sort((a, b) => a - b), order, 'sıra: ☰ · marka · öz-denetim · ⋮');
+  const n = media('max-width: 560px');
+  assert.ok(n, 'telefon: 560 px medya sorgusu');
+  assert.match(decl('.brand .std', n), /display:\s*none/);
+});
+
+test('menüler: ☰ çekmecesinde komutlar ve Amsler Grid testi; ⋮ menüsünde Yardım, Ayarlar, Hakkında', () => {
+  const i = html.indexOf('<dialog id="drawer"');
+  assert.ok(i >= 0, 'çekmece bir <dialog>');
+  const drawer = html.slice(i, html.indexOf('</dialog>', i));
+  for (const id of ['btn-new', 'btn-examples', 'menu-examples', 'btn-save', 'btn-inventory', 'btn-report', 'btn-amsler']) {
+    assert.ok(drawer.includes('id="' + id + '"'), id);
+  }
+  const j = html.indexOf('id="menu-more"');
+  const more = html.slice(j, html.indexOf('</header>'));
+  assert.deepEqual([...more.matchAll(/id="(btn-[a-z]+)"/g)].map((m) => m[1]), ['btn-help', 'btn-settings', 'btn-about']);
+  for (const id of ['dlg-about', 'dlg-amsler']) assert.match(html, new RegExp('<dialog id="' + id + '"'));
+  const d = decl('dialog.drawer');
+  assert.match(d, /margin:\s*0/);
+  assert.match(d, /max-height:\s*100%/);
+});
+
+test('kapalı diyalog görünmez: diyaloğa display veren her kural [open] ile sınırlı', () => {
+  for (const m of css.matchAll(/([^{}]+)\{([^}]*)\}/g)) {
+    if (!/display:\s*(flex|grid|block)/.test(m[2])) continue;
+    for (const sel of m[1].split(',')) {
+      const subject = sel.trim().split(/[\s>+~]+/).pop();
+      // konu (en sağdaki basit seçici) diyaloğun kendisi mi: dialog…, #dlg-…, #drawer, .drawer (ama .drawer-head değil)
+      if (/^(dialog(?![\w-])|#dlg-[\w-]+(?=$|[.[:#])|#drawer(?![\w-])|\.drawer(?![\w-]))/.test(subject)) {
+        assert.match(subject, /\[open\]/, sel.trim());
+      }
+    }
+  }
+});
+
+test('Amsler test ekranı: dokunma kaydırmaz, yakınlaştırmaz; ızgara seçilmez', () => {
+  assert.match(decl('.am-test'), /touch-action:\s*none/);
+  assert.match(decl('.am-grid'), /user-select:\s*none/);
 });
 
 test('koyu ve açık temada vurgu rengi üstündeki yazı okunur (WCAG ≥ 4,5:1)', () => {

@@ -2,8 +2,9 @@
 
 Lazer tehlike analizi yazılımı: **MPE**, **NOHD / ENOHD**, gerekli **optik yoğunluk (OD)**,
 **EN 207 / EN 208** göz koruyucu seviyeleri, **yaygın yansıma**, **deri**, **mercek (lens-on-laser)**
-ve **fiber optik** tehlikeleri; envanter ve yazdırılabilir rapor. Türkçe arayüz, internet gerektirmez,
-kurulum gerektirmez.
+ve **fiber optik** tehlikeleri; envanter ve yazdırılabilir rapor. Sahada maruziyet şüphesi için **Amsler Grid testi**.
+Türkçe ve İngilizce arayüz, internet gerektirmez, kurulum gerektirmez. Lisans: **GNU GPL v3 ya da sonrası**
+(`LICENSE`). Geliştirici: S.ÖCAL.
 
 Sınır değerler iki set hâlinde uygulanır ve varsayılan olarak **en koruyucusu** belirler:
 
@@ -36,8 +37,9 @@ Klasör istenen yere taşınabilir; tüm dosyalar göreli yollarla bağlıdır.
    profiller desteklenir. M² otomatik hesaplanır; kırınım sınırının altındaki değerler uyarı verir.
 3. İsteğe bağlı bölümler: dürbünle bakış (ENOHD), atmosferik zayıflama, yaygın yansıma, mercek, fiber,
    deri maruziyet süresi, gözlükteki ışın çapı, lazer kimliği.
-4. Sonuçlar her değişiklikte anında güncellenir. **Kaydet** (Ctrl+S) envantere ekler, **Rapor** yazdırılabilir
-   rapor (PDF) üretir, **Örnekler** menüsünde 12 tipik lazer vardır.
+4. Sonuçlar her değişiklikte anında güncellenir. Komutlar sol üstteki **☰** menüsündedir: **Yeni analiz**,
+   **Örnekler** (12 tipik lazer), **Envantere kaydet** (Ctrl+S), **Envanter**, **Rapor** (yazdırılabilir, PDF) ve
+   **Amsler Grid testi**. Sağ üstteki **⋮** menüsünde **Yardım**, **Ayarlar** ve **Hakkında** vardır.
 
 Sayı girişi: ondalık için virgül veya nokta (`1,5` = `1.5`), bilimsel gösterim `1e-9`, `2x10^-4`.
 Binlik ayırıcı kullanılmaz; `1.000` gibi belirsiz girişler uyarı verir. Her alanın altındaki satır
@@ -46,7 +48,7 @@ girdinin nasıl yorumlandığını gösterir (ör. `= 1064 nm`).
 Envanter bu bilgisayarda tarayıcının yerel deposunda tutulur. Yedek için **Envanter → JSON dışa aktar**;
 Excel için **CSV**.
 
-### Ayarlar (dişli düğmesi)
+### Ayarlar (⋮ → Ayarlar)
 
 | Ayar | Seçenekler | Varsayılan |
 |---|---|---|
@@ -172,7 +174,7 @@ Standart tablolarındaki yuvarlamadan doğan küçük basamaklar olduğu gibi uy
 elle hesaplanmış değerler, EasyHaz LSO örnek dosyalarındaki sonuçlar, yayımlanmış EN 207/208 örnekleri).
 Biri bile başarısız olursa kırmızı uyarı bandı çıkar. Başlıktaki yeşil rozete tıklayarak ayrıntıyı görebilirsiniz.
 
-**Geliştirme testleri** — `node --test test/*.test.js` (Node ≥ 18; Node 18 ve 24 ile denenir): 92 test.
+**Geliştirme testleri** — `node --test test/*.test.js` (Node ≥ 18; Node 18 ve 24 ile denenir): 114 test.
 
 - ICNIRP Tablo 5, 7, 8 satır noktaları; düzeltme faktörleri; ölçüm açıklıkları
 - Tüm dalga boylarında MPE'nin süreyle azalmadığı (bilinen tablo basamakları hariç) ve sürekliliği
@@ -252,6 +254,58 @@ aynasal yansıma geometrisi. 2006/25/AT setinde radyans biçimindeki fotokimyasa
 uygulanmaz (nokta kaynak varsayımı, daha koruyucu). Bu durumlarda her bileşeni ayrı analiz edip en kötüsünü esas alın veya
 uzman değerlendirmesine başvurun.
 
+## Amsler Grid testi
+
+☰ → **Amsler Grid testi**. Lazer maruziyeti şüphesinde (parlama, ardıl görüntü, görmede leke) merkezi görmeyi her göz
+için ayrı yoklayan hızlı bir saha testidir. Tanı koymaz, göz muayenesinin yerini tutmaz.
+
+**Izgara.** Amsler'in standart ızgarası 10 cm × 10 cm, 20 × 20 karedir; kare 5 mm. Yaklaşık 30 cm'den bakılınca
+her kare ≈ 1° (2·atan(2,5/300) = 0,955°; tam 1° için 28,6 cm), ızgaranın tamamı ≈ 19° görür. Uygulama kareleri
+ekranda da **gerçek 5 mm** çizer. Merkez noktası bir kesişimde kalsın diye ekrana sığan çift sayıda kare gösterilir,
+en çok 20 × 20. Telefon dikeyken genişlik çoğunlukla 12–14 kareye yeter (≈ ±6°); yan çevrilince yatay alan genişler.
+
+**Ekran ölçüsü** (öncelik sırasıyla):
+
+| Kaynak | Nasıl | Not |
+|---|---|---|
+| Kartla ayar | Banka ya da kimlik kartı (ISO/IEC 7810 ID-1, 85,60 × 53,98 mm) ekrana yaslanır, çerçeve kartla çakışana kadar ayarlanır; 50 mm cetvel çizgisiyle de denetlenebilir | Cihaz pikseli/mm olarak saklanır; tarayıcı yakınlaştırması değişse de geçerli kalır |
+| Android ekran bilgisi | `DisplayMetrics.xdpi/ydpi` → CSS px/mm = xdpi / 25,4 / devicePixelRatio | xdpi ≠ ydpi (> %5) ya da ekran köşegeni 3,5–14 inç dışında ise "şüpheli" denir ve kart önerilir |
+| Varsayım | Tarayıcının 96 px/inç kabulü | Fiziksel değildir: test ekranı kartla ayar yapılmasını ister |
+
+**Akış.** Kişi (ad ya da sicil no), olay ve belirtiler (bulanık görme, leke/kör nokta, birkaç dakikada geçmeyen ardıl
+görüntü, ağrı/ışığa hassasiyet) girilir. Önce sağ, sonra sol göz test edilir. Bozuk, eksik ya da karanlık görülen
+karelere dokunulur; sürükleyerek birden çok kare işaretlenir. Siyah çizgi/beyaz zemin ya da beyaz çizgi/siyah zemin
+seçilebilir. Android'de test süresince ekran açık kalır, parlaklık en yükseğe çıkar ve sayfa yakınlaştırması sıfırlanır.
+
+**Sonuç.**
+- İşaretli kare **ya da** belirti varsa: "Bulgu var". Aynı gün göz hekimi (retina muayenesi, mümkünse OCT); olay lazer
+  güvenlik sorumlusuna bildirilir. Merkezdeki ±2°'lik alan (orta 4 × 4 kare) tutulmuşsa ayrıca belirtilir.
+- İşaret ve belirti yoksa: "bulgu yok", ama **hasarı dışlamaz**. Maruziyet şüphesinde en geç 48 saat içinde göz
+  muayenesi; görme azalırsa ya da leke, ardıl görüntü sürerse hemen başvuru; testin birkaç saat sonra tekrarı önerilir.
+- Aynı kişinin önceki testi (ad karşılaştırması büyük/küçük harf ve İ/ı farkı gözetmez) bulunursa karşılaştırılır:
+  önceki teste göre yeni işaretlenen kare sayısı gösterilir. Bu yüzden lazerle çalışanlar için bir **temel test** kaydı önerilir.
+
+**Kayıt.** Sonuç otomatik olarak bu cihazdaki test geçmişine kaydedilir (`lazerEmniyet.amsler.v1`, en çok 200 test).
+Sonuç A4 rapor olarak yazdırılabilir (PDF): kişi, olay, belirtiler, iki gözün işaretli ızgarası, test koşulu, önceki
+test, imza alanları. **Kâğıt test yazdır** gerçek boyutlu 10 × 10 cm boş ızgara ve 50 mm denetim çizgisi üretir;
+yazdırırken ölçek %100 seçilmelidir.
+
+**Sınırlamalar.** Amsler testinin duyarlılığı sınırlıdır; beyin eksik alanı tamamlayabilir (Crossland ve Rubin 2007).
+Lazer hasarı çoğunlukla merkezde kör nokta yapar, çizgilerde eğrilik olmayabilir (Sakaguchi ve ark. 2000). Ekranda
+gösterilen ızgara, kare boyu ve mesafe doğru olduğunda kâğıt testle uyumludur (Brucker ve ark. 2019). Test 30 cm
+mesafeye dayanır; mesafe ölçülmez, kullanıcıya söylenir.
+
+## Hakkında ve lisans
+
+⋮ → **Hakkında**: geliştirici (S.ÖCAL), uygulama sürümü ve sürüm tarihi (`js/ui/version.js`: `APP_VERSION`,
+`APP_DATE`), hesap motoru sürümü, öz-denetim sonucu, derleme zamanı (`tools/build-single.js` tek dosyaya yazar) ve
+Android'de uygulama sürüm kodu, cihaz, Android ve WebView sürümü.
+
+Lisans: **GNU Genel Kamu Lisansı sürüm 3 ya da (seçiminize bağlı olarak) daha sonraki bir sürüm**
+(SPDX: `GPL-3.0-or-later`). Copyright © 2026 S.ÖCAL. Lisansın tam metni kök klasördeki `LICENSE` dosyasındadır ve
+uygulamanın içinde Hakkında penceresinden okunabilir (`js/ui/license.js`; test, iki metnin aynı olduğunu denetler).
+Kaynak kodu HTML/JS dosyaları ve `android/` klasörüdür; tek dosya sürümü de küçültülmemiş, okunur kaynak içerir.
+
 ## Android sürümü
 
 `android/` klasöründeki uygulama, masaüstündeki doğrulanmış tek dosyalık sürümü (`dist/LazerEmniyet.html`) olduğu gibi
@@ -268,9 +322,12 @@ içine gömen çevrimdışı bir **WebView kabuğudur**. Hesap motoru, arayüz, 
 | Tema ve dil | Uygulama içi Ayarlar (Sistem/Açık/Koyu, Türkçe/English); durum çubuğu şeridi, gezinme çubuğu, Android bildirimleri ve onay pencereleri de seçimi izler |
 | Ağ | **INTERNET izni yok, hiçbir izin istenmez.** Sayfa APK'nın içinden, ağa çıkmayan sabit bir https kökenden sunulur |
 | Yedek | Bulut yedeği kapalıdır (`allowBackup=false`); envanter yalnız cihazda kalır, yedek için **JSON dışa aktar** |
+| Uygulama adı | Ana ekranda ve uygulama listesinde **Laser Safety Analysis** |
+| Amsler Grid testi | Ekranın fiziksel piksel yoğunluğu (`screenMetrics`) ile 5 mm kareler; test süresince ekran açık, parlaklık en yüksek, yakınlaştırma sıfır (`testScreen`) |
+| Hakkında | Uygulama sürümü ve sürüm kodu, cihaz, Android ve WebView sürümü (`appInfo`) |
 
 Gereksinim: Android 11 veya üstü (minSdk 30); hedef Android 15 (targetSdk 35). Uygulama kimliği `com.quarka.lazeremniyet`.
-Sürüm numarası `js/ui/version.js` dosyasındaki uygulama sürümünden otomatik alınır: 1.4.0 → versionName 1.4.0, versionCode 10400.
+Sürüm numarası `js/ui/version.js` dosyasındaki uygulama sürümünden otomatik alınır: 1.5.0 → versionName 1.5.0, versionCode 10500.
 Hesap motorunun sürümü ayrıdır: `js/core/analysis.js` → `ENGINE_VERSION`, şu an 1.3.1.
 
 ### Derleme
@@ -334,7 +391,20 @@ Uygulama 1.4.0 (aynı gün, aynı emülatör):
 - Uygulama içinde İngilizce ve Koyu seçilince durum şeridi ve gezinme alanı koyulaştı. Android onay penceresi
   İngilizce çıktı ("Laser Safety", Cancel/OK).
 
-Gerçek telefon (Honor 400, MagicOS): APK dosya aktarımıyla İndirilenler klasörüne kopyalandı (1.3.1, sonra 1.4.0).
+Uygulama 1.5.0 (aynı gün, aynı emülatör: 1080 × 2400, 420 dpi):
+- APK: etiket **Laser Safety Analysis**, versionCode 10500, izin yok; gömülü HTML `dist` ile bayt bayt aynı. Öz-denetim 64/64.
+- ☰ çekmece, ⋮ menü, Hakkında (uygulama 1.5.0 (10500), Android 15 (API 35), WebView 124, derleme zamanı) çalıştı.
+  Geri tuşu sırasıyla Amsler adımını, açık pencereyi, çekmeceyi kapattı.
+- Amsler: köprüden xdpi 420 → kare 31,496 CSS px = **82,68 cihaz pikseli = 5,00 mm**. Ekran görüntüsünde 13 dikey
+  çizgi aralığı ortalama 82,5 px, 21 yatay çizgi uç uca 1651,5 px (beklenen 1653,5; piksel yuvarlaması). Gerçek
+  dokunuşla (adb) tek kare ve sürükleyerek 10 kare işaretlendi. Test sırasında `KEEP_SCREEN_ON` ve parlaklık 1,0;
+  testten çıkınca ikisi de kalktı.
+- Kâğıt ızgara → Save as PDF (A4, 1 sayfa), 254 dpi'de ölçüldü: ızgara kenarı **100,0 mm**, 20 × 20 kare (dikey çizgi
+  aralığı 4,99 mm), 50 mm çizgisi 49,7 mm (kenar yumuşatma payı). PDF görüntüleyicide de ölçek %100 seçilmelidir.
+- Test sonucu → Save as PDF: 1 sayfa A4; kişi, olay, belirti, iki göz ızgarası, test koşulu, imza alanları.
+- İngilizce seçiliyken Android onay penceresinin başlığı "Laser Safety Analysis".
+
+Gerçek telefon (Honor 400, MagicOS): APK dosya aktarımıyla İndirilenler klasörüne kopyalandı (1.3.1, 1.4.0, sonra 1.5.0).
 Kurulum ve deneme kullanıcıda. USB hata ayıklama açılırsa yukarıdaki otomatik doğrulama telefonda da çalıştırılabilir.
 Üreticinin yazdırma ve dosya seçici ekranları farklı görünebilir; akış aynıdır.
 
@@ -353,15 +423,20 @@ js/core/              hesap motoru (DOM'suz; Node ve tarayıcıda aynı kod)
   units.js            sayı ayrıştırma, birimler, Türkçe biçim
   selftest.js         gömülü öz-denetim vektörleri
 js/ui/                form, sonuç ekranı, envanter, rapor, yardım, örnekler
-  version.js          uygulama sürümü (Android sürüm numarası buradan)
+  version.js          uygulama sürümü ve tarihi (Android sürüm numarası buradan)
+  amsler.js           Amsler Grid testi: ızgara geometrisi, ekran ölçüsü, test geçmişi, rapor
+  about.js            Hakkında penceresi
+  license.js          GPL v3 tam metni (LICENSE ile aynı)
   i18n.js             dil desteği: T() arayüz, X() motor metinleri (kalıplarla, motora dokunmadan)
   lang_en.js          İngilizce sözlük
 test/                 Node testleri; test/data: EasyHaz 2014 doğrulama verisi ve 2010 örnek dosyaları
-tools/build-single.js tek dosya derlemesi → dist/LazerEmniyet.html
+LICENSE               GNU GPL v3 tam metni
+tools/build-single.js tek dosya derlemesi → dist/LazerEmniyet.html (derleme zamanını da yazar)
 tools/easyhaz_oracle.py  EasyHaz çapraz doğrulama aracı (LibreOffice UNO, makrosuz)
 android/              Android uygulaması (WebView kabuğu; dist/LazerEmniyet.html'i gömer)
   app/build.gradle.kts           sürüm js/ui/version.js'ten; copyWebApp görevi
-  app/src/main/java/.../MainActivity.kt  WebView, PDF, dosya seçici, geri tuşu, tema/dil köprüsü, kenardan kenara düzen
+  app/src/main/java/.../MainActivity.kt  WebView, PDF, dosya seçici, geri tuşu, tema/dil köprüsü, kenardan kenara düzen,
+                                         Amsler için ekran yoğunluğu ve test ekranı, Hakkında için sürüm bilgisi
 ```
 
 ## Geliştirme
@@ -381,6 +456,15 @@ Klasör bir git deposudur. İlk commit `1be12d6`, inceleme öncesi v1.3 durumudu
 `git log` ile görülebilir.
 
 ## Sürüm notları
+
+**Uygulama 1.5.0 (16.11.2026, motor 1.3.1 değişmedi)**
+- Yeni üst çubuk: sol üstte **☰** çekmece (Yeni analiz, Örnekler, Envantere kaydet, Envanter, Rapor, Amsler Grid testi),
+  sağ üstte **⋮** menü (Yardım, Ayarlar, Hakkında). Başlık tek satır ve yapışkan; telefonda öz-denetim rozeti "✓ 64/64".
+- **Amsler Grid testi**: gerçek 5 mm kareler, kartla ekran ayarı, iki göz, dokunarak işaretleme, belirtiler, sonuç önerisi,
+  test geçmişi ve aynı kişinin önceki testiyle karşılaştırma, A4 rapor, gerçek boyutlu kâğıt ızgara.
+- **Hakkında**: geliştirici S.ÖCAL, sürüm ve tarih, derleme zamanı, GNU GPL v3+ bildirimi ve tam metni. `LICENSE` eklendi.
+- Android: uygulama adı **Laser Safety Analysis**; köprüye `screenMetrics`, `testScreen`, `appInfo` eklendi (10500).
+- Testler 114 (yeni: amsler.test.js, about.test.js; css ve i18n testleri yeni menüleri ve Amsler ekranlarını kapsıyor).
 
 **Uygulama 1.4.0 (16.11.2026, motor 1.3.1 değişmedi)**
 - Ayarlar penceresi: tema (Sistem/Açık/Koyu), dil (Türkçe/English), açıklamalar (dokununca / her zaman).
@@ -425,6 +509,16 @@ Kaynakla teyit edilemeyenler (daha koruyucu yönde bırakıldı):
 
 ## Kaynaklar
 
+Amsler Grid testi:
+- Amsler M. Earliest symptoms of diseases of the macula. Br J Ophthalmol 1953;37(9):521–537. https://doi.org/10.1136/bjo.37.9.521
+- Crossland M, Rubin G. The Amsler chart: absence of evidence is not evidence of absence. Br J Ophthalmol 2007;91(3):391–393.
+  https://doi.org/10.1136/bjo.2006.095315
+- Sakaguchi H ve ark. Amsler grid examination and optical coherence tomography of a macular hole caused by accidental
+  Nd:YAG laser injury. Am J Ophthalmol 2000;130(3):355–356. https://doi.org/10.1016/s0002-9394(00)00547-x
+- Barkana Y, Belkin M. Laser eye injuries. Surv Ophthalmol 2000;44(6):459–478. https://doi.org/10.1016/s0039-6257(00)00112-0
+- Brucker J ve ark. Ophthalmol Ther 2019;8(3):461–476 (mobil Amsler modülü). https://doi.org/10.1007/s40123-019-0203-9
+
+Lazer güvenliği:
 - ICNIRP (2013). Guidelines on limits of exposure to laser radiation of wavelengths between 180 nm and
   1,000 µm. Health Phys. 105(3):271–295 — https://www.icnirp.org/cms/upload/publications/ICNIRPLaser180gdl_2013.pdf
 - IEC 60825-1:2014 (TS EN 60825-1), Ek A; IEC TR 60825-14

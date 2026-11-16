@@ -50,6 +50,9 @@
     for (const el of document.querySelectorAll('[data-i18n-ph]')) el.setAttribute('placeholder', T(el.getAttribute('data-i18n-ph')));
     for (const el of document.querySelectorAll('[data-i18n-title]')) el.setAttribute('title', T(el.getAttribute('data-i18n-title')));
     for (const el of document.querySelectorAll('[data-i18n-aria]')) el.setAttribute('aria-label', T(el.getAttribute('data-i18n-aria')));
+    document.title = T('Lazer Emniyet Analizi');
+    const ver = $('drawer-ver');
+    if (ver) ver.textContent = T('Uygulama {0} · hesap motoru {1}', LE.APP_VERSION || '', LE.analysis.ENGINE_VERSION);
   }
 
   /** Ayarları uygular. first: açılışta (form henüz kurulmadı). */
@@ -72,6 +75,8 @@
       recalc();
       if ($('dlg-inventory').open) renderInventory();
       if ($('dlg-help').open) $('help-body').innerHTML = LE.help.html(selftest);
+      if ($('dlg-about').open) showAbout(true);
+      if (LE.amsler) LE.amsler.refresh();
       if ($('dlg-selftest').open) showSelftest(true);
       if ($('dlg-report').open && lastOut) $('rep-body').innerHTML = LE.report.build(lastOut, LE.form.getState(), { reportId: LE.report.reportId({}), selftest });
     }
@@ -106,7 +111,10 @@
     const b = $('selftest');
     if (!selftest.total) return;
     const ok = selftest.passed === selftest.total;
-    b.textContent = (ok ? '✓ ' : '✗ ') + T('Öz-denetim {0}/{1}', selftest.passed, selftest.total);
+    // telefonda yalnız "✓ 64/64" görünür (.st-word gizlenir); tam metin başlıkta ve ekran okuyucuda
+    b.innerHTML = (ok ? '✓' : '✗') + ' <span class="st-word">' + esc(T('Öz-denetim')) + ' </span>' + selftest.passed + '/' + selftest.total;
+    b.setAttribute('aria-label', T('Öz-denetim {0}/{1}', selftest.passed, selftest.total));
+    b.title = T('Hesap motoru öz-denetimi') + ': ' + selftest.passed + '/' + selftest.total;
     b.classList.toggle('fail', !ok);
     if (!ok) {
       const bn = $('selftest-banner');
@@ -199,7 +207,78 @@
   }
 
   // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  // ☰ çekmece ve ⋮ menüsü
+  // ---------------------------------------------------------------------------
+  function openDrawer() {
+    closeMore();
+    const d = $('drawer');
+    if (!d.open) d.showModal();
+    $('btn-menu').setAttribute('aria-expanded', 'true');
+  }
+  function closeDrawer() {
+    const d = $('drawer');
+    if (d.open) d.close();
+  }
+  function setExamplesOpen(open) {
+    $('menu-examples').classList.toggle('hidden', !open);
+    $('btn-examples').setAttribute('aria-expanded', String(open));
+  }
+  function moreOpen() {
+    return !$('menu-more').classList.contains('hidden');
+  }
+  function openMore() {
+    $('menu-more').classList.remove('hidden');
+    $('btn-more').setAttribute('aria-expanded', 'true');
+    const first = $('menu-more').querySelector('button');
+    if (first) first.focus();
+  }
+  function closeMore(focusButton) {
+    if (!moreOpen()) return;
+    $('menu-more').classList.add('hidden');
+    $('btn-more').setAttribute('aria-expanded', 'false');
+    if (focusButton) $('btn-more').focus();
+  }
+
+  function showAbout(refreshOnly) {
+    $('about-body').innerHTML = LE.about.html(selftest);
+    LE.about.attach($('about-body'));
+    if (!refreshOnly) $('dlg-about').showModal();
+  }
+
+  function wireMenus() {
+    const drawer = $('drawer');
+    $('btn-menu').addEventListener('click', openDrawer);
+    drawer.addEventListener('close', () => $('btn-menu').setAttribute('aria-expanded', 'false'));
+    // çekmecenin dışına (karartılmış zemine) dokunmak kapatır
+    drawer.addEventListener('click', (e) => { if (e.target === drawer) closeDrawer(); });
+    // komutlar önce çekmeceyi kapatır (onay pencereleri ve diyaloglar çekmecenin üstünde kalmasın)
+    for (const id of ['btn-new', 'btn-save', 'btn-inventory', 'btn-report', 'btn-amsler']) $(id).addEventListener('click', closeDrawer);
+    $('btn-examples').addEventListener('click', () => setExamplesOpen($('menu-examples').classList.contains('hidden')));
+
+    const more = $('menu-more');
+    $('btn-more').addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (moreOpen()) closeMore(); else openMore();
+    });
+    for (const b of more.querySelectorAll('button')) b.addEventListener('click', () => closeMore());
+    document.addEventListener('click', (e) => {
+      if (moreOpen() && !more.contains(e.target)) closeMore();
+    });
+    more.addEventListener('keydown', (e) => {
+      const items = Array.from(more.querySelectorAll('button'));
+      const i = items.indexOf(document.activeElement);
+      if (e.key === 'Escape') { e.preventDefault(); closeMore(true); }
+      else if (e.key === 'ArrowDown') { e.preventDefault(); items[(i + 1) % items.length].focus(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); items[(i - 1 + items.length) % items.length].focus(); }
+      else if (e.key === 'Tab') closeMore();
+    });
+    $('btn-about').addEventListener('click', () => showAbout());
+    $('btn-amsler').addEventListener('click', () => LE.amsler.open());
+  }
+
   function wire() {
+    wireMenus();
     $('btn-new').addEventListener('click', () => {
       if (!confirm(T('Form varsayılan değerlere sıfırlansın mı? (Kaydedilmemiş değişiklikler kaybolur.)'))) return;
       LE.form.setState(LE.form.defaultState());
@@ -226,16 +305,6 @@
         applyPrefs(false);
       });
     }
-    const exBtn = $('btn-examples');
-    const exMenu = $('menu-examples');
-    exBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const open = exMenu.classList.toggle('hidden') === false;
-      exBtn.setAttribute('aria-expanded', String(open));
-    });
-    document.addEventListener('click', (e) => {
-      if (!exMenu.contains(e.target)) { exMenu.classList.add('hidden'); exBtn.setAttribute('aria-expanded', 'false'); }
-    });
     for (const btn of document.querySelectorAll('[data-close]')) {
       btn.addEventListener('click', () => btn.closest('dialog').close());
     }
@@ -297,11 +366,11 @@
       const t = exText(ex);
       const b = document.createElement('button');
       b.type = 'button';
-      b.setAttribute('role', 'menuitem');
       b.innerHTML = esc(t.title) + '<small>' + esc(t.desc) + '</small>';
       b.addEventListener('click', () => {
+        closeDrawer();
+        setExamplesOpen(false);
         loadExample(i);
-        m.classList.add('hidden');
       });
       m.appendChild(b);
     });
@@ -374,7 +443,7 @@
     const cols = [['name', T('Tanım')], ['maker', T('Üretici / model')], ['serial', T('Seri no')], ['cls', T('Sınıf')], ['loc', T('Konum')], ['wl', 'λ (nm)'], ['nohd', 'NOHD'], ['odWorst', 'OD'], ['marking', 'EN 207'], ['date', T('Tarih')]];
     const body = $('inv-body');
     if (!LE.store.loadInventory().length) {
-      body.innerHTML = '<p class="muted">' + T('Envanter boş. Bir analizi "Kaydet" düğmesiyle (Ctrl+S) ekleyin ya da daha önce dışa aktarılmış bir JSON dosyasını içe aktarın.') + '</p>';
+      body.innerHTML = '<p class="muted">' + T('Envanter boş. Bir analizi ☰ menüsündeki "Envantere kaydet" ile (Ctrl+S) ekleyin ya da daha önce dışa aktarılmış bir JSON dosyasını içe aktarın.') + '</p>';
       return;
     }
     const head = cols.map(([k, t]) => '<th><button class="minibtn" data-sort="' + k + '">' + t + (sortKey === k ? (sortDir > 0 ? ' ▲' : ' ▼') : '') + '</button></th>').join('') + '<th></th>';
@@ -444,18 +513,14 @@
   }
 
   /**
-   * Geri tuşu (Android): açık diyaloğu ya da Örnekler menüsünü kapatır.
+   * Geri tuşu (Android): Amsler testinde bir adım geri; yoksa en üstteki diyaloğu (çekmece dahil) ya da ⋮ menüsünü kapatır.
    * @returns {boolean} bir şey kapatıldıysa true; false ise uygulama kapanabilir.
    */
   function back() {
-    const open = document.querySelector('dialog[open]');
-    if (open) { open.close(); return true; }
-    const m = $('menu-examples');
-    if (m && !m.classList.contains('hidden')) {
-      m.classList.add('hidden');
-      $('btn-examples').setAttribute('aria-expanded', 'false');
-      return true;
-    }
+    if (LE.amsler && LE.amsler.isOpen()) return LE.amsler.back();
+    const open = document.querySelectorAll('dialog[open]');
+    if (open.length) { open[open.length - 1].close(); return true; }
+    if (moreOpen()) { closeMore(); return true; }
     return false;
   }
   LE.app = { back, applyPrefs };

@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="tr">
 <head>
-  <!-- Lazer Emniyet Analizi 1.4.0, motor v1.3.1, tek dosya derlemesi 2026-11-16T11:12:01.184Z -->
+  <!-- Lazer Emniyet Analizi 1.5.0, motor v1.3.1, tek dosya derlemesi 2026-11-16T15:21:51Z -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Lazer Emniyet Analizi</title>
@@ -93,33 +93,45 @@ body {
 button, input, select, textarea { font: inherit; color: inherit; }
 a { color: var(--accent); }
 
-/* ---------------- Başlık çubuğu ---------------- */
+/* ---------------- Başlık çubuğu: ☰ · marka · öz-denetim · ⋮ ---------------- */
 .topbar {
   position: sticky; top: 0; z-index: 30;
-  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
-  padding: 8px 16px;
+  display: flex; align-items: center; gap: 6px; flex-wrap: nowrap;
+  padding: 5px 8px; min-height: 54px;
   background: var(--head); color: var(--head-ink);
   border-bottom: 3px solid var(--laser);
 }
-.brand { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1 1 280px; }
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1 1 auto; padding-left: 2px; }
 .brand svg { flex: none; }
 .brand > div { min-width: 0; }
-.brand h1 { font-size: 17px; margin: 0; letter-spacing: .2px; white-space: nowrap; }
-.brand .std { font-size: 11.5px; color: #b7bfcd; overflow-wrap: anywhere; }
-.toolbar { display: flex; gap: 6px; flex-wrap: wrap; margin-left: auto; align-items: center; }
+.brand h1 { font-size: 17px; margin: 0; letter-spacing: .2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.brand .std, .drawer-head .std { font-size: 11.5px; color: #b7bfcd; }
+.brand .std { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tbtn {
   background: #252c3a; color: var(--head-ink); border: 1px solid #343d50;
   border-radius: 7px; padding: 6px 11px; cursor: pointer; white-space: nowrap;
 }
 .tbtn:hover { background: #2f384a; }
-.tbtn.primary { background: var(--laser); color: #111; border-color: var(--laser); font-weight: 600; }
-.tbtn.primary:hover { filter: brightness(.95); }
-.tbtn.icon { padding: 5px 8px; line-height: 0; }
+.tbtn.icon {
+  flex: none; width: 42px; height: 42px; padding: 0; border-radius: 50%; border-color: transparent; background: transparent;
+  display: inline-flex; align-items: center; justify-content: center; line-height: 0;
+}
+.tbtn.icon:hover, .tbtn.icon[aria-expanded="true"] { background: #2f384a; }
+.tbtn:focus-visible, .ditem:focus-visible, .menu-list button:focus-visible { outline: 2px solid var(--laser); outline-offset: -2px; }
 .selftest {
-  font-size: 12px; padding: 4px 9px; border-radius: 999px; cursor: pointer; border: 1px solid transparent;
+  flex: none; font-size: 12px; padding: 4px 9px; border-radius: 999px; cursor: pointer; border: 1px solid transparent;
   background: #1f3a26; color: #a9f0bd; border-color: #2f5a3a; white-space: nowrap;
 }
 .selftest.fail { background: #4a1414; color: #ffb4ab; border-color: #7a2020; }
+/* telefon: tek satır; standart listesi ve "Öz-denetim" sözcüğü gizlenir (çekmecede ve Hakkında'da görünür) */
+@media (max-width: 560px) {
+  .brand .std { display: none; }
+  .brand h1 { font-size: 16px; }
+  .selftest .st-word { display: none; }
+}
+@media (max-width: 380px) {
+  .brand > svg { display: none; }
+}
 
 .banner { padding: 10px 16px; font-weight: 600; }
 .banner.fail { background: var(--danger); color: #fff; }
@@ -330,26 +342,131 @@ dialog.small { width: min(460px, calc(100vw - 32px)); }
   pointer-events: none; max-width: calc(100vw - 32px);
 }
 .toast.show { opacity: 1; }
-.menu { position: relative; }
+/* ⋮ menüsü: başlığın sağında, sağa hizalı (ekrandan taşmaz) */
+.menu { position: relative; flex: none; }
 .menu-list {
   position: absolute; right: 0; top: calc(100% + 6px); background: var(--panel); color: var(--ink); border: 1px solid var(--line);
-  border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,.2); min-width: 300px; max-height: 70vh; overflow: auto; padding: 6px; z-index: 40;
+  border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.25); min-width: 210px; max-width: calc(100vw - 16px);
+  max-height: 70vh; overflow: auto; padding: 6px; z-index: 40;
 }
 .menu-list button {
-  display: block; width: 100%; text-align: left; border: 0; background: none; padding: 8px 10px; border-radius: 7px; cursor: pointer;
+  display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; border: 0; background: none;
+  padding: 11px 12px; border-radius: 8px; cursor: pointer; font-size: 14.5px;
 }
 .menu-list button:hover { background: var(--accent-soft); }
-.menu-list small { display: block; color: var(--muted); }
-/* telefon: başlık yapışkan değil (ekranın beşte birini kaplıyordu); Örnekler menüsü başlığın altında,
-   ekran genişliğinde açılır (sağa hizalı menü sol kenardan taşıyordu) */
-@media (max-width: 700px) {
-  .topbar { position: relative; }
-  .menu { position: static; }
-  .menu-list { left: 12px; right: 12px; top: calc(100% + 4px); min-width: 0; }
+.menu-list .ic, .ditem .ic { flex: none; color: var(--muted); }
+
+/* ☰ çekmece: soldan açılan tam yükseklikte modal panel */
+dialog.drawer {
+  margin: 0; inset: 0 auto 0 0; height: 100%; max-height: 100%; width: min(330px, 86vw); max-width: 86vw;
+  border: 0; border-radius: 0 16px 16px 0; padding: 0; overflow: hidden; box-shadow: 0 0 40px rgba(0,0,0,.35);
 }
+dialog.drawer[open] { display: flex; flex-direction: column; animation: drawer-in .18s ease-out; }
+@keyframes drawer-in { from { transform: translateX(-100%); } to { transform: none; } }
+@media (prefers-reduced-motion: reduce) { dialog.drawer[open] { animation: none; } }
+.drawer-head {
+  display: flex; gap: 12px; align-items: flex-start; padding: 18px 16px 14px;
+  background: var(--head); color: var(--head-ink); border-bottom: 3px solid var(--laser);
+}
+.drawer-head svg { flex: none; }
+.drawer-title { font-weight: 700; font-size: 16.5px; }
+.drawer-head .std { margin-top: 2px; }
+.drawer-nav { padding: 8px; overflow: auto; display: grid; gap: 2px; align-content: start; flex: 1; }
+.drawer-nav hr { border: 0; border-top: 1px solid var(--line); margin: 6px 6px; }
+.ditem {
+  display: flex; align-items: center; gap: 16px; width: 100%; text-align: left; border: 0; background: none;
+  padding: 11px 12px; border-radius: 10px; cursor: pointer; font-size: 14.5px; min-height: 46px;
+}
+.ditem:hover { background: var(--accent-soft); }
+.ditem small { display: block; color: var(--muted); font-size: 12px; }
+.ditem .kbd { margin-left: auto; font: 11px var(--mono); color: var(--muted); }
+@media (hover: none) { .ditem .kbd { display: none; } }
+.ditem .chev {
+  margin-left: auto; width: 8px; height: 8px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted);
+  transform: rotate(45deg); transition: transform .15s; margin-right: 4px;
+}
+.ditem[aria-expanded="true"] .chev { transform: rotate(-135deg); }
+.dsub { display: grid; gap: 1px; padding: 0 0 6px 50px; }
+.dsub button {
+  display: block; width: 100%; text-align: left; border: 0; background: none; padding: 7px 10px; border-radius: 8px; cursor: pointer; font-size: 13.5px;
+}
+.dsub button:hover { background: var(--accent-soft); }
+.dsub small { display: block; color: var(--muted); font-size: 11.5px; }
 .hidden { display: none !important; }
 .muted { color: var(--muted); }
 .mono { font-family: var(--mono); }
+
+/* ---------------- Hakkında ---------------- */
+.about h3 { margin: 16px 0 6px; font-size: 14.5px; }
+.about p { margin: 6px 0; }
+.about-head { display: flex; gap: 14px; align-items: center; margin-bottom: 12px; }
+.about-head svg { flex: none; }
+.about-name { font-size: 17px; font-weight: 700; }
+table.about-t th { width: 42%; background: none; position: static; font-size: 12.5px; }
+div.license {
+  white-space: pre-line; font-size: 12.5px; line-height: 1.45; background: var(--panel-2); border: 1px solid var(--line);
+  border-radius: 8px; padding: 10px 12px; max-height: 50vh; overflow: auto; margin: 6px 0 0; overflow-wrap: anywhere;
+}
+
+/* ---------------- Amsler Grid testi ---------------- */
+#dlg-amsler { width: min(860px, calc(100vw - 32px)); }
+@media (max-width: 700px) {
+  #dlg-amsler[open] { width: 100%; max-width: 100%; height: 100%; max-height: 100%; margin: 0; border: 0; border-radius: 0; }
+}
+/* test sırasında tam ekran; zemin ızgara rengindedir (tema rengi değil) */
+#dlg-amsler[open].testing {
+  width: 100%; max-width: 100%; height: 100%; max-height: 100%; margin: 0; border: 0; border-radius: 0;
+  display: flex; flex-direction: column; overflow: hidden; background: #fff; color: #000;
+}
+#dlg-amsler.testing .dlg-head { display: none; }
+#dlg-amsler.testing .dlg-body { flex: 1; min-height: 0; padding: 0; display: flex; flex-direction: column; overflow: hidden; }
+.am-intro, .am-result, .am-calib { display: grid; gap: 12px; }
+.am-intro p, .am-result p, .am-calib p { margin: 0; }
+.am-lead { font-size: 14.5px; }
+.am-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+.am-fields label { display: grid; gap: 4px; font-size: 12.5px; color: var(--muted); font-weight: 550; }
+.am-fields input {
+  padding: 8px 10px; border: 1px solid var(--line-strong); border-radius: 7px; background: var(--panel); color: var(--ink); font-size: 14px;
+}
+.am-fields input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); outline: none; }
+.am-sym { border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px 10px; margin: 0; display: grid; gap: 8px; }
+.am-sym legend { font-size: 12.5px; color: var(--muted); font-weight: 600; padding: 0 4px; }
+.am-steps { margin: 0; padding-left: 22px; display: grid; gap: 5px; }
+.am-cal { padding: 8px 12px; border-radius: 8px; background: var(--info-bg); display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.am-cal.warn { background: var(--warn-bg); border: 1px solid var(--warn); }
+.am-colors { max-width: 520px; }
+.am-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.am-actions .btn { padding: 9px 14px; }
+.am-refs { margin: 4px 0 0; padding-left: 20px; display: grid; gap: 4px; font-size: 12.5px; color: var(--muted); }
+.am-note { font-size: 12px; }
+.am-bad { color: var(--danger); }
+.am-test { flex: 1; min-height: 0; display: flex; flex-direction: column; background: #fff; color: #000; touch-action: none; }
+.am-test.inv { background: #000; color: #fff; }
+.am-bar { display: flex; align-items: center; gap: 8px 12px; padding: 8px 12px; flex-wrap: wrap; font-size: 14px; }
+.am-bar .am-eye { font-size: 15px; letter-spacing: .3px; }
+.am-bar .am-hint { font-size: 12.5px; opacity: .8; flex: 1 1 200px; }
+.am-bar .btn { background: transparent; color: inherit; border-color: currentColor; padding: 9px 14px; }
+.am-bar .btn.primary { background: #1c4fd8; color: #fff; border-color: #1c4fd8; }
+.am-bottom { justify-content: flex-end; }
+.am-bottom #am-count { margin-right: auto; font-variant-numeric: tabular-nums; }
+.am-x {
+  margin-left: auto; width: 40px; height: 40px; border-radius: 50%; border: 1px solid currentColor; background: transparent; color: inherit;
+  font-size: 22px; line-height: 1; cursor: pointer;
+}
+.am-zoom { background: #b71c1c; color: #fff; padding: 6px 12px; font-weight: 600; }
+.am-gridwrap { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.am-grid { display: block; cursor: crosshair; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.am-grids { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; }
+.am-grids figure { margin: 0; width: min(260px, calc(50% - 8px)); } /* telefonda da iki göz yan yana */
+.am-grids figcaption { font-weight: 600; text-align: center; margin-bottom: 4px; }
+.am-grids svg { display: block; width: 100%; height: auto; }
+.am-cardwrap { display: flex; justify-content: center; padding: 6px 0; }
+.am-card {
+  border: 2px solid var(--accent); background: var(--accent-soft); display: flex; align-items: center; justify-content: center;
+  font-size: 12px; color: var(--muted); box-sizing: border-box;
+}
+.am-ruler { height: 12px; border: 2px solid var(--ink); border-top: 0; margin: 0 auto; box-sizing: border-box; }
+#am-range { width: 100%; accent-color: var(--accent); }
 
 /* ---------------- Rapor (yazdırma) ---------------- */
 #report-print { display: none; }
@@ -384,6 +501,7 @@ dialog.small { width: min(460px, calc(100vw - 32px)); }
 </head>
 <body>
   <header class="topbar">
+    <button class="tbtn icon" id="btn-menu" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="drawer" title="Menü" aria-label="Menü" data-i18n-title="Menü" data-i18n-aria="Menü"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5h16M4 12h16M4 17.5h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
     <div class="brand">
       <svg width="30" height="27" viewBox="0 0 64 58" aria-hidden="true"><path d="M32 3 61 55H3Z" fill="#ffd400" stroke="#111" stroke-width="4" stroke-linejoin="round"/><circle cx="32" cy="37" r="5" fill="#111"/><path d="M32 37 19 25M32 37l15-6M32 37l-2 12M32 37h-14" stroke="#111" stroke-width="3" stroke-linecap="round"/></svg>
       <div>
@@ -391,19 +509,15 @@ dialog.small { width: min(460px, calc(100vw - 32px)); }
         <div class="std" data-i18n="ICNIRP 2013 · IEC 60825-1:2014 · 2006/25/AT · ANSI Z136.1-2014 · EN 207 / EN 208">ICNIRP 2013 · IEC 60825-1:2014 · 2006/25/AT · ANSI Z136.1-2014 · EN 207 / EN 208</div>
       </div>
     </div>
-    <nav class="toolbar" aria-label="Komutlar" data-i18n-aria="Komutlar">
-      <button class="tbtn" id="btn-new" title="Yeni analiz (varsayılan değerler)" data-i18n="Yeni" data-i18n-title="Yeni analiz (varsayılan değerler)">Yeni</button>
-      <div class="menu">
-        <button class="tbtn" id="btn-examples" aria-haspopup="true" aria-expanded="false"><span data-i18n="Örnekler">Örnekler</span> ▾</button>
-        <div class="menu-list hidden" id="menu-examples" role="menu"></div>
+    <button class="selftest" id="selftest" type="button" title="Hesap motoru öz-denetimi" data-i18n-title="Hesap motoru öz-denetimi">…</button>
+    <div class="menu">
+      <button class="tbtn icon" id="btn-more" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="menu-more" title="Diğer seçenekler" aria-label="Diğer seçenekler" data-i18n-title="Diğer seçenekler" data-i18n-aria="Diğer seçenekler"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5.5" r="1.9" fill="currentColor"/><circle cx="12" cy="12" r="1.9" fill="currentColor"/><circle cx="12" cy="18.5" r="1.9" fill="currentColor"/></svg></button>
+      <div class="menu-list hidden" id="menu-more" role="menu" aria-labelledby="btn-more">
+        <button type="button" role="menuitem" id="btn-help"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.6 9.3a2.5 2.5 0 1 1 3.6 2.3c-.7.4-1.2 1-1.2 1.8v.6"/><circle cx="12" cy="12" r="9"/><circle cx="12" cy="17.2" r=".6" fill="currentColor"/></svg><span data-i18n="Yardım">Yardım</span></button>
+        <button type="button" role="menuitem" id="btn-settings"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M10.6 2h2.8l.5 2.6a7.6 7.6 0 0 1 1.9 1.1l2.5-.9 1.4 2.4-2 1.7a7.7 7.7 0 0 1 0 2.2l2 1.7-1.4 2.4-2.5-.9a7.6 7.6 0 0 1-1.9 1.1l-.5 2.6h-2.8l-.5-2.6a7.6 7.6 0 0 1-1.9-1.1l-2.5.9-1.4-2.4 2-1.7a7.7 7.7 0 0 1 0-2.2l-2-1.7 1.4-2.4 2.5.9a7.6 7.6 0 0 1 1.9-1.1ZM12 8.6a3.4 3.4 0 1 0 0 6.8 3.4 3.4 0 0 0 0-6.8Z"/></svg><span data-i18n="Ayarlar">Ayarlar</span></button>
+        <button type="button" role="menuitem" id="btn-about"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 11v6"/><circle cx="12" cy="12" r="9"/><circle cx="12" cy="7.6" r=".6" fill="currentColor"/></svg><span data-i18n="Hakkında">Hakkında</span></button>
       </div>
-      <button class="tbtn" id="btn-save" title="Envantere kaydet" data-i18n="Kaydet" data-i18n-title="Envantere kaydet">Kaydet</button>
-      <button class="tbtn" id="btn-inventory" data-i18n="Envanter">Envanter</button>
-      <button class="tbtn primary" id="btn-report" data-i18n="Rapor">Rapor</button>
-      <button class="tbtn" id="btn-help" data-i18n="Yardım">Yardım</button>
-      <button class="tbtn icon" id="btn-settings" title="Ayarlar: tema, dil, açıklamalar" aria-label="Ayarlar" data-i18n-title="Ayarlar: tema, dil, açıklamalar" data-i18n-aria="Ayarlar"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M10.6 2h2.8l.5 2.6a7.6 7.6 0 0 1 1.9 1.1l2.5-.9 1.4 2.4-2 1.7a7.7 7.7 0 0 1 0 2.2l2 1.7-1.4 2.4-2.5-.9a7.6 7.6 0 0 1-1.9 1.1l-.5 2.6h-2.8l-.5-2.6a7.6 7.6 0 0 1-1.9-1.1l-2.5.9-1.4-2.4 2-1.7a7.7 7.7 0 0 1 0-2.2l-2-1.7 1.4-2.4 2.5.9a7.6 7.6 0 0 1 1.9-1.1ZM12 8.6a3.4 3.4 0 1 0 0 6.8 3.4 3.4 0 0 0 0-6.8Z" transform="translate(0 2)"/></svg></button>
-      <button class="selftest" id="selftest" title="Hesap motoru öz-denetimi" data-i18n-title="Hesap motoru öz-denetimi">…</button>
-    </nav>
+    </div>
   </header>
   <div id="selftest-banner" class="banner fail hidden" role="alert"></div>
 
@@ -411,6 +525,28 @@ dialog.small { width: min(460px, calc(100vw - 32px)); }
     <section class="col" id="inputs" aria-label="Girişler" data-i18n-aria="Girişler"></section>
     <section class="col" id="results" aria-label="Sonuçlar" aria-live="polite" data-i18n-aria="Sonuçlar"></section>
   </main>
+
+  <!-- ☰ Çekmece: komutlar ve Amsler Grid testi -->
+  <dialog id="drawer" class="drawer" aria-labelledby="drawer-title">
+    <div class="drawer-head">
+      <svg width="40" height="36" viewBox="0 0 64 58" aria-hidden="true"><path d="M32 3 61 55H3Z" fill="#ffd400" stroke="#111" stroke-width="4" stroke-linejoin="round"/><circle cx="32" cy="37" r="5" fill="#111"/><path d="M32 37 19 25M32 37l15-6M32 37l-2 12M32 37h-14" stroke="#111" stroke-width="3" stroke-linecap="round"/></svg>
+      <div>
+        <div class="drawer-title" id="drawer-title" data-i18n="Lazer Emniyet Analizi">Lazer Emniyet Analizi</div>
+        <div class="std" data-i18n="ICNIRP 2013 · IEC 60825-1:2014 · 2006/25/AT · ANSI Z136.1-2014 · EN 207 / EN 208">ICNIRP 2013 · IEC 60825-1:2014 · 2006/25/AT · ANSI Z136.1-2014 · EN 207 / EN 208</div>
+        <div class="std" id="drawer-ver"></div>
+      </div>
+    </div>
+    <nav class="drawer-nav" aria-label="Komutlar" data-i18n-aria="Komutlar">
+      <button type="button" class="ditem" id="btn-new"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V7zM14 3v4h4M12 11v6M9 14h6"/></svg><span data-i18n="Yeni analiz">Yeni analiz</span></button>
+      <button type="button" class="ditem" id="btn-examples" aria-expanded="false" aria-controls="menu-examples"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h10l4 4v12H5zM8 9h6M8 13h8M8 17h5"/></svg><span data-i18n="Örnekler">Örnekler</span><span class="chev" aria-hidden="true"></span></button>
+      <div class="dsub hidden" id="menu-examples" role="group" aria-label="Örnekler" data-i18n-aria="Örnekler"></div>
+      <button type="button" class="ditem" id="btn-save"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h11l3 3v15H5zM8 3v5h7V3M8 21v-7h8v7"/></svg><span data-i18n="Envantere kaydet">Envantere kaydet</span><kbd class="kbd">Ctrl+S</kbd></button>
+      <button type="button" class="ditem" id="btn-inventory"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18v4H3zM5 9v11h14V9M10 13h4"/></svg><span data-i18n="Envanter">Envanter</span></button>
+      <button type="button" class="ditem" id="btn-report"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l4 4v14H7zM14 3v4h4M10 11h5M10 14.5h5M10 18h3"/></svg><span data-i18n="Rapor">Rapor</span></button>
+      <hr>
+      <button type="button" class="ditem" id="btn-amsler"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4zM4 8h16M4 12h16M4 16h16M8 4v16M12 4v16M16 4v16"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg><span><span data-i18n="Amsler Grid testi">Amsler Grid testi</span><small data-i18n="Sahada hızlı ilk göz kontrolü">Sahada hızlı ilk göz kontrolü</small></span></button>
+    </nav>
+  </dialog>
 
   <!-- Envanter -->
   <dialog id="dlg-inventory" aria-labelledby="inv-title">
@@ -481,6 +617,24 @@ dialog.small { width: min(460px, calc(100vw - 32px)); }
         <div class="help show" data-i18n="Gizli açıklamalar alanların yanındaki (i) düğmesiyle ve sonuçlardaki Açıklama satırlarıyla açılır. Uyarılar her zaman görünür.">Gizli açıklamalar alanların yanındaki (i) düğmesiyle ve sonuçlardaki Açıklama satırlarıyla açılır. Uyarılar her zaman görünür.</div>
       </div>
     </div>
+  </dialog>
+
+  <!-- Hakkında -->
+  <dialog id="dlg-about" class="small" aria-labelledby="about-title">
+    <div class="dlg-head">
+      <h2 id="about-title" data-i18n="Hakkında">Hakkında</h2>
+      <div class="sp"><button class="btn" data-close data-i18n="Kapat">Kapat</button></div>
+    </div>
+    <div class="dlg-body about" id="about-body"></div>
+  </dialog>
+
+  <!-- Amsler Grid testi -->
+  <dialog id="dlg-amsler" aria-labelledby="amsler-title">
+    <div class="dlg-head">
+      <h2 id="amsler-title" data-i18n="Amsler Grid testi">Amsler Grid testi</h2>
+      <div class="sp"><button class="btn" data-close data-i18n="Kapat">Kapat</button></div>
+    </div>
+    <div class="dlg-body" id="amsler-body"></div>
   </dialog>
 
   <!-- Öz-denetim ayrıntısı -->
@@ -2583,11 +2737,16 @@ dialog.small { width: min(460px, calc(100vw - 32px)); }
 /*
  * Lazer Emniyet — uygulama (arayüz) sürümü. Hesap motorunun sürümü ayrıdır:
  * js/core/analysis.js → ENGINE_VERSION. Android sürüm numarası bu dosyadan türetilir.
+ * Copyright © 2026 S.ÖCAL — SPDX-License-Identifier: GPL-3.0-or-later
  */
 (function (root) {
   'use strict';
   const LE = (root.LE = root.LE || {});
-  LE.APP_VERSION = '1.4.0';
+  LE.APP_VERSION = '1.5.0';
+  LE.APP_DATE = '2026-11-16'; // sürüm tarihi
+  LE.BUILD_TIME = '2026-11-16T15:21:51Z'; // tek dosya derlemesinde tools/build-single.js yazar
+  LE.APP_AUTHOR = 'S.ÖCAL';
+  LE.APP_LICENSE = 'GPL-3.0-or-later';
 })(typeof globalThis !== 'undefined' ? globalThis : this);
 
 </script>
@@ -3330,6 +3489,137 @@ dialog.small { width: min(460px, calc(100vw - 32px)); }
     "En kötü OD": "Worst-case OD",
     "Yaygın NHZ (m)": "Diffuse NHZ (m)",
     "Kayıt": "Saved",
+    // --- 1.5.0: menüler, Hakkında
+    "Menü": "Menu",
+    "Diğer seçenekler": "More options",
+    "Hakkında": "About",
+    "Öz-denetim": "Self-test",
+    "Uygulama {0} · hesap motoru {1}": "Application {0} · calculation engine {1}",
+    "Envanter boş. Bir analizi ☰ menüsündeki \"Envantere kaydet\" ile (Ctrl+S) ekleyin ya da daha önce dışa aktarılmış bir JSON dosyasını içe aktarın.": "The inventory is empty. Add an analysis with \"Save to inventory\" in the ☰ menu (Ctrl+S) or import a previously exported JSON file.",
+    "Geliştirici": "Developer",
+    "Uygulama sürümü": "Application version",
+    "Sürüm tarihi": "Release date",
+    "Hesap motoru": "Calculation engine",
+    "Derleme": "Build",
+    "kaynak dosyalardan çalışıyor": "running from source files",
+    "Android uygulaması": "Android app",
+    "Cihaz": "Device",
+    "Lisans": "Licence",
+    "Lazer tehlike analizi: MPE, NOHD, OD, EN 207 / EN 208 göz koruyucu seçimi ve Amsler Grid testi": "Laser hazard analysis: MPE, NOHD, OD, EN 207 / EN 208 eyewear selection and Amsler grid test",
+    "Bu program özgür yazılımdır: Özgür Yazılım Vakfı (Free Software Foundation) tarafından yayımlanan GNU Genel Kamu Lisansı'nın 3. sürümü ya da (seçiminize bağlı olarak) daha sonraki herhangi bir sürümü koşulları altında yeniden dağıtabilir ve/veya değiştirebilirsiniz.": "This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.",
+    "Bu program yararlı olması umuduyla dağıtılmaktadır, ancak HİÇBİR GARANTİSİ YOKTUR; SATILABİLİRLİK ya da BELİRLİ BİR AMACA UYGUNLUK konusunda zımni garanti dahi verilmez. Ayrıntılar için GNU Genel Kamu Lisansı'na bakın.": "This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.",
+    "Kaynak kodu (HTML/JS dosyaları ve Android kabuğu) aynı lisansla dağıtılır. Lisansın bağlayıcı metni aşağıdaki İngilizce metindir.": "The source code (HTML/JS files and the Android shell) is distributed under the same licence. The full licence text follows.",
+    "GNU Genel Kamu Lisansı, sürüm 3 — tam metin (İngilizce)": "GNU General Public License, version 3 — full text",
+    "Not": "Note",
+    "Program harici kütüphane ve ağ bağlantısı kullanmaz; tüm hesaplar bu cihazda yapılır, kayıtlar bu cihazda saklanır. Sonuçlar girilen verilere dayanır ve yetkin bir lazer güvenlik sorumlusunun değerlendirmesinin yerine geçmez.": "The program uses no external libraries and no network connection; all calculations run on this device and records are stored on this device. Results depend on the data entered and do not replace the assessment of a competent laser safety officer.",
+    // --- 1.5.0: Amsler Grid testi
+    "Amsler Grid testi": "Amsler grid test",
+    "Sahada hızlı ilk göz kontrolü": "Quick first eye check in the field",
+    "Amsler ızgarası, {0} × {1} kare": "Amsler grid, {0} × {1} squares",
+    "Görme bulanık ya da azalmış": "Blurred or reduced vision",
+    "Görüş alanında leke ya da kör nokta": "Spot or blind spot in the visual field",
+    "Birkaç dakikada geçmeyen ardıl görüntü": "After-image lasting more than a few minutes",
+    "Göz ağrısı, sulanma ya da ışığa hassasiyet": "Eye pain, watering or sensitivity to light",
+    "Ekran ölçüsü kartla ayarlandı: kareler 5 mm.": "Screen size calibrated with a card: squares are 5 mm.",
+    "Ekran ölçüsü Android ekran bilgisinden ({0} dpi): kareler 5 mm.": "Screen size from the Android display data ({0} dpi): squares are 5 mm.",
+    "Cihazın bildirdiği değer şüpheli; kartla ayarlayın.": "The value reported by the device is doubtful; calibrate with a card.",
+    "Bir kez kartla doğrulamanız önerilir.": "Checking once with a card is recommended.",
+    "Ekran ölçüsü ayarlanmadı: kareler 5 mm olmayabilir. Testten önce kartla ayarlayın.": "Screen size not calibrated: squares may not be 5 mm. Calibrate with a card before the test.",
+    "kartla ayarlandı": "calibrated with a card",
+    "Android ekran bilgisi": "Android display data",
+    "ayarlanmadı": "not calibrated",
+    "işaretli alan yok": "no area marked",
+    "{0} kare işaretlendi": "{0} squares marked",
+    "merkezdeki ±2°'lik alan dahil": "including the central ±2° area",
+    "Gözlük ya da lens kullanıyorsanız takın (lazer koruyucu gözlüğü çıkarın). Ortam iyi aydınlatılmış olsun.": "Wear your reading glasses or contact lenses if you use them (take off laser protective eyewear). Make sure the room is well lit.",
+    "Telefonu gözünüzden yaklaşık 30 cm uzakta tutun (bir A4 kâğıdın uzun kenarı kadar).": "Hold the phone about 30 cm from your eye (the long side of an A4 sheet).",
+    "Bir gözünüzü bastırmadan avucunuzla kapatın; açık gözünüzle yalnız ortadaki noktaya bakın.": "Cover one eye with your palm without pressing on it; with the open eye look only at the central dot.",
+    "Gözünüzü noktadan ayırmadan: çizgiler düz mü, kareler eşit mi; eksik, bulanık ya da karanlık bir yer var mı?": "Without moving your eye from the dot: are the lines straight and the squares equal; is any area missing, blurred or dark?",
+    "Bozuk görünen karelere dokunun (yeniden dokunmak işareti kaldırır; parmağınızı sürükleyerek birden çok kare işaretleyebilirsiniz). Sonra diğer göze geçin.": "Tap the squares that look abnormal (tap again to remove a mark; drag your finger to mark several squares). Then go on to the other eye.",
+    "Standart ızgara: 10 cm × 10 cm, 20 × 20 kare, kare 5 mm; 30 cm'den her kare ≈ 1° (tam 1° için 28,6 cm). Amsler M. Br J Ophthalmol 1953;37:521–537.": "Standard grid: 10 cm × 10 cm, 20 × 20 squares of 5 mm; at 30 cm each square subtends ≈ 1° (exactly 1° at 28.6 cm). Amsler M. Br J Ophthalmol 1953;37:521–537.",
+    "Lazer hasarı çoğunlukla merkezde kör nokta (skotom) yapar; çizgilerde eğrilik olmayabilir. Sakaguchi H ve ark. Am J Ophthalmol 2000;130:355–356.": "Laser injury usually causes a central blind spot (scotoma); the lines may not look distorted. Sakaguchi H et al. Am J Ophthalmol 2000;130:355–356.",
+    "Duyarlılık sınırlıdır (bazı çalışmalarda %50'nin altında): beyin eksik alanı tamamlayabilir, bu yüzden normal sonuç hasarı dışlamaz. Crossland M, Rubin G. Br J Ophthalmol 2007;91:391–393.": "Sensitivity is limited (below 50% in some studies): the brain can fill in a missing area, so a normal result does not rule out injury. Crossland M, Rubin G. Br J Ophthalmol 2007;91:391–393.",
+    "Ekranda gösterilen ızgara, kare boyu ve mesafe doğru olduğunda kâğıt testle uyumludur. Brucker J ve ark. Ophthalmol Ther 2019;8:461–476.": "A grid shown on a screen agrees with the paper test when the square size and the distance are correct. Brucker J et al. Ophthalmol Ther 2019;8:461–476.",
+    "Lazerle çalışanlar için bir temel (başlangıç) test kaydı önerilir; maruziyetten sonra aynı kişinin önceki testiyle karşılaştırılır.": "A baseline test record is recommended for laser workers; after an exposure the result is compared with the same person's previous test.",
+    "Lazer maruziyeti şüphesinde (parlama, ardıl görüntü, görmede leke) merkezi görmeyi her göz için ayrı kontrol eder. Sahada hızlı bir ilk değerlendirmedir; tanı koymaz, göz muayenesinin yerini tutmaz.": "After a suspected laser exposure (flash, after-image, spot in the vision) this checks the central vision of each eye separately. It is a quick first assessment in the field; it is not a diagnosis and does not replace an eye examination.",
+    "Kişi (ad soyad ya da sicil no)": "Person (name or staff number)",
+    "Olay / lazer (isteğe bağlı)": "Incident / laser (optional)",
+    "Belirtiler (varsa işaretleyin)": "Symptoms (tick any present)",
+    "Kartla ayarla": "Calibrate with a card",
+    "Bu ekranda {0} × {1} kare (≈ {2}° × {3}°) gösterilir; standart kâğıt ızgara 20 × 20 karedir (≈ 19° × 19°). Telefonu yan çevirmek yatay alanı genişletir.": "This screen shows {0} × {1} squares (≈ {2}° × {3}°); the standard paper grid has 20 × 20 squares (≈ 19° × 19°). Turning the phone sideways widens the horizontal field.",
+    "Izgara rengi": "Grid colours",
+    "Siyah çizgi, beyaz zemin": "Black lines on white",
+    "Beyaz çizgi, siyah zemin": "White lines on black",
+    "Teste başla (önce sağ göz)": "Start the test (right eye first)",
+    "Geçmiş testler ({0})": "Previous tests ({0})",
+    "Kâğıt test yazdır (10 × 10 cm)": "Print a paper grid (10 × 10 cm)",
+    "Test sırasında ekran açık kalır ve parlaklık en yükseğe çıkar (Android). Sonuçlar yalnız bu cihazda saklanır.": "During the test the screen stays on at full brightness (Android). Results are stored only on this device.",
+    "Yöntem ve kaynaklar": "Method and references",
+    "Bir banka kartını ya da kimlik kartını (85,60 × 53,98 mm) ekrana yaslayın. Çerçeve kartın kenarlarıyla çakışana kadar ayarlayın.": "Hold a bank card or ID card (85.60 × 53.98 mm) against the screen. Adjust until the frame matches the edges of the card.",
+    "Ölçek": "Scale",
+    "Cetvelle kontrol: aşağıdaki çizgi 50 mm olmalı.": "Check with a ruler: the line below should be 50 mm.",
+    "Ayarı sil (cihaz değerine dön)": "Delete calibration (use device value)",
+    "Geri": "Back",
+    "SAĞ GÖZ — sol gözünüzü kapatın": "RIGHT EYE — cover your left eye",
+    "SOL GÖZ — sağ gözünüzü kapatın": "LEFT EYE — cover your right eye",
+    "≈ 30 cm uzaktan ortadaki noktaya bakın; bozuk görünen karelere dokunun.": "From ≈ 30 cm look at the central dot; tap the squares that look abnormal.",
+    "Testi bırak": "Stop the test",
+    "Sayfa yakınlaştırılmış: kareler 5 mm değil. İki parmakla uzaklaştırın.": "The page is zoomed: the squares are not 5 mm. Pinch to zoom out.",
+    "Temizle": "Clear",
+    "Sol göze geç": "Go to the left eye",
+    "Sonucu göster": "Show the result",
+    "Sağ göz": "Right eye",
+    "Sol göz": "Left eye",
+    "Önceki test ({0}): ": "Previous test ({0}): ",
+    "Önceki teste göre yeni işaretli kare: sağ {0}, sol {1}.": "Newly marked squares since the previous test: right {0}, left {1}.",
+    "Tarih: {0}": "Date: {0}",
+    "Kişi: {0}": "Person: {0}",
+    "Olay: {0}": "Incident: {0}",
+    "Ekran ölçüsü: {0}": "Screen size: {0}",
+    "Sonuç bu cihazdaki test geçmişine kaydedildi.": "The result was saved to the test history on this device.",
+    "Sonuç kaydedilemedi (tarayıcı deposu kapalı); yazdırarak saklayın.": "The result could not be saved (browser storage unavailable); print it to keep it.",
+    "Bulgu var: göz hekimine başvurun": "Abnormal: see an eye doctor",
+    "Amsler testinde bulgu yok": "No abnormality on the Amsler test",
+    "Belirtiler": "Symptoms",
+    "Hemen (aynı gün) bir göz hekimine başvurun; retina muayenesi ve mümkünse OCT gerekir. Olayı lazer güvenlik sorumlusuna bildirin. Gözü ovuşturmayın, lazerle çalışmayı bırakın.": "See an eye doctor at once (the same day); a retinal examination and, if possible, OCT are needed. Report the incident to the laser safety officer. Do not rub the eye; stop working with lasers.",
+    "Bu sonuç hasarı dışlamaz. Maruziyet şüphesi varsa en kısa sürede (en geç 48 saat içinde) göz muayenesi yaptırın. Görme azalırsa ya da leke, ardıl görüntü sürerse hemen başvurun. Testi birkaç saat sonra tekrarlayın.": "This result does not rule out injury. If an exposure is suspected, have an eye examination as soon as possible (within 48 hours at the latest). Seek care at once if vision gets worse or a spot or after-image persists. Repeat the test a few hours later.",
+    "Kırmızı: bozuk, eksik ya da karanlık görülen kareler. Gri: bu ekranda test edilmeyen alan.": "Red: squares seen as distorted, missing or dark. Grey: area not tested on this screen.",
+    "Yeni test": "New test",
+    "Geçmiş testler": "Previous tests",
+    "Kayıtlı test yok.": "No saved tests.",
+    "Bulgu var": "Abnormal",
+    "Bulgu yok": "Normal",
+    "sağ {0} · sol {1} kare": "right {0} · left {1} squares",
+    "belirti": "symptoms",
+    "Kişi": "Person",
+    "Olay": "Incident",
+    "Sonuç": "Result",
+    "{0} test. Kayıtlar yalnız bu cihazda saklanır; belgelemek için sonucu yazdırın (PDF).": "{0} tests. Records are stored only on this device; print the result (PDF) for documentation.",
+    "Olay / lazer": "Incident / laser",
+    "Test koşulu": "Test conditions",
+    "Kare 5 mm, bakış mesafesi ≈ 30 cm (kare ≈ 1°); test edilen alan: sağ {0} × {1}, sol {2} × {3} kare; ekran ölçüsü: {4}": "Square 5 mm, viewing distance ≈ 30 cm (square ≈ 1°); area tested: right {0} × {1}, left {2} × {3} squares; screen size: {4}",
+    "Önceki test": "Previous test",
+    "yeni işaretli kare: sağ {0}, sol {1}": "newly marked squares: right {0}, left {1}",
+    "Bulgu var: hemen (aynı gün) göz hekimine başvurulmalı ve olay lazer güvenlik sorumlusuna bildirilmelidir.": "Abnormal: an eye doctor must be seen at once (the same day) and the incident reported to the laser safety officer.",
+    "Bulgu yok. Bu sonuç hasarı dışlamaz; maruziyet şüphesinde en geç 48 saat içinde göz muayenesi önerilir.": "Normal. This result does not rule out injury; after a suspected exposure an eye examination within 48 hours is recommended.",
+    "Kırmızı: bozuk, eksik ya da karanlık görülen kareler. Gri: bu ekranda test edilmeyen alan (standart ızgara 20 × 20 kare).": "Red: squares seen as distorted, missing or dark. Grey: area not tested on this screen (the standard grid has 20 × 20 squares).",
+    "Testi uygulayan": "Tested by",
+    "Lazer güvenlik sorumlusu": "Laser safety officer",
+    "Amsler Grid testi tanı koymaz; duyarlılığı sınırlıdır ve normal sonuç hasarı dışlamaz. Kaynaklar: Amsler M. Br J Ophthalmol 1953;37:521–537 · Crossland M, Rubin G. Br J Ophthalmol 2007;91:391–393 · Sakaguchi H ve ark. Am J Ophthalmol 2000;130:355–356.": "The Amsler grid test is not a diagnosis; its sensitivity is limited and a normal result does not rule out injury. References: Amsler M. Br J Ophthalmol 1953;37:521–537 · Crossland M, Rubin G. Br J Ophthalmol 2007;91:391–393 · Sakaguchi H et al. Am J Ophthalmol 2000;130:355–356.",
+    "Yazılım: Lazer Emniyet Analizi{0}.": "Software: Laser Safety Analysis{0}.",
+    "Standart ızgara: 10 cm × 10 cm, 20 × 20 kare, kare 5 mm": "Standard grid: 10 cm × 10 cm, 20 × 20 squares of 5 mm",
+    "Yazdırırken ölçeği %100 (gerçek boyut) seçin: ızgaranın kenarı 10 cm, yukarıdaki çizgi 5 cm olmalıdır.": "Print at 100% scale (actual size): the side of the grid must be 10 cm and the line above 5 cm.",
+    "Gözlük ya da lens kullanıyorsanız takın; ortam iyi aydınlatılmış olsun.": "Wear your reading glasses or contact lenses if you use them; make sure the room is well lit.",
+    "Kâğıdı gözünüzden yaklaşık 30 cm uzakta tutun.": "Hold the sheet about 30 cm from your eye.",
+    "Bozuk görünen yerleri kalemle işaretleyin, sonra diğer gözü test edin. Bulgu varsa hemen göz hekimine başvurun.": "Mark any abnormal areas with a pen, then test the other eye. If anything is abnormal, see an eye doctor at once.",
+    "Test kaydedildi.": "Test saved.",
+    "Amsler ızgarası (10 × 10 cm)": "Amsler grid (10 × 10 cm)",
+    "Ekran ölçüsü kaydedildi.": "Screen size saved.",
+    "Amsler testi - {0}": "Amsler test - {0}",
+    "{0} tarihli test silinsin mi? Bu işlem geri alınamaz.": "Delete the test of {0}? This cannot be undone.",
+    "Ölçek: {0} CSS piksel/mm": "Scale: {0} CSS px/mm",
+    "{0} kare işaretli": "{0} squares marked",
+    "İşaret yok": "No marks",
   });
 })(typeof globalThis !== 'undefined' ? globalThis : this);
 
@@ -5062,9 +5352,10 @@ mercek ve fiber çıkışı tehlikeleri. İnternet bağlantısı gerektirmez; ve
   bilimsel gösterim için <span class="mono">1e-9</span> ya da <span class="mono">2×10^-4</span> kullanabilirsiniz. Her alanın altındaki gri satır,
   girdinin nasıl yorumlandığını gösterir — lütfen kontrol edin.</li>
   <li><b>Işın</b>: çap ve ıraksamayı üretici verisindeki ölçütle (çoğunlukla 1/e²) girin; program 1/e'ye çevirir.</li>
-  <li>Sonuçlar anında güncellenir. <b>Kaydet</b> ile envantere ekleyin, <b>Rapor</b> ile yazdırılabilir rapor (PDF) alın.</li>
+  <li>Sonuçlar anında güncellenir. Sol üstteki <b>☰</b> menüsünde <b>Yeni analiz</b>, <b>Örnekler</b>, <b>Envantere kaydet</b> (Ctrl+S),
+  <b>Envanter</b>, yazdırılabilir <b>Rapor</b> (PDF) ve <b>Amsler Grid testi</b> bulunur. Sağ üstteki <b>⋮</b> menüsünde Yardım, Ayarlar ve Hakkında vardır.</li>
   <li>Ekran sade kalsın diye açıklamalar gizlidir: alanın yanındaki <span class="mono">i</span> düğmesine ya da sonuçların altındaki <b>Açıklama</b>
-  satırına dokunun (Ayarlar → Açıklamalar → Her zaman ile hepsi görünür).</li>
+  satırına dokunun (⋮ → Ayarlar → Açıklamalar → Her zaman ile hepsi görünür).</li>
 </ol>
 
 <h3>Mesafe–OD grafiğini okuma</h3>
@@ -5144,6 +5435,18 @@ seviyeleri (+1). Standart (paysız) sonuçlar değişmez.</p>
   yaygın yansıma sonuçlarıyla birebir karşılaştırıldı.</li>
 </ul>
 
+<h3>Amsler Grid testi</h3>
+<ul>
+  <li>Lazer maruziyeti şüphesinde merkezi görmeyi her göz için ayrı ayrı yoklayan hızlı saha testidir (☰ → Amsler Grid testi).
+  Kareler gerçek 5 mm çizilir; telefon ≈ 30 cm uzakta tutulunca her kare ≈ 1°'dir (Amsler 1953: 10 × 10 cm, 20 × 20 kare).</li>
+  <li>Ekran ölçüsü Android'in bildirdiği piksel yoğunluğundan alınır; bir banka ya da kimlik kartıyla (85,60 × 53,98 mm) doğrulanabilir.
+  Tarayıcıda kart ayarı yapılmadan kareler 5 mm olmayabilir.</li>
+  <li>Bozuk, eksik ya da karanlık görülen karelere dokunularak işaretlenir. İşaret ya da belirti varsa sonuç "bulgu var"dır: aynı gün göz hekimine
+  başvurulmalı ve olay lazer güvenlik sorumlusuna bildirilmelidir.</li>
+  <li>Normal sonuç hasarı dışlamaz (duyarlılık sınırlı; Crossland ve Rubin 2007). Sonuçlar bu cihazda saklanır, aynı kişinin önceki testiyle karşılaştırılır
+  ve PDF olarak yazdırılabilir. Gerçek boyutlu kâğıt ızgara da yazdırılabilir.</li>
+</ul>
+
 <h3>Kapsam dışı</h3>
 <ul>
   <li>Lazer sınıflandırması (AEL hesabı), çoklu dalga boyu toplama, taramalı ışınlar, darbe grupları (burst), aynasal yansıma geometrisi.</li>
@@ -5164,9 +5467,10 @@ lens and fibre output hazards. It needs no internet connection; data are stored 
   <span class="mono">1e-9</span> or <span class="mono">2×10^-4</span> for scientific notation. The grey line under each field shows
   how the input was interpreted — please check it.</li>
   <li><b>Beam</b>: enter the diameter and divergence in the definition used by the manufacturer (usually 1/e²); the program converts to 1/e.</li>
-  <li>Results update immediately. <b>Save</b> adds the analysis to the inventory, <b>Report</b> gives a printable report (PDF).</li>
+  <li>Results update immediately. The <b>☰</b> menu at the top left holds <b>New analysis</b>, <b>Examples</b>, <b>Save to inventory</b> (Ctrl+S),
+  <b>Inventory</b>, the printable <b>Report</b> (PDF) and the <b>Amsler grid test</b>. The <b>⋮</b> menu at the top right holds Help, Settings and About.</li>
   <li>Explanations are hidden to keep the screen calm: tap <span class="mono">i</span> next to a field or <b>Explanation</b> under a result to show them
-  (Settings → Explanations → Always to show all).</li>
+  (⋮ → Settings → Explanations → Always to show all).</li>
 </ol>
 
 <h3>Reading the distance–OD chart</h3>
@@ -5243,6 +5547,18 @@ levels (+1). The standard results without margin are unchanged.</p>
   from 2010 (ANSI Z136.1-2007 ≈ ICNIRP 2000).</li>
 </ul>
 
+<h3>Amsler grid test</h3>
+<ul>
+  <li>A quick field test of the central vision of each eye after a suspected laser exposure (☰ → Amsler grid test).
+  The squares are drawn 5 mm wide; with the phone held ≈ 30 cm away each square subtends ≈ 1° (Amsler 1953: 10 × 10 cm, 20 × 20 squares).</li>
+  <li>The screen size comes from the pixel density reported by Android and can be checked with a bank or ID card (85.60 × 53.98 mm).
+  In a browser the squares may not be 5 mm until the card calibration is done.</li>
+  <li>Squares seen as distorted, missing or dark are marked by tapping. Any mark or symptom makes the result abnormal: an eye doctor must be seen
+  the same day and the incident reported to the laser safety officer.</li>
+  <li>A normal result does not rule out injury (limited sensitivity; Crossland and Rubin 2007). Results are stored on this device, compared with the same
+  person's previous test and can be printed as PDF. An actual-size paper grid can be printed as well.</li>
+</ul>
+
 <h3>Out of scope</h3>
 <ul>
   <li>Laser classification (AEL), multi-wavelength summation, scanning beams, pulse bursts, specular reflection geometry.</li>
@@ -5252,6 +5568,1587 @@ levels (+1). The standard results without margin are unchanged.</p>
   }
 
   LE.help = { html };
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+</script>
+  <script>/* js/ui/license.js */
+/*
+ * Lazer Emniyet — GNU Genel Kamu Lisansı, sürüm 3 (tam metin; Hakkında penceresinde gösterilir).
+ * Kaynak: LICENSE dosyası (test/about.test.js iki metnin aynı olduğunu denetler).
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+(function (root) {
+  "use strict";
+  const LE = (root.LE = root.LE || {});
+  LE.LICENSE_TEXT = [
+    "                    GNU GENERAL PUBLIC LICENSE",
+    "                       Version 3, 29 June 2007",
+    "",
+    " Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>",
+    " Everyone is permitted to copy and distribute verbatim copies",
+    " of this license document, but changing it is not allowed.",
+    "",
+    "                            Preamble",
+    "",
+    "  The GNU General Public License is a free, copyleft license for",
+    "software and other kinds of works.",
+    "",
+    "  The licenses for most software and other practical works are designed",
+    "to take away your freedom to share and change the works.  By contrast,",
+    "the GNU General Public License is intended to guarantee your freedom to",
+    "share and change all versions of a program--to make sure it remains free",
+    "software for all its users.  We, the Free Software Foundation, use the",
+    "GNU General Public License for most of our software; it applies also to",
+    "any other work released this way by its authors.  You can apply it to",
+    "your programs, too.",
+    "",
+    "  When we speak of free software, we are referring to freedom, not",
+    "price.  Our General Public Licenses are designed to make sure that you",
+    "have the freedom to distribute copies of free software (and charge for",
+    "them if you wish), that you receive source code or can get it if you",
+    "want it, that you can change the software or use pieces of it in new",
+    "free programs, and that you know you can do these things.",
+    "",
+    "  To protect your rights, we need to prevent others from denying you",
+    "these rights or asking you to surrender the rights.  Therefore, you have",
+    "certain responsibilities if you distribute copies of the software, or if",
+    "you modify it: responsibilities to respect the freedom of others.",
+    "",
+    "  For example, if you distribute copies of such a program, whether",
+    "gratis or for a fee, you must pass on to the recipients the same",
+    "freedoms that you received.  You must make sure that they, too, receive",
+    "or can get the source code.  And you must show them these terms so they",
+    "know their rights.",
+    "",
+    "  Developers that use the GNU GPL protect your rights with two steps:",
+    "(1) assert copyright on the software, and (2) offer you this License",
+    "giving you legal permission to copy, distribute and/or modify it.",
+    "",
+    "  For the developers' and authors' protection, the GPL clearly explains",
+    "that there is no warranty for this free software.  For both users' and",
+    "authors' sake, the GPL requires that modified versions be marked as",
+    "changed, so that their problems will not be attributed erroneously to",
+    "authors of previous versions.",
+    "",
+    "  Some devices are designed to deny users access to install or run",
+    "modified versions of the software inside them, although the manufacturer",
+    "can do so.  This is fundamentally incompatible with the aim of",
+    "protecting users' freedom to change the software.  The systematic",
+    "pattern of such abuse occurs in the area of products for individuals to",
+    "use, which is precisely where it is most unacceptable.  Therefore, we",
+    "have designed this version of the GPL to prohibit the practice for those",
+    "products.  If such problems arise substantially in other domains, we",
+    "stand ready to extend this provision to those domains in future versions",
+    "of the GPL, as needed to protect the freedom of users.",
+    "",
+    "  Finally, every program is threatened constantly by software patents.",
+    "States should not allow patents to restrict development and use of",
+    "software on general-purpose computers, but in those that do, we wish to",
+    "avoid the special danger that patents applied to a free program could",
+    "make it effectively proprietary.  To prevent this, the GPL assures that",
+    "patents cannot be used to render the program non-free.",
+    "",
+    "  The precise terms and conditions for copying, distribution and",
+    "modification follow.",
+    "",
+    "                       TERMS AND CONDITIONS",
+    "",
+    "  0. Definitions.",
+    "",
+    "  \"This License\" refers to version 3 of the GNU General Public License.",
+    "",
+    "  \"Copyright\" also means copyright-like laws that apply to other kinds of",
+    "works, such as semiconductor masks.",
+    "",
+    "  \"The Program\" refers to any copyrightable work licensed under this",
+    "License.  Each licensee is addressed as \"you\".  \"Licensees\" and",
+    "\"recipients\" may be individuals or organizations.",
+    "",
+    "  To \"modify\" a work means to copy from or adapt all or part of the work",
+    "in a fashion requiring copyright permission, other than the making of an",
+    "exact copy.  The resulting work is called a \"modified version\" of the",
+    "earlier work or a work \"based on\" the earlier work.",
+    "",
+    "  A \"covered work\" means either the unmodified Program or a work based",
+    "on the Program.",
+    "",
+    "  To \"propagate\" a work means to do anything with it that, without",
+    "permission, would make you directly or secondarily liable for",
+    "infringement under applicable copyright law, except executing it on a",
+    "computer or modifying a private copy.  Propagation includes copying,",
+    "distribution (with or without modification), making available to the",
+    "public, and in some countries other activities as well.",
+    "",
+    "  To \"convey\" a work means any kind of propagation that enables other",
+    "parties to make or receive copies.  Mere interaction with a user through",
+    "a computer network, with no transfer of a copy, is not conveying.",
+    "",
+    "  An interactive user interface displays \"Appropriate Legal Notices\"",
+    "to the extent that it includes a convenient and prominently visible",
+    "feature that (1) displays an appropriate copyright notice, and (2)",
+    "tells the user that there is no warranty for the work (except to the",
+    "extent that warranties are provided), that licensees may convey the",
+    "work under this License, and how to view a copy of this License.  If",
+    "the interface presents a list of user commands or options, such as a",
+    "menu, a prominent item in the list meets this criterion.",
+    "",
+    "  1. Source Code.",
+    "",
+    "  The \"source code\" for a work means the preferred form of the work",
+    "for making modifications to it.  \"Object code\" means any non-source",
+    "form of a work.",
+    "",
+    "  A \"Standard Interface\" means an interface that either is an official",
+    "standard defined by a recognized standards body, or, in the case of",
+    "interfaces specified for a particular programming language, one that",
+    "is widely used among developers working in that language.",
+    "",
+    "  The \"System Libraries\" of an executable work include anything, other",
+    "than the work as a whole, that (a) is included in the normal form of",
+    "packaging a Major Component, but which is not part of that Major",
+    "Component, and (b) serves only to enable use of the work with that",
+    "Major Component, or to implement a Standard Interface for which an",
+    "implementation is available to the public in source code form.  A",
+    "\"Major Component\", in this context, means a major essential component",
+    "(kernel, window system, and so on) of the specific operating system",
+    "(if any) on which the executable work runs, or a compiler used to",
+    "produce the work, or an object code interpreter used to run it.",
+    "",
+    "  The \"Corresponding Source\" for a work in object code form means all",
+    "the source code needed to generate, install, and (for an executable",
+    "work) run the object code and to modify the work, including scripts to",
+    "control those activities.  However, it does not include the work's",
+    "System Libraries, or general-purpose tools or generally available free",
+    "programs which are used unmodified in performing those activities but",
+    "which are not part of the work.  For example, Corresponding Source",
+    "includes interface definition files associated with source files for",
+    "the work, and the source code for shared libraries and dynamically",
+    "linked subprograms that the work is specifically designed to require,",
+    "such as by intimate data communication or control flow between those",
+    "subprograms and other parts of the work.",
+    "",
+    "  The Corresponding Source need not include anything that users",
+    "can regenerate automatically from other parts of the Corresponding",
+    "Source.",
+    "",
+    "  The Corresponding Source for a work in source code form is that",
+    "same work.",
+    "",
+    "  2. Basic Permissions.",
+    "",
+    "  All rights granted under this License are granted for the term of",
+    "copyright on the Program, and are irrevocable provided the stated",
+    "conditions are met.  This License explicitly affirms your unlimited",
+    "permission to run the unmodified Program.  The output from running a",
+    "covered work is covered by this License only if the output, given its",
+    "content, constitutes a covered work.  This License acknowledges your",
+    "rights of fair use or other equivalent, as provided by copyright law.",
+    "",
+    "  You may make, run and propagate covered works that you do not",
+    "convey, without conditions so long as your license otherwise remains",
+    "in force.  You may convey covered works to others for the sole purpose",
+    "of having them make modifications exclusively for you, or provide you",
+    "with facilities for running those works, provided that you comply with",
+    "the terms of this License in conveying all material for which you do",
+    "not control copyright.  Those thus making or running the covered works",
+    "for you must do so exclusively on your behalf, under your direction",
+    "and control, on terms that prohibit them from making any copies of",
+    "your copyrighted material outside their relationship with you.",
+    "",
+    "  Conveying under any other circumstances is permitted solely under",
+    "the conditions stated below.  Sublicensing is not allowed; section 10",
+    "makes it unnecessary.",
+    "",
+    "  3. Protecting Users' Legal Rights From Anti-Circumvention Law.",
+    "",
+    "  No covered work shall be deemed part of an effective technological",
+    "measure under any applicable law fulfilling obligations under article",
+    "11 of the WIPO copyright treaty adopted on 20 December 1996, or",
+    "similar laws prohibiting or restricting circumvention of such",
+    "measures.",
+    "",
+    "  When you convey a covered work, you waive any legal power to forbid",
+    "circumvention of technological measures to the extent such circumvention",
+    "is effected by exercising rights under this License with respect to",
+    "the covered work, and you disclaim any intention to limit operation or",
+    "modification of the work as a means of enforcing, against the work's",
+    "users, your or third parties' legal rights to forbid circumvention of",
+    "technological measures.",
+    "",
+    "  4. Conveying Verbatim Copies.",
+    "",
+    "  You may convey verbatim copies of the Program's source code as you",
+    "receive it, in any medium, provided that you conspicuously and",
+    "appropriately publish on each copy an appropriate copyright notice;",
+    "keep intact all notices stating that this License and any",
+    "non-permissive terms added in accord with section 7 apply to the code;",
+    "keep intact all notices of the absence of any warranty; and give all",
+    "recipients a copy of this License along with the Program.",
+    "",
+    "  You may charge any price or no price for each copy that you convey,",
+    "and you may offer support or warranty protection for a fee.",
+    "",
+    "  5. Conveying Modified Source Versions.",
+    "",
+    "  You may convey a work based on the Program, or the modifications to",
+    "produce it from the Program, in the form of source code under the",
+    "terms of section 4, provided that you also meet all of these conditions:",
+    "",
+    "    a) The work must carry prominent notices stating that you modified",
+    "    it, and giving a relevant date.",
+    "",
+    "    b) The work must carry prominent notices stating that it is",
+    "    released under this License and any conditions added under section",
+    "    7.  This requirement modifies the requirement in section 4 to",
+    "    \"keep intact all notices\".",
+    "",
+    "    c) You must license the entire work, as a whole, under this",
+    "    License to anyone who comes into possession of a copy.  This",
+    "    License will therefore apply, along with any applicable section 7",
+    "    additional terms, to the whole of the work, and all its parts,",
+    "    regardless of how they are packaged.  This License gives no",
+    "    permission to license the work in any other way, but it does not",
+    "    invalidate such permission if you have separately received it.",
+    "",
+    "    d) If the work has interactive user interfaces, each must display",
+    "    Appropriate Legal Notices; however, if the Program has interactive",
+    "    interfaces that do not display Appropriate Legal Notices, your",
+    "    work need not make them do so.",
+    "",
+    "  A compilation of a covered work with other separate and independent",
+    "works, which are not by their nature extensions of the covered work,",
+    "and which are not combined with it such as to form a larger program,",
+    "in or on a volume of a storage or distribution medium, is called an",
+    "\"aggregate\" if the compilation and its resulting copyright are not",
+    "used to limit the access or legal rights of the compilation's users",
+    "beyond what the individual works permit.  Inclusion of a covered work",
+    "in an aggregate does not cause this License to apply to the other",
+    "parts of the aggregate.",
+    "",
+    "  6. Conveying Non-Source Forms.",
+    "",
+    "  You may convey a covered work in object code form under the terms",
+    "of sections 4 and 5, provided that you also convey the",
+    "machine-readable Corresponding Source under the terms of this License,",
+    "in one of these ways:",
+    "",
+    "    a) Convey the object code in, or embodied in, a physical product",
+    "    (including a physical distribution medium), accompanied by the",
+    "    Corresponding Source fixed on a durable physical medium",
+    "    customarily used for software interchange.",
+    "",
+    "    b) Convey the object code in, or embodied in, a physical product",
+    "    (including a physical distribution medium), accompanied by a",
+    "    written offer, valid for at least three years and valid for as",
+    "    long as you offer spare parts or customer support for that product",
+    "    model, to give anyone who possesses the object code either (1) a",
+    "    copy of the Corresponding Source for all the software in the",
+    "    product that is covered by this License, on a durable physical",
+    "    medium customarily used for software interchange, for a price no",
+    "    more than your reasonable cost of physically performing this",
+    "    conveying of source, or (2) access to copy the",
+    "    Corresponding Source from a network server at no charge.",
+    "",
+    "    c) Convey individual copies of the object code with a copy of the",
+    "    written offer to provide the Corresponding Source.  This",
+    "    alternative is allowed only occasionally and noncommercially, and",
+    "    only if you received the object code with such an offer, in accord",
+    "    with subsection 6b.",
+    "",
+    "    d) Convey the object code by offering access from a designated",
+    "    place (gratis or for a charge), and offer equivalent access to the",
+    "    Corresponding Source in the same way through the same place at no",
+    "    further charge.  You need not require recipients to copy the",
+    "    Corresponding Source along with the object code.  If the place to",
+    "    copy the object code is a network server, the Corresponding Source",
+    "    may be on a different server (operated by you or a third party)",
+    "    that supports equivalent copying facilities, provided you maintain",
+    "    clear directions next to the object code saying where to find the",
+    "    Corresponding Source.  Regardless of what server hosts the",
+    "    Corresponding Source, you remain obligated to ensure that it is",
+    "    available for as long as needed to satisfy these requirements.",
+    "",
+    "    e) Convey the object code using peer-to-peer transmission, provided",
+    "    you inform other peers where the object code and Corresponding",
+    "    Source of the work are being offered to the general public at no",
+    "    charge under subsection 6d.",
+    "",
+    "  A separable portion of the object code, whose source code is excluded",
+    "from the Corresponding Source as a System Library, need not be",
+    "included in conveying the object code work.",
+    "",
+    "  A \"User Product\" is either (1) a \"consumer product\", which means any",
+    "tangible personal property which is normally used for personal, family,",
+    "or household purposes, or (2) anything designed or sold for incorporation",
+    "into a dwelling.  In determining whether a product is a consumer product,",
+    "doubtful cases shall be resolved in favor of coverage.  For a particular",
+    "product received by a particular user, \"normally used\" refers to a",
+    "typical or common use of that class of product, regardless of the status",
+    "of the particular user or of the way in which the particular user",
+    "actually uses, or expects or is expected to use, the product.  A product",
+    "is a consumer product regardless of whether the product has substantial",
+    "commercial, industrial or non-consumer uses, unless such uses represent",
+    "the only significant mode of use of the product.",
+    "",
+    "  \"Installation Information\" for a User Product means any methods,",
+    "procedures, authorization keys, or other information required to install",
+    "and execute modified versions of a covered work in that User Product from",
+    "a modified version of its Corresponding Source.  The information must",
+    "suffice to ensure that the continued functioning of the modified object",
+    "code is in no case prevented or interfered with solely because",
+    "modification has been made.",
+    "",
+    "  If you convey an object code work under this section in, or with, or",
+    "specifically for use in, a User Product, and the conveying occurs as",
+    "part of a transaction in which the right of possession and use of the",
+    "User Product is transferred to the recipient in perpetuity or for a",
+    "fixed term (regardless of how the transaction is characterized), the",
+    "Corresponding Source conveyed under this section must be accompanied",
+    "by the Installation Information.  But this requirement does not apply",
+    "if neither you nor any third party retains the ability to install",
+    "modified object code on the User Product (for example, the work has",
+    "been installed in ROM).",
+    "",
+    "  The requirement to provide Installation Information does not include a",
+    "requirement to continue to provide support service, warranty, or updates",
+    "for a work that has been modified or installed by the recipient, or for",
+    "the User Product in which it has been modified or installed.  Access to a",
+    "network may be denied when the modification itself materially and",
+    "adversely affects the operation of the network or violates the rules and",
+    "protocols for communication across the network.",
+    "",
+    "  Corresponding Source conveyed, and Installation Information provided,",
+    "in accord with this section must be in a format that is publicly",
+    "documented (and with an implementation available to the public in",
+    "source code form), and must require no special password or key for",
+    "unpacking, reading or copying.",
+    "",
+    "  7. Additional Terms.",
+    "",
+    "  \"Additional permissions\" are terms that supplement the terms of this",
+    "License by making exceptions from one or more of its conditions.",
+    "Additional permissions that are applicable to the entire Program shall",
+    "be treated as though they were included in this License, to the extent",
+    "that they are valid under applicable law.  If additional permissions",
+    "apply only to part of the Program, that part may be used separately",
+    "under those permissions, but the entire Program remains governed by",
+    "this License without regard to the additional permissions.",
+    "",
+    "  When you convey a copy of a covered work, you may at your option",
+    "remove any additional permissions from that copy, or from any part of",
+    "it.  (Additional permissions may be written to require their own",
+    "removal in certain cases when you modify the work.)  You may place",
+    "additional permissions on material, added by you to a covered work,",
+    "for which you have or can give appropriate copyright permission.",
+    "",
+    "  Notwithstanding any other provision of this License, for material you",
+    "add to a covered work, you may (if authorized by the copyright holders of",
+    "that material) supplement the terms of this License with terms:",
+    "",
+    "    a) Disclaiming warranty or limiting liability differently from the",
+    "    terms of sections 15 and 16 of this License; or",
+    "",
+    "    b) Requiring preservation of specified reasonable legal notices or",
+    "    author attributions in that material or in the Appropriate Legal",
+    "    Notices displayed by works containing it; or",
+    "",
+    "    c) Prohibiting misrepresentation of the origin of that material, or",
+    "    requiring that modified versions of such material be marked in",
+    "    reasonable ways as different from the original version; or",
+    "",
+    "    d) Limiting the use for publicity purposes of names of licensors or",
+    "    authors of the material; or",
+    "",
+    "    e) Declining to grant rights under trademark law for use of some",
+    "    trade names, trademarks, or service marks; or",
+    "",
+    "    f) Requiring indemnification of licensors and authors of that",
+    "    material by anyone who conveys the material (or modified versions of",
+    "    it) with contractual assumptions of liability to the recipient, for",
+    "    any liability that these contractual assumptions directly impose on",
+    "    those licensors and authors.",
+    "",
+    "  All other non-permissive additional terms are considered \"further",
+    "restrictions\" within the meaning of section 10.  If the Program as you",
+    "received it, or any part of it, contains a notice stating that it is",
+    "governed by this License along with a term that is a further",
+    "restriction, you may remove that term.  If a license document contains",
+    "a further restriction but permits relicensing or conveying under this",
+    "License, you may add to a covered work material governed by the terms",
+    "of that license document, provided that the further restriction does",
+    "not survive such relicensing or conveying.",
+    "",
+    "  If you add terms to a covered work in accord with this section, you",
+    "must place, in the relevant source files, a statement of the",
+    "additional terms that apply to those files, or a notice indicating",
+    "where to find the applicable terms.",
+    "",
+    "  Additional terms, permissive or non-permissive, may be stated in the",
+    "form of a separately written license, or stated as exceptions;",
+    "the above requirements apply either way.",
+    "",
+    "  8. Termination.",
+    "",
+    "  You may not propagate or modify a covered work except as expressly",
+    "provided under this License.  Any attempt otherwise to propagate or",
+    "modify it is void, and will automatically terminate your rights under",
+    "this License (including any patent licenses granted under the third",
+    "paragraph of section 11).",
+    "",
+    "  However, if you cease all violation of this License, then your",
+    "license from a particular copyright holder is reinstated (a)",
+    "provisionally, unless and until the copyright holder explicitly and",
+    "finally terminates your license, and (b) permanently, if the copyright",
+    "holder fails to notify you of the violation by some reasonable means",
+    "prior to 60 days after the cessation.",
+    "",
+    "  Moreover, your license from a particular copyright holder is",
+    "reinstated permanently if the copyright holder notifies you of the",
+    "violation by some reasonable means, this is the first time you have",
+    "received notice of violation of this License (for any work) from that",
+    "copyright holder, and you cure the violation prior to 30 days after",
+    "your receipt of the notice.",
+    "",
+    "  Termination of your rights under this section does not terminate the",
+    "licenses of parties who have received copies or rights from you under",
+    "this License.  If your rights have been terminated and not permanently",
+    "reinstated, you do not qualify to receive new licenses for the same",
+    "material under section 10.",
+    "",
+    "  9. Acceptance Not Required for Having Copies.",
+    "",
+    "  You are not required to accept this License in order to receive or",
+    "run a copy of the Program.  Ancillary propagation of a covered work",
+    "occurring solely as a consequence of using peer-to-peer transmission",
+    "to receive a copy likewise does not require acceptance.  However,",
+    "nothing other than this License grants you permission to propagate or",
+    "modify any covered work.  These actions infringe copyright if you do",
+    "not accept this License.  Therefore, by modifying or propagating a",
+    "covered work, you indicate your acceptance of this License to do so.",
+    "",
+    "  10. Automatic Licensing of Downstream Recipients.",
+    "",
+    "  Each time you convey a covered work, the recipient automatically",
+    "receives a license from the original licensors, to run, modify and",
+    "propagate that work, subject to this License.  You are not responsible",
+    "for enforcing compliance by third parties with this License.",
+    "",
+    "  An \"entity transaction\" is a transaction transferring control of an",
+    "organization, or substantially all assets of one, or subdividing an",
+    "organization, or merging organizations.  If propagation of a covered",
+    "work results from an entity transaction, each party to that",
+    "transaction who receives a copy of the work also receives whatever",
+    "licenses to the work the party's predecessor in interest had or could",
+    "give under the previous paragraph, plus a right to possession of the",
+    "Corresponding Source of the work from the predecessor in interest, if",
+    "the predecessor has it or can get it with reasonable efforts.",
+    "",
+    "  You may not impose any further restrictions on the exercise of the",
+    "rights granted or affirmed under this License.  For example, you may",
+    "not impose a license fee, royalty, or other charge for exercise of",
+    "rights granted under this License, and you may not initiate litigation",
+    "(including a cross-claim or counterclaim in a lawsuit) alleging that",
+    "any patent claim is infringed by making, using, selling, offering for",
+    "sale, or importing the Program or any portion of it.",
+    "",
+    "  11. Patents.",
+    "",
+    "  A \"contributor\" is a copyright holder who authorizes use under this",
+    "License of the Program or a work on which the Program is based.  The",
+    "work thus licensed is called the contributor's \"contributor version\".",
+    "",
+    "  A contributor's \"essential patent claims\" are all patent claims",
+    "owned or controlled by the contributor, whether already acquired or",
+    "hereafter acquired, that would be infringed by some manner, permitted",
+    "by this License, of making, using, or selling its contributor version,",
+    "but do not include claims that would be infringed only as a",
+    "consequence of further modification of the contributor version.  For",
+    "purposes of this definition, \"control\" includes the right to grant",
+    "patent sublicenses in a manner consistent with the requirements of",
+    "this License.",
+    "",
+    "  Each contributor grants you a non-exclusive, worldwide, royalty-free",
+    "patent license under the contributor's essential patent claims, to",
+    "make, use, sell, offer for sale, import and otherwise run, modify and",
+    "propagate the contents of its contributor version.",
+    "",
+    "  In the following three paragraphs, a \"patent license\" is any express",
+    "agreement or commitment, however denominated, not to enforce a patent",
+    "(such as an express permission to practice a patent or covenant not to",
+    "sue for patent infringement).  To \"grant\" such a patent license to a",
+    "party means to make such an agreement or commitment not to enforce a",
+    "patent against the party.",
+    "",
+    "  If you convey a covered work, knowingly relying on a patent license,",
+    "and the Corresponding Source of the work is not available for anyone",
+    "to copy, free of charge and under the terms of this License, through a",
+    "publicly available network server or other readily accessible means,",
+    "then you must either (1) cause the Corresponding Source to be so",
+    "available, or (2) arrange to deprive yourself of the benefit of the",
+    "patent license for this particular work, or (3) arrange, in a manner",
+    "consistent with the requirements of this License, to extend the patent",
+    "license to downstream recipients.  \"Knowingly relying\" means you have",
+    "actual knowledge that, but for the patent license, your conveying the",
+    "covered work in a country, or your recipient's use of the covered work",
+    "in a country, would infringe one or more identifiable patents in that",
+    "country that you have reason to believe are valid.",
+    "",
+    "  If, pursuant to or in connection with a single transaction or",
+    "arrangement, you convey, or propagate by procuring conveyance of, a",
+    "covered work, and grant a patent license to some of the parties",
+    "receiving the covered work authorizing them to use, propagate, modify",
+    "or convey a specific copy of the covered work, then the patent license",
+    "you grant is automatically extended to all recipients of the covered",
+    "work and works based on it.",
+    "",
+    "  A patent license is \"discriminatory\" if it does not include within",
+    "the scope of its coverage, prohibits the exercise of, or is",
+    "conditioned on the non-exercise of one or more of the rights that are",
+    "specifically granted under this License.  You may not convey a covered",
+    "work if you are a party to an arrangement with a third party that is",
+    "in the business of distributing software, under which you make payment",
+    "to the third party based on the extent of your activity of conveying",
+    "the work, and under which the third party grants, to any of the",
+    "parties who would receive the covered work from you, a discriminatory",
+    "patent license (a) in connection with copies of the covered work",
+    "conveyed by you (or copies made from those copies), or (b) primarily",
+    "for and in connection with specific products or compilations that",
+    "contain the covered work, unless you entered into that arrangement,",
+    "or that patent license was granted, prior to 28 March 2007.",
+    "",
+    "  Nothing in this License shall be construed as excluding or limiting",
+    "any implied license or other defenses to infringement that may",
+    "otherwise be available to you under applicable patent law.",
+    "",
+    "  12. No Surrender of Others' Freedom.",
+    "",
+    "  If conditions are imposed on you (whether by court order, agreement or",
+    "otherwise) that contradict the conditions of this License, they do not",
+    "excuse you from the conditions of this License.  If you cannot convey a",
+    "covered work so as to satisfy simultaneously your obligations under this",
+    "License and any other pertinent obligations, then as a consequence you may",
+    "not convey it at all.  For example, if you agree to terms that obligate you",
+    "to collect a royalty for further conveying from those to whom you convey",
+    "the Program, the only way you could satisfy both those terms and this",
+    "License would be to refrain entirely from conveying the Program.",
+    "",
+    "  13. Use with the GNU Affero General Public License.",
+    "",
+    "  Notwithstanding any other provision of this License, you have",
+    "permission to link or combine any covered work with a work licensed",
+    "under version 3 of the GNU Affero General Public License into a single",
+    "combined work, and to convey the resulting work.  The terms of this",
+    "License will continue to apply to the part which is the covered work,",
+    "but the special requirements of the GNU Affero General Public License,",
+    "section 13, concerning interaction through a network will apply to the",
+    "combination as such.",
+    "",
+    "  14. Revised Versions of this License.",
+    "",
+    "  The Free Software Foundation may publish revised and/or new versions of",
+    "the GNU General Public License from time to time.  Such new versions will",
+    "be similar in spirit to the present version, but may differ in detail to",
+    "address new problems or concerns.",
+    "",
+    "  Each version is given a distinguishing version number.  If the",
+    "Program specifies that a certain numbered version of the GNU General",
+    "Public License \"or any later version\" applies to it, you have the",
+    "option of following the terms and conditions either of that numbered",
+    "version or of any later version published by the Free Software",
+    "Foundation.  If the Program does not specify a version number of the",
+    "GNU General Public License, you may choose any version ever published",
+    "by the Free Software Foundation.",
+    "",
+    "  If the Program specifies that a proxy can decide which future",
+    "versions of the GNU General Public License can be used, that proxy's",
+    "public statement of acceptance of a version permanently authorizes you",
+    "to choose that version for the Program.",
+    "",
+    "  Later license versions may give you additional or different",
+    "permissions.  However, no additional obligations are imposed on any",
+    "author or copyright holder as a result of your choosing to follow a",
+    "later version.",
+    "",
+    "  15. Disclaimer of Warranty.",
+    "",
+    "  THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY",
+    "APPLICABLE LAW.  EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT",
+    "HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM \"AS IS\" WITHOUT WARRANTY",
+    "OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO,",
+    "THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR",
+    "PURPOSE.  THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM",
+    "IS WITH YOU.  SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF",
+    "ALL NECESSARY SERVICING, REPAIR OR CORRECTION.",
+    "",
+    "  16. Limitation of Liability.",
+    "",
+    "  IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING",
+    "WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MODIFIES AND/OR CONVEYS",
+    "THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY",
+    "GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE",
+    "USE OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF",
+    "DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD",
+    "PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS),",
+    "EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF",
+    "SUCH DAMAGES.",
+    "",
+    "  17. Interpretation of Sections 15 and 16.",
+    "",
+    "  If the disclaimer of warranty and limitation of liability provided",
+    "above cannot be given local legal effect according to their terms,",
+    "reviewing courts shall apply local law that most closely approximates",
+    "an absolute waiver of all civil liability in connection with the",
+    "Program, unless a warranty or assumption of liability accompanies a",
+    "copy of the Program in return for a fee.",
+    "",
+    "                     END OF TERMS AND CONDITIONS",
+    "",
+    "            How to Apply These Terms to Your New Programs",
+    "",
+    "  If you develop a new program, and you want it to be of the greatest",
+    "possible use to the public, the best way to achieve this is to make it",
+    "free software which everyone can redistribute and change under these terms.",
+    "",
+    "  To do so, attach the following notices to the program.  It is safest",
+    "to attach them to the start of each source file to most effectively",
+    "state the exclusion of warranty; and each file should have at least",
+    "the \"copyright\" line and a pointer to where the full notice is found.",
+    "",
+    "    <one line to give the program's name and a brief idea of what it does.>",
+    "    Copyright (C) <year>  <name of author>",
+    "",
+    "    This program is free software: you can redistribute it and/or modify",
+    "    it under the terms of the GNU General Public License as published by",
+    "    the Free Software Foundation, either version 3 of the License, or",
+    "    (at your option) any later version.",
+    "",
+    "    This program is distributed in the hope that it will be useful,",
+    "    but WITHOUT ANY WARRANTY; without even the implied warranty of",
+    "    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the",
+    "    GNU General Public License for more details.",
+    "",
+    "    You should have received a copy of the GNU General Public License",
+    "    along with this program.  If not, see <https://www.gnu.org/licenses/>.",
+    "",
+    "Also add information on how to contact you by electronic and paper mail.",
+    "",
+    "  If the program does terminal interaction, make it output a short",
+    "notice like this when it starts in an interactive mode:",
+    "",
+    "    <program>  Copyright (C) <year>  <name of author>",
+    "    This program comes with ABSOLUTELY NO WARRANTY; for details type `show w'.",
+    "    This is free software, and you are welcome to redistribute it",
+    "    under certain conditions; type `show c' for details.",
+    "",
+    "The hypothetical commands `show w' and `show c' should show the appropriate",
+    "parts of the General Public License.  Of course, your program's commands",
+    "might be different; for a GUI interface, you would use an \"about box\".",
+    "",
+    "  You should also get your employer (if you work as a programmer) or school,",
+    "if any, to sign a \"copyright disclaimer\" for the program, if necessary.",
+    "For more information on this, and how to apply and follow the GNU GPL, see",
+    "<https://www.gnu.org/licenses/>.",
+    "",
+    "  The GNU General Public License does not permit incorporating your program",
+    "into proprietary programs.  If your program is a subroutine library, you",
+    "may consider it more useful to permit linking proprietary applications with",
+    "the library.  If this is what you want to do, use the GNU Lesser General",
+    "Public License instead of this License.  But first, please read",
+    "<https://www.gnu.org/licenses/why-not-lgpl.html>.",
+    "",
+  ].join("\n");
+})(typeof globalThis !== "undefined" ? globalThis : this);
+
+</script>
+  <script>/* js/ui/about.js */
+/*
+ * Lazer Emniyet — Hakkında: geliştirici, sürüm ve tarih, lisans (GNU GPL v3 ya da sonrası).
+ * Copyright © 2026 S.ÖCAL — SPDX-License-Identifier: GPL-3.0-or-later
+ */
+(function (root) {
+  'use strict';
+  const LE = (root.LE = root.LE || {});
+  const T = (s, ...a) => (LE.i18n ? LE.i18n.T(s, ...a) : s.replace(/\{(\d+)\}/g, (m, i) => a[i]));
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+  const COPYRIGHT_YEAR = '2026';
+  const LOGO = '<svg width="44" height="40" viewBox="0 0 64 58" aria-hidden="true"><path d="M32 3 61 55H3Z" fill="#ffd400" stroke="#111" stroke-width="4" stroke-linejoin="round"/><circle cx="32" cy="37" r="5" fill="#111"/><path d="M32 37 19 25M32 37l15-6M32 37l-2 12M32 37h-14" stroke="#111" stroke-width="3" stroke-linecap="round"/></svg>';
+
+  const isEn = () => !!(LE.i18n && LE.i18n.lang() === 'en');
+
+  /** '2026-11-16' → 16.11.2026 (Türkçe) / 2026-11-16 (İngilizce). */
+  function fmtDay(iso) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso || '');
+    if (!m) return '';
+    return isEn() ? m[1] + '-' + m[2] + '-' + m[3] : m[3] + '.' + m[2] + '.' + m[1];
+  }
+
+  /** ISO zaman damgası → yerel tarih ve saat. */
+  function fmtStamp(iso) {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    const p = (n) => String(n).padStart(2, '0');
+    return fmtDay(d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate())) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+  }
+
+  /** Android kabuğunun sürüm bilgisi (yalnız uygulamada). */
+  function androidInfo() {
+    const b = root.LazerAndroid;
+    if (!b || typeof b.appInfo !== 'function') return null;
+    try {
+      const o = JSON.parse(b.appInfo());
+      return o && typeof o === 'object' ? o : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function html(selftest) {
+    const st = selftest || { passed: 0, total: 0 };
+    const A = LE.analysis;
+    const author = LE.APP_AUTHOR || 'S.ÖCAL';
+    const rows = [
+      [T('Geliştirici'), '<b>' + esc(author) + '</b>'],
+      [T('Uygulama sürümü'), esc(LE.APP_VERSION || '—')],
+      [T('Sürüm tarihi'), esc(fmtDay(LE.APP_DATE) || '—')],
+      [T('Hesap motoru'), esc(A ? A.ENGINE_VERSION : '—')],
+      [T('Öz-denetim'), st.total ? esc(st.passed + '/' + st.total) + ' ' + (st.passed === st.total ? T('başarılı') : T('— BAŞARISIZ')) : '—'],
+      [T('Derleme'), LE.BUILD_TIME ? esc(fmtStamp(LE.BUILD_TIME)) : T('kaynak dosyalardan çalışıyor')],
+    ];
+    const info = androidInfo();
+    if (info) {
+      rows.push([T('Android uygulaması'), esc(String(info.versionName || '') + (info.versionCode ? ' (' + info.versionCode + ')' : ''))]);
+      rows.push([T('Cihaz'), esc([info.device, info.release ? 'Android ' + info.release + (info.sdk ? ' (API ' + info.sdk + ')' : '') : ''].filter(Boolean).join(' · '))]);
+      if (info.webview) rows.push(['WebView', esc(info.webview)]);
+    }
+    rows.push([T('Lisans'), 'GNU GPL v3+ (' + esc(LE.APP_LICENSE || 'GPL-3.0-or-later') + ')']);
+    return '<div class="about-head">' + LOGO + '<div><div class="about-name">' + T('Lazer Emniyet Analizi') + '</div>' +
+      '<div class="muted">' + T('Lazer tehlike analizi: MPE, NOHD, OD, EN 207 / EN 208 göz koruyucu seçimi ve Amsler Grid testi') + '</div></div></div>' +
+      '<table class="t about-t"><tbody>' + rows.map((r) => '<tr><th>' + r[0] + '</th><td>' + r[1] + '</td></tr>').join('') + '</tbody></table>' +
+      '<h3>' + T('Lisans') + '</h3>' +
+      '<p>Copyright © ' + COPYRIGHT_YEAR + ' ' + esc(author) + '</p>' +
+      '<p>' + T('Bu program özgür yazılımdır: Özgür Yazılım Vakfı (Free Software Foundation) tarafından yayımlanan GNU Genel Kamu Lisansı\'nın 3. sürümü ya da (seçiminize bağlı olarak) daha sonraki herhangi bir sürümü koşulları altında yeniden dağıtabilir ve/veya değiştirebilirsiniz.') + '</p>' +
+      '<p>' + T('Bu program yararlı olması umuduyla dağıtılmaktadır, ancak HİÇBİR GARANTİSİ YOKTUR; SATILABİLİRLİK ya da BELİRLİ BİR AMACA UYGUNLUK konusunda zımni garanti dahi verilmez. Ayrıntılar için GNU Genel Kamu Lisansı\'na bakın.') + '</p>' +
+      '<p class="muted">' + T('Kaynak kodu (HTML/JS dosyaları ve Android kabuğu) aynı lisansla dağıtılır. Lisansın bağlayıcı metni aşağıdaki İngilizce metindir.') + '</p>' +
+      '<details class="more" id="about-license"><summary>' + T('GNU Genel Kamu Lisansı, sürüm 3 — tam metin (İngilizce)') + '</summary><div class="license" lang="en"></div></details>' +
+      '<h3>' + T('Not') + '</h3>' +
+      '<p class="muted">' + T('Program harici kütüphane ve ağ bağlantısı kullanmaz; tüm hesaplar bu cihazda yapılır, kayıtlar bu cihazda saklanır. Sonuçlar girilen verilere dayanır ve yetkin bir lazer güvenlik sorumlusunun değerlendirmesinin yerine geçmez.') + '</p>';
+  }
+
+  /**
+   * Ekranda okunur biçim: 72 sütuna göre kırılmış satırlar paragraf içinde birleştirilir (dar ekranda satır ortasından
+   * kırılmasın). Metnin kendisi değişmez; LICENSE dosyasıyla aynı metin LE.LICENSE_TEXT'tedir.
+   */
+  function reflow(text) {
+    return String(text || '').split(/\n[ \t]*\n/).map((p) => p.replace(/[ \t]*\n[ \t]*/g, ' ').trim()).filter(Boolean).join('\n\n');
+  }
+
+  /** Lisans metni ilk açılışta doldurulur (35 kB metin başlangıçta DOM'a eklenmez). */
+  function attach(body) {
+    const d = body && body.querySelector('#about-license');
+    if (!d) return;
+    d.addEventListener('toggle', () => {
+      const box = d.querySelector('.license');
+      if (d.open && box && !box.textContent) box.textContent = reflow(LE.LICENSE_TEXT);
+    });
+  }
+
+  LE.about = { html, attach, reflow, fmtDay, androidInfo };
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+</script>
+  <script>/* js/ui/amsler.js */
+/*
+ * Lazer Emniyet — Amsler Grid testi (sahada hızlı ilk göz kontrolü)
+ * Copyright © 2026 S.ÖCAL — SPDX-License-Identifier: GPL-3.0-or-later
+ *
+ * Standart ızgara (Amsler M. Br J Ophthalmol 1953;37:521–537, DOI 10.1136/bjo.37.9.521): 10 cm × 10 cm,
+ * 20 × 20 kare, kare 5 mm; ~30 cm'den her kare ≈ 1°, toplam ≈ 20° merkezi görme alanı.
+ * Ekranda da kareler gerçek 5 mm çizilir: ölçek Android ekran bilgisinden (xdpi/ydpi) ya da bir banka/kimlik
+ * kartıyla (ID-1, 85,60 × 53,98 mm) yapılan ayardan gelir. Ekrana sığan çift sayıda kare gösterilir (merkez
+ * noktası bir kesişimde kalır), en çok 20 × 20.
+ * Lazer hasarı çoğunlukla merkezde kör nokta (skotom) yapar (Sakaguchi 2000, DOI 10.1016/s0002-9394(00)00547-x).
+ * Testin duyarlılığı sınırlıdır (Crossland ve Rubin 2007, DOI 10.1136/bjo.2006.095315): normal sonuç hasarı dışlamaz.
+ *
+ * Hesap, kayıt ve ekran metinleri DOM'suzdur (Node testleri); etkileşim yalnız tarayıcıda kurulur.
+ */
+(function (root) {
+  'use strict';
+  const LE = (root.LE = root.LE || {});
+  const T = (s, ...a) => (LE.i18n ? LE.i18n.T(s, ...a) : s.replace(/\{(\d+)\}/g, (m, i) => a[i]));
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+  const fmt = (v, d) => (LE.units ? LE.units.fmt(v, d) : String(Math.round(v)));
+  const pct = (f) => (LE.units ? LE.units.fmtPct(f, 2) : f * 100 + '%');
+  /** Sabit sayı metni: Türkçede ondalık virgül. */
+  const dec = (s) => (LE.i18n && LE.i18n.lang() === 'en' ? s : s.replace(/(\d)\.(\d)/g, '$1,$2'));
+
+  const CELL_MM = 5; // standart Amsler karesi
+  const DIST_MM = 300; // bakış mesafesi
+  const MAX_CELLS = 20; // 10 cm × 10 cm
+  const CENTER = 2; // merkez bölgesi: ±2 kare (≈ ±2°)
+  const CARD_MM = [85.6, 53.98]; // ISO/IEC 7810 ID-1: banka kartı, T.C. kimlik kartı
+  const CARD_R_MM = 3.18; // kart köşe yarıçapı
+  const CSS_PX_PER_MM = 96 / 25.4; // tarayıcının varsayımı (fiziksel değil)
+  const KEY_CAL = 'lazerEmniyet.amslerKalibrasyon.v1';
+  const KEY_HIST = 'lazerEmniyet.amsler.v1';
+  const MAX_HIST = 200;
+  const CELL_RE = /^-?\d+,-?\d+$/;
+
+  // ---------------------------------------------------------------------------
+  // Hesap (DOM'suz)
+  // ---------------------------------------------------------------------------
+
+  /** Kenarı cellMm olan karenin distMm uzaklıktan gördüğü açı (derece). */
+  function degPerCell(cellMm, distMm) {
+    return (2 * Math.atan(cellMm / 2 / distMm) * 180) / Math.PI;
+  }
+
+  /** Karenin tam 1° gördüğü mesafe (mm). */
+  function distanceForOneDegree(cellMm) {
+    return cellMm / 2 / Math.tan(Math.PI / 360);
+  }
+
+  /**
+   * Izgara yerleşimi: kullanılabilir alana (CSS px) gerçek 5 mm'lik kareler; merkez noktası bir kesişimde
+   * kalsın diye her yönde çift sayıda kare (en az 2, en çok 20).
+   * @param {number} wPx, hPx  kullanılabilir genişlik ve yükseklik (CSS px)
+   * @param {number} sx, sy    CSS px / mm (yatay, dikey)
+   */
+  function layout(wPx, hPx, sx, sy) {
+    const cw = CELL_MM * sx;
+    const ch = CELL_MM * (sy || sx);
+    const even = (n) => (Number.isFinite(n) ? Math.max(2, Math.min(MAX_CELLS, 2 * Math.floor(n / 2))) : 2);
+    const cols = even(Math.floor(wPx / cw + 1e-9));
+    const rows = even(Math.floor(hPx / ch + 1e-9));
+    const deg = degPerCell(CELL_MM, DIST_MM);
+    return { cols, rows, cw, ch, widthPx: cols * cw, heightPx: rows * ch, deg, degX: cols * deg, degY: rows * deg };
+  }
+
+  function store() {
+    try { return root.localStorage || null; } catch (e) { return null; }
+  }
+  function readJSON(key, def) {
+    try {
+      const s = store();
+      const v = s && s.getItem(key);
+      return v ? JSON.parse(v) : def;
+    } catch (e) {
+      return def;
+    }
+  }
+  function writeJSON(key, val) {
+    try {
+      const s = store();
+      if (!s) return false;
+      s.setItem(key, JSON.stringify(val));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function dpr() {
+    const d = Number(root.devicePixelRatio);
+    return d > 0 ? d : 1;
+  }
+
+  /** Android kabuğunun bildirdiği fiziksel ekran yoğunluğu; geçersizse null. */
+  function androidScreen() {
+    const b = root.LazerAndroid;
+    if (!b || typeof b.screenMetrics !== 'function') return null;
+    try {
+      const m = JSON.parse(b.screenMetrics());
+      if (!m || !(m.xdpi >= 100 && m.xdpi <= 1000 && m.ydpi >= 100 && m.ydpi <= 1000)) return null;
+      const diag = m.widthPixels > 0 && m.heightPixels > 0 ? Math.hypot(m.widthPixels / m.xdpi, m.heightPixels / m.ydpi) : NaN;
+      // bazı cihazlar yoğunluğu yanlış bildirir: eksenler uyuşmuyorsa ya da ekran köşegeni telefon/tablet
+      // aralığında değilse (3,5–14 inç) kartla doğrulama istenir
+      const suspect = Math.abs(m.xdpi / m.ydpi - 1) > 0.05 || !(diag >= 3.5 && diag <= 14);
+      return { m, diag, suspect };
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /**
+   * Ekran ölçeği (CSS px / mm). Öncelik: 1) kartla yapılan ayar, 2) Android ekran bilgisi, 3) tarayıcı varsayımı.
+   * @returns {{sx:number, sy:number, source:'card'|'android'|'none', dpi?:object, diag?:number, suspect?:boolean}}
+   */
+  function metrics() {
+    const r = dpr();
+    const cal = readJSON(KEY_CAL, null);
+    if (cal && cal.dpmm > 0.5 && cal.dpmm < 200) return { sx: cal.dpmm / r, sy: cal.dpmm / r, source: 'card', at: cal.at };
+    const a = androidScreen();
+    if (a) return { sx: a.m.xdpi / 25.4 / r, sy: a.m.ydpi / 25.4 / r, source: 'android', dpi: a.m, diag: a.diag, suspect: a.suspect };
+    return { sx: CSS_PX_PER_MM, sy: CSS_PX_PER_MM, source: 'none' };
+  }
+
+  /** Kartla ayar: CSS px/mm cihaz pikseli/mm olarak saklanır (tarayıcı yakınlaştırmasından bağımsız). */
+  function saveCalibration(sxCss) {
+    return writeJSON(KEY_CAL, { dpmm: sxCss * dpr(), at: new Date().toISOString() });
+  }
+  function clearCalibration() {
+    try { const s = store(); if (s) s.removeItem(KEY_CAL); } catch (e) { /* depo yok */ }
+  }
+
+  function validRecord(r) {
+    return !!(r && typeof r.id === 'string' && typeof r.at === 'string' && Array.isArray(r.R) && Array.isArray(r.L) &&
+      r.R.every((c) => CELL_RE.test(c)) && r.L.every((c) => CELL_RE.test(c)));
+  }
+
+  /** Test geçmişi, yeniden eskiye. Bozuk kayıtlar atlanır. */
+  function loadHistory() {
+    const a = readJSON(KEY_HIST, []);
+    if (!Array.isArray(a)) return [];
+    return a.filter(validRecord)
+      .map((r) => Object.assign({ person: '', event: '', sym: [], cols: { R: MAX_CELLS, L: MAX_CELLS }, rows: { R: MAX_CELLS, L: MAX_CELLS }, source: 'none' }, r))
+      .sort((x, y) => (x.at < y.at ? 1 : x.at > y.at ? -1 : 0));
+  }
+  function saveRecord(rec) {
+    const list = loadHistory().filter((r) => r.id !== rec.id);
+    list.unshift(rec);
+    return writeJSON(KEY_HIST, list.slice(0, MAX_HIST));
+  }
+  function removeRecord(id) {
+    return writeJSON(KEY_HIST, loadHistory().filter((r) => r.id !== id));
+  }
+
+  function cellXY(c) {
+    const [x, y] = c.split(',').map(Number);
+    return [x, y];
+  }
+
+  /** Göz sonucu: işaretli kare sayısı; merkezdeki ±2 kare (≈ ±2°) tutulmuş mu. */
+  function eyeSummary(cells) {
+    const central = cells.some((c) => {
+      const [x, y] = cellXY(c);
+      return x >= -CENTER && x < CENTER && y >= -CENTER && y < CENTER;
+    });
+    return { n: cells.length, normal: cells.length === 0, central };
+  }
+
+  /** Test sonucu: işaretli kare ya da belirti varsa bulgu var. */
+  function verdict(rec) {
+    const R = eyeSummary(rec.R || []);
+    const L = eyeSummary(rec.L || []);
+    const sym = (rec.sym || []).length > 0;
+    const marks = !R.normal || !L.normal;
+    return { bad: marks || sym, marks, sym, central: R.central || L.central, R, L };
+  }
+
+  /** Önceki testte işaretli olmayan yeni kareler. */
+  function newCells(cur, prev) {
+    const p = new Set(prev || []);
+    return (cur || []).filter((c) => !p.has(c));
+  }
+
+  /** Kişi adı karşılaştırması: boşluk, büyük/küçük harf ve İ/ı farkı gözetilmez. */
+  function personKey(s) {
+    return String(s || '').trim().replace(/\s+/g, ' ').toLocaleLowerCase('tr').replace(/ı/g, 'i');
+  }
+
+  /** Aynı kişinin bu testten önceki son testi. */
+  function previousFor(rec, list) {
+    const k = personKey(rec.person);
+    if (!k) return null;
+    return (list || loadHistory()).slice().sort((x, y) => (x.at < y.at ? 1 : -1))
+      .find((r) => r.id !== rec.id && r.at < rec.at && personKey(r.person) === k) || null;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Çizimler (SVG metni; ekranda ve yazdırmada ortak)
+  // ---------------------------------------------------------------------------
+
+  /**
+   * 20 × 20 kayıt ızgarası: test edilen alan beyaz, dışı gri; işaretli kareler kırmızı.
+   * @param {object} o { cells: ['x,y'], cols, rows, size: CSS uzunluğu (örn. '80mm') }
+   */
+  function recordSVG(o) {
+    const N = MAX_CELLS;
+    const half = N / 2;
+    const cols = o.cols || N;
+    const rows = o.rows || N;
+    const size = o.size || '80mm';
+    const p = ['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + N + ' ' + N + '" width="' + size + '" height="' + size + '" role="img" aria-label="' + esc(T('Amsler ızgarası, {0} × {1} kare', cols, rows)) + '">'];
+    p.push('<rect x="0" y="0" width="' + N + '" height="' + N + '" fill="#c8c8c8"/>');
+    p.push('<rect x="' + (half - cols / 2) + '" y="' + (half - rows / 2) + '" width="' + cols + '" height="' + rows + '" fill="#fff"/>');
+    for (const c of o.cells || []) {
+      const [x, y] = cellXY(c);
+      p.push('<rect x="' + (half + x) + '" y="' + (half + y) + '" width="1" height="1" fill="#e00" fill-opacity="0.6"/>');
+    }
+    for (let i = 0; i <= N; i++) {
+      p.push('<line x1="' + i + '" y1="0" x2="' + i + '" y2="' + N + '" stroke="#000" stroke-width="0.05"/>');
+      p.push('<line x1="0" y1="' + i + '" x2="' + N + '" y2="' + i + '" stroke="#000" stroke-width="0.05"/>');
+    }
+    p.push('<circle cx="' + half + '" cy="' + half + '" r="0.25" fill="#000"/></svg>');
+    return p.join('');
+  }
+
+  /** Gerçek boyutlu kâğıt test: 100 mm × 100 mm, 20 × 20 kare, merkez noktası. */
+  function paperSVG() {
+    const p = ['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100mm" height="100mm">'];
+    p.push('<rect x="0" y="0" width="100" height="100" fill="#fff"/>');
+    for (let i = 0; i <= 20; i++) {
+      const v = i * 5;
+      const w = i === 0 || i === 20 ? 0.5 : 0.25;
+      p.push('<line x1="' + v + '" y1="0" x2="' + v + '" y2="100" stroke="#000" stroke-width="' + w + '"/>');
+      p.push('<line x1="0" y1="' + v + '" x2="100" y2="' + v + '" stroke="#000" stroke-width="' + w + '"/>');
+    }
+    p.push('<circle cx="50" cy="50" r="1.2" fill="#000"/></svg>');
+    return p.join('');
+  }
+
+  /** 50 mm kontrol çizgisi (yazdırma ölçeğini doğrulamak için). */
+  const RULER_50 = '<svg xmlns="http://www.w3.org/2000/svg" width="50mm" height="6mm" viewBox="0 0 50 6"><path d="M0.2 0v6M49.8 0v6M0 3h50" stroke="#000" stroke-width="0.4" fill="none"/></svg>';
+
+  // ---------------------------------------------------------------------------
+  // Metinler ve ekranlar (DOM'suz; Node testleri İngilizce çıktıyı denetler)
+  // ---------------------------------------------------------------------------
+
+  /** Biçim: TR 16.11.2026 09:05, EN 2026-11-16 09:05 (yerel saat). */
+  function fmtDate(iso) {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return String(iso || '');
+    const p = (n) => String(n).padStart(2, '0');
+    const en = LE.i18n && LE.i18n.lang() === 'en';
+    const day = en ? d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) : p(d.getDate()) + '.' + p(d.getMonth() + 1) + '.' + d.getFullYear();
+    return day + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+  }
+
+  function symptoms() {
+    return [
+      ['blur', T('Görme bulanık ya da azalmış')],
+      ['spot', T('Görüş alanında leke ya da kör nokta')],
+      ['after', T('Birkaç dakikada geçmeyen ardıl görüntü')],
+      ['pain', T('Göz ağrısı, sulanma ya da ışığa hassasiyet')],
+    ];
+  }
+  function symptomText(sym) {
+    const s = new Set(sym || []);
+    return symptoms().filter((x) => s.has(x[0])).map((x) => x[1]).join('; ');
+  }
+
+  function sourceText(m) {
+    if (m.source === 'card') return T('Ekran ölçüsü kartla ayarlandı: kareler 5 mm.');
+    if (m.source === 'android') {
+      return T('Ekran ölçüsü Android ekran bilgisinden ({0} dpi): kareler 5 mm.', Math.round(m.dpi.xdpi)) + ' ' +
+        (m.suspect ? T('Cihazın bildirdiği değer şüpheli; kartla ayarlayın.') : T('Bir kez kartla doğrulamanız önerilir.'));
+    }
+    return T('Ekran ölçüsü ayarlanmadı: kareler 5 mm olmayabilir. Testten önce kartla ayarlayın.');
+  }
+  function sourceShort(src) {
+    return src === 'card' ? T('kartla ayarlandı') : src === 'android' ? T('Android ekran bilgisi') : T('ayarlanmadı');
+  }
+
+  function eyeText(cells) {
+    const s = eyeSummary(cells || []);
+    if (s.normal) return T('işaretli alan yok');
+    return T('{0} kare işaretlendi', s.n) + (s.central ? ' — ' + T('merkezdeki ±2°\'lik alan dahil') : '');
+  }
+  function eyeLine(label, cells) {
+    return '<b>' + label + ':</b> ' + eyeText(cells);
+  }
+
+  function more(html, summary) {
+    return LE.render && LE.render.more ? LE.render.more(html, summary) : '<details class="more"><summary>' + summary + '</summary>' + html + '</details>';
+  }
+
+  const ui = { step: 'intro', eye: 'R', rec: null, viewing: null, saved: null, invert: false, person: '', event: '', sym: [], calSx: 0 };
+
+  function screenSteps() {
+    return [
+      T('Gözlük ya da lens kullanıyorsanız takın (lazer koruyucu gözlüğü çıkarın). Ortam iyi aydınlatılmış olsun.'),
+      T('Telefonu gözünüzden yaklaşık 30 cm uzakta tutun (bir A4 kâğıdın uzun kenarı kadar).'),
+      T('Bir gözünüzü bastırmadan avucunuzla kapatın; açık gözünüzle yalnız ortadaki noktaya bakın.'),
+      T('Gözünüzü noktadan ayırmadan: çizgiler düz mü, kareler eşit mi; eksik, bulanık ya da karanlık bir yer var mı?'),
+      T('Bozuk görünen karelere dokunun (yeniden dokunmak işareti kaldırır; parmağınızı sürükleyerek birden çok kare işaretleyebilirsiniz). Sonra diğer göze geçin.'),
+    ];
+  }
+
+  function refsHTML() {
+    return '<ul class="am-refs">' +
+      '<li>' + T('Standart ızgara: 10 cm × 10 cm, 20 × 20 kare, kare 5 mm; 30 cm\'den her kare ≈ 1° (tam 1° için 28,6 cm). Amsler M. Br J Ophthalmol 1953;37:521–537.') + '</li>' +
+      '<li>' + T('Lazer hasarı çoğunlukla merkezde kör nokta (skotom) yapar; çizgilerde eğrilik olmayabilir. Sakaguchi H ve ark. Am J Ophthalmol 2000;130:355–356.') + '</li>' +
+      '<li>' + T('Duyarlılık sınırlıdır (bazı çalışmalarda %50\'nin altında): beyin eksik alanı tamamlayabilir, bu yüzden normal sonuç hasarı dışlamaz. Crossland M, Rubin G. Br J Ophthalmol 2007;91:391–393.') + '</li>' +
+      '<li>' + T('Ekranda gösterilen ızgara, kare boyu ve mesafe doğru olduğunda kâğıt testle uyumludur. Brucker J ve ark. Ophthalmol Ther 2019;8:461–476.') + '</li>' +
+      '<li>' + T('Lazerle çalışanlar için bir temel (başlangıç) test kaydı önerilir; maruziyetten sonra aynı kişinin önceki testiyle karşılaştırılır.') + '</li>' +
+      '</ul>';
+  }
+
+  function introHTML() {
+    const m = metrics();
+    const vw = Number(root.innerWidth) || 400;
+    const vh = Number(root.innerHeight) || 760;
+    const lay = layout(vw - 16, vh - 130, m.sx, m.sy);
+    const n = loadHistory().length;
+    const sym = symptoms().map(([k, label]) => '<label class="chk"><input type="checkbox" data-sym="' + k + '"' + (ui.sym.indexOf(k) >= 0 ? ' checked' : '') + '> ' + label + '</label>').join('');
+    return '<div class="am-intro">' +
+      '<p class="am-lead">' + T('Lazer maruziyeti şüphesinde (parlama, ardıl görüntü, görmede leke) merkezi görmeyi her göz için ayrı kontrol eder. Sahada hızlı bir ilk değerlendirmedir; tanı koymaz, göz muayenesinin yerini tutmaz.') + '</p>' +
+      '<div class="am-fields">' +
+      '<label>' + T('Kişi (ad soyad ya da sicil no)') + '<input id="am-person" autocomplete="off" value="' + esc(ui.person) + '"></label>' +
+      '<label>' + T('Olay / lazer (isteğe bağlı)') + '<input id="am-event" autocomplete="off" value="' + esc(ui.event) + '"></label></div>' +
+      '<fieldset class="am-sym"><legend>' + T('Belirtiler (varsa işaretleyin)') + '</legend>' + sym + '</fieldset>' +
+      '<ol class="am-steps">' + screenSteps().map((s) => '<li>' + s + '</li>').join('') + '</ol>' +
+      '<p class="am-cal' + (m.source === 'none' || m.suspect ? ' warn' : '') + '"><span>' + esc(sourceText(m)) + '</span> ' +
+      '<button type="button" class="minibtn" id="am-calib">' + T('Kartla ayarla') + '</button></p>' +
+      '<p class="muted am-field">' + T('Bu ekranda {0} × {1} kare (≈ {2}° × {3}°) gösterilir; standart kâğıt ızgara 20 × 20 karedir (≈ 19° × 19°). Telefonu yan çevirmek yatay alanı genişletir.', lay.cols, lay.rows, fmt(lay.degX, 2), fmt(lay.degY, 2)) + '</p>' +
+      '<div class="seg am-colors" role="group" aria-label="' + esc(T('Izgara rengi')) + '">' +
+      '<button type="button" data-inv="0" aria-pressed="' + !ui.invert + '">' + T('Siyah çizgi, beyaz zemin') + '</button>' +
+      '<button type="button" data-inv="1" aria-pressed="' + ui.invert + '">' + T('Beyaz çizgi, siyah zemin') + '</button></div>' +
+      '<div class="am-actions">' +
+      '<button type="button" class="btn primary" id="am-start">' + T('Teste başla (önce sağ göz)') + '</button>' +
+      '<button type="button" class="btn" id="am-history">' + T('Geçmiş testler ({0})', n) + '</button>' +
+      '<button type="button" class="btn" id="am-paper">' + T('Kâğıt test yazdır (10 × 10 cm)') + '</button></div>' +
+      '<p class="muted am-note">' + T('Test sırasında ekran açık kalır ve parlaklık en yükseğe çıkar (Android). Sonuçlar yalnız bu cihazda saklanır.') + '</p>' +
+      more(refsHTML(), T('Yöntem ve kaynaklar')) +
+      '</div>';
+  }
+
+  function calibHTML() {
+    const sx = ui.calSx || metrics().sx;
+    return '<div class="am-calib">' +
+      '<p>' + T('Bir banka kartını ya da kimlik kartını (85,60 × 53,98 mm) ekrana yaslayın. Çerçeve kartın kenarlarıyla çakışana kadar ayarlayın.') + '</p>' +
+      '<div class="am-cardwrap"><div class="am-card" id="am-card"><span>' + dec('85.60 × 53.98 mm') + '</span></div></div>' +
+      '<div class="am-actions am-adj">' + [[0.98, '−', 0.02], [0.998, '−', 0.002], [1.002, '+', 0.002], [1.02, '+', 0.02]]
+        .map(([k, sgn, f]) => '<button type="button" class="btn" data-k="' + k + '">' + sgn + pct(f) + '</button>').join('') + '</div>' +
+      '<input type="range" id="am-range" min="2" max="16" step="0.005" value="' + sx + '" aria-label="' + esc(T('Ölçek')) + '">' +
+      '<p class="muted">' + T('Cetvelle kontrol: aşağıdaki çizgi 50 mm olmalı.') + '</p>' +
+      '<div class="am-ruler" id="am-ruler"></div>' +
+      '<p class="muted" id="am-scale"></p>' +
+      '<div class="am-actions"><button type="button" class="btn primary" id="am-cal-save">' + T('Kaydet') + '</button>' +
+      '<button type="button" class="btn" id="am-cal-reset">' + T('Ayarı sil (cihaz değerine dön)') + '</button>' +
+      '<button type="button" class="btn" id="am-back">' + T('Geri') + '</button></div></div>';
+  }
+
+  function testHTML(eye) {
+    const right = eye !== 'L';
+    return '<div class="am-test' + (ui.invert ? ' inv' : '') + '">' +
+      '<div class="am-bar"><b class="am-eye">' + (right ? T('SAĞ GÖZ — sol gözünüzü kapatın') : T('SOL GÖZ — sağ gözünüzü kapatın')) + '</b>' +
+      '<span class="am-hint">' + T('≈ 30 cm uzaktan ortadaki noktaya bakın; bozuk görünen karelere dokunun.') + '</span>' +
+      '<button type="button" class="am-x" id="am-quit" aria-label="' + esc(T('Testi bırak')) + '" title="' + esc(T('Testi bırak')) + '">×</button></div>' +
+      '<div class="am-zoom hidden" id="am-zoom" role="alert">' + T('Sayfa yakınlaştırılmış: kareler 5 mm değil. İki parmakla uzaklaştırın.') + '</div>' +
+      '<div class="am-gridwrap" id="am-gridwrap"></div>' +
+      '<div class="am-bar am-bottom"><span id="am-count" aria-live="polite"></span>' +
+      '<button type="button" class="btn" id="am-clear">' + T('Temizle') + '</button>' +
+      '<button type="button" class="btn primary" id="am-next">' + (right ? T('Sol göze geç') : T('Sonucu göster')) + '</button></div>' +
+      '</div>';
+  }
+
+  /** saved: true = kaydedildi, false = kaydedilemedi, null = geçmişten açıldı. */
+  function resultHTML(rec, prev, saved) {
+    const v = verdict(rec);
+    const grid = (eye) => '<figure><figcaption>' + (eye === 'R' ? T('Sağ göz') : T('Sol göz')) + '</figcaption>' +
+      recordSVG({ cells: rec[eye], cols: rec.cols && rec.cols[eye], rows: rec.rows && rec.rows[eye], size: '100%' }) + '</figure>';
+    let cmp = '';
+    if (prev) {
+      const nR = newCells(rec.R, prev.R).length;
+      const nL = newCells(rec.L, prev.L).length;
+      cmp = '<p>' + T('Önceki test ({0}): ', esc(fmtDate(prev.at))) + eyeLine(T('Sağ göz'), prev.R) + '; ' + eyeLine(T('Sol göz'), prev.L) + '.' +
+        (nR || nL ? ' <b>' + T('Önceki teste göre yeni işaretli kare: sağ {0}, sol {1}.', nR, nL) + '</b>' : '') + '</p>';
+    }
+    const sym = symptomText(rec.sym);
+    const meta = [T('Tarih: {0}', esc(fmtDate(rec.at)))];
+    if (rec.person) meta.push(T('Kişi: {0}', esc(rec.person)));
+    if (rec.event) meta.push(T('Olay: {0}', esc(rec.event)));
+    meta.push(T('Ekran ölçüsü: {0}', sourceShort(rec.source)));
+    const note = saved === true ? '<p class="muted">' + T('Sonuç bu cihazdaki test geçmişine kaydedildi.') + '</p>'
+      : saved === false ? '<p class="am-cal warn">' + T('Sonuç kaydedilemedi (tarayıcı deposu kapalı); yazdırarak saklayın.') + '</p>' : '';
+    return '<div class="am-result">' +
+      '<div class="verdict ' + (v.bad ? 'danger' : 'ok') + '"><h2>' + (v.bad ? T('Bulgu var: göz hekimine başvurun') : T('Amsler testinde bulgu yok')) + '</h2>' +
+      '<p>' + eyeLine(T('Sağ göz'), rec.R) + '</p><p>' + eyeLine(T('Sol göz'), rec.L) + '</p>' +
+      (sym ? '<p><b>' + T('Belirtiler') + ':</b> ' + esc(sym) + '</p>' : '') +
+      '<p>' + (v.bad
+        ? T('Hemen (aynı gün) bir göz hekimine başvurun; retina muayenesi ve mümkünse OCT gerekir. Olayı lazer güvenlik sorumlusuna bildirin. Gözü ovuşturmayın, lazerle çalışmayı bırakın.')
+        : T('Bu sonuç hasarı dışlamaz. Maruziyet şüphesi varsa en kısa sürede (en geç 48 saat içinde) göz muayenesi yaptırın. Görme azalırsa ya da leke, ardıl görüntü sürerse hemen başvurun. Testi birkaç saat sonra tekrarlayın.')) + '</p></div>' +
+      cmp +
+      '<div class="am-grids">' + grid('R') + grid('L') + '</div>' +
+      '<p class="muted">' + T('Kırmızı: bozuk, eksik ya da karanlık görülen kareler. Gri: bu ekranda test edilmeyen alan.') + '</p>' +
+      '<p class="muted">' + meta.join(' · ') + '</p>' + note +
+      '<div class="am-actions"><button type="button" class="btn primary" id="am-print">' + T('Yazdır / PDF') + '</button>' +
+      (saved === null ? '' : '<button type="button" class="btn" id="am-again">' + T('Yeni test') + '</button><button type="button" class="btn" id="am-history">' + T('Geçmiş testler') + '</button>') +
+      '<button type="button" class="btn" id="am-back">' + T('Geri') + '</button></div></div>';
+  }
+
+  function historyHTML(list) {
+    if (!list.length) {
+      return '<p class="muted">' + T('Kayıtlı test yok.') + '</p><div class="am-actions"><button type="button" class="btn" id="am-back">' + T('Geri') + '</button></div>';
+    }
+    const rows = list.map((r) => {
+      const v = verdict(r);
+      const res = (v.bad ? '<b class="am-bad">' + T('Bulgu var') + '</b>' : T('Bulgu yok')) + '<br><small>' +
+        T('sağ {0} · sol {1} kare', r.R.length, r.L.length) + (v.sym ? ' · ' + T('belirti') : '') + '</small>';
+      return '<tr><td>' + esc(fmtDate(r.at)) + '</td><td>' + esc(r.person || '—') + '</td><td>' + esc(r.event || '') + '</td><td>' + res + '</td>' +
+        '<td style="white-space:nowrap"><button type="button" class="minibtn" data-view="' + esc(r.id) + '">' + T('Aç') + '</button> ' +
+        '<button type="button" class="minibtn" data-del="' + esc(r.id) + '">' + T('Sil') + '</button></td></tr>';
+    }).join('');
+    return '<div class="tablewrap"><table class="t"><thead><tr><th>' + T('Tarih') + '</th><th>' + T('Kişi') + '</th><th>' + T('Olay') + '</th><th>' + T('Sonuç') + '</th><th></th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      '<p class="muted">' + T('{0} test. Kayıtlar yalnız bu cihazda saklanır; belgelemek için sonucu yazdırın (PDF).', list.length) + '</p>' +
+      '<div class="am-actions"><button type="button" class="btn" id="am-back">' + T('Geri') + '</button></div>';
+  }
+
+  /** A4 test raporu (yazdırma / PDF). */
+  function reportHTML(rec, prev) {
+    const v = verdict(rec);
+    const cols = rec.cols || {};
+    const rows = rec.rows || {};
+    const g = (eye) => '<div style="text-align:center"><b>' + (eye === 'R' ? T('Sağ göz') : T('Sol göz')) + '</b><br>' +
+      recordSVG({ cells: rec[eye], cols: cols[eye], rows: rows[eye], size: '80mm' }) + '</div>';
+    const tr = [
+      [T('Kişi'), esc(rec.person || '')],
+      [T('Olay / lazer'), esc(rec.event || '')],
+      [T('Tarih'), esc(fmtDate(rec.at))],
+      [T('Belirtiler'), esc(symptomText(rec.sym) || T('yok'))],
+      [T('Sağ göz'), eyeText(rec.R)],
+      [T('Sol göz'), eyeText(rec.L)],
+      [T('Test koşulu'), T('Kare 5 mm, bakış mesafesi ≈ 30 cm (kare ≈ 1°); test edilen alan: sağ {0} × {1}, sol {2} × {3} kare; ekran ölçüsü: {4}', cols.R || MAX_CELLS, rows.R || MAX_CELLS, cols.L || MAX_CELLS, rows.L || MAX_CELLS, sourceShort(rec.source))],
+    ];
+    if (prev) {
+      const nR = newCells(rec.R, prev.R).length;
+      const nL = newCells(rec.L, prev.L).length;
+      tr.push([T('Önceki test'), esc(fmtDate(prev.at)) + ': ' + T('sağ {0} · sol {1} kare', prev.R.length, prev.L.length) + (nR || nL ? '; <b>' + T('yeni işaretli kare: sağ {0}, sol {1}', nR, nL) + '</b>' : '')]);
+    }
+    return '<div class="head"><div><h1>' + T('Amsler Grid testi') + '</h1><div>' + T('Sahada hızlı ilk göz kontrolü') + '</div></div>' +
+      '<div style="text-align:right">' + T('Tarih: {0}', esc(fmtDate(rec.at))) + '</div></div>' +
+      '<table><tbody>' + tr.map((r) => '<tr><th style="width:28%">' + r[0] + '</th><td>' + r[1] + '</td></tr>').join('') + '</tbody></table>' +
+      '<div class="verdictbox">' + (v.bad
+        ? T('Bulgu var: hemen (aynı gün) göz hekimine başvurulmalı ve olay lazer güvenlik sorumlusuna bildirilmelidir.')
+        : T('Bulgu yok. Bu sonuç hasarı dışlamaz; maruziyet şüphesinde en geç 48 saat içinde göz muayenesi önerilir.')) + '</div>' +
+      '<div style="display:flex;gap:10mm;justify-content:center;margin:5mm 0">' + g('R') + g('L') + '</div>' +
+      '<p style="font-size:9pt">' + T('Kırmızı: bozuk, eksik ya da karanlık görülen kareler. Gri: bu ekranda test edilmeyen alan (standart ızgara 20 × 20 kare).') + '</p>' +
+      '<div class="sign"><div>' + T('Testi uygulayan') + '</div><div>' + T('Lazer güvenlik sorumlusu') + '</div></div>' +
+      '<p class="disc">' + T('Amsler Grid testi tanı koymaz; duyarlılığı sınırlıdır ve normal sonuç hasarı dışlamaz. Kaynaklar: Amsler M. Br J Ophthalmol 1953;37:521–537 · Crossland M, Rubin G. Br J Ophthalmol 2007;91:391–393 · Sakaguchi H ve ark. Am J Ophthalmol 2000;130:355–356.') + ' ' +
+      T('Yazılım: Lazer Emniyet Analizi{0}.', LE.APP_VERSION ? ' ' + esc(LE.APP_VERSION) : '') + '</p>';
+  }
+
+  /** Gerçek boyutlu boş ızgara (kâğıtla test). */
+  function paperHTML() {
+    return '<h1 style="text-align:center">' + T('Amsler Grid testi') + '</h1>' +
+      '<p style="text-align:center">' + T('Standart ızgara: 10 cm × 10 cm, 20 × 20 kare, kare 5 mm') + '</p>' +
+      '<div style="display:flex;justify-content:center;margin:5mm 0 3mm">' + paperSVG() + '</div>' +
+      '<div style="display:flex;justify-content:center">' + RULER_50 + '</div>' +
+      '<p style="text-align:center;font-size:9pt">' + T('Yazdırırken ölçeği %100 (gerçek boyut) seçin: ızgaranın kenarı 10 cm, yukarıdaki çizgi 5 cm olmalıdır.') + '</p>' +
+      '<ol style="font-size:10.5pt">' +
+      '<li>' + T('Gözlük ya da lens kullanıyorsanız takın; ortam iyi aydınlatılmış olsun.') + '</li>' +
+      '<li>' + T('Kâğıdı gözünüzden yaklaşık 30 cm uzakta tutun.') + '</li>' +
+      '<li>' + T('Bir gözünüzü bastırmadan avucunuzla kapatın; açık gözünüzle yalnız ortadaki noktaya bakın.') + '</li>' +
+      '<li>' + T('Gözünüzü noktadan ayırmadan: çizgiler düz mü, kareler eşit mi; eksik, bulanık ya da karanlık bir yer var mı?') + '</li>' +
+      '<li>' + T('Bozuk görünen yerleri kalemle işaretleyin, sonra diğer gözü test edin. Bulgu varsa hemen göz hekimine başvurun.') + '</li>' +
+      '</ol>' +
+      '<p class="disc">' + T('Amsler Grid testi tanı koymaz; duyarlılığı sınırlıdır ve normal sonuç hasarı dışlamaz. Kaynaklar: Amsler M. Br J Ophthalmol 1953;37:521–537 · Crossland M, Rubin G. Br J Ophthalmol 2007;91:391–393 · Sakaguchi H ve ark. Am J Ophthalmol 2000;130:355–356.') + '</p>';
+  }
+
+  // ---------------------------------------------------------------------------
+  // Etkileşim (tarayıcı)
+  // ---------------------------------------------------------------------------
+  const $ = (id) => (typeof document !== 'undefined' ? document.getElementById(id) : null);
+
+  /** Android: test sırasında ekran açık kalır, parlaklık en yüksek; test bitince eski hâli. */
+  function testScreen(on) {
+    const b = root.LazerAndroid;
+    if (b && typeof b.testScreen === 'function') {
+      try { b.testScreen(!!on); } catch (e) { /* eski kabuk */ }
+    }
+  }
+
+  function isOpen() {
+    const d = $('dlg-amsler');
+    return !!(d && d.open);
+  }
+
+  function open() {
+    const d = $('dlg-amsler');
+    if (!d) return;
+    ui.step = 'intro';
+    ui.viewing = null;
+    if (!d.open) d.showModal();
+    render();
+  }
+
+  /** Android geri tuşu: sol göz → sağ göz, geçmişten açılan sonuç → geçmiş, diğer adımlar → giriş, giriş → kapat. */
+  function back() {
+    const d = $('dlg-amsler');
+    if (!d || !d.open) return false;
+    if (ui.step === 'L') { ui.eye = 'R'; ui.step = 'R'; render(); return true; }
+    if (ui.step === 'result' && ui.viewing) { ui.viewing = null; ui.step = 'history'; render(); return true; }
+    if (ui.step !== 'intro') { testScreen(false); ui.step = 'intro'; render(); return true; }
+    d.close();
+    return true;
+  }
+
+  function render() {
+    const d = $('dlg-amsler');
+    const body = $('amsler-body');
+    if (!d || !body) return;
+    d.classList.toggle('testing', ui.step === 'R' || ui.step === 'L');
+    if (ui.step === 'intro') body.innerHTML = introHTML();
+    else if (ui.step === 'calib') body.innerHTML = calibHTML();
+    else if (ui.step === 'history') body.innerHTML = historyHTML(loadHistory());
+    else if (ui.step === 'result') {
+      const rec = ui.viewing || ui.rec;
+      body.innerHTML = resultHTML(rec, previousFor(rec), ui.viewing ? null : ui.saved);
+    } else body.innerHTML = testHTML(ui.eye);
+    d.scrollTop = 0;
+    body.scrollTop = 0;
+    wire();
+  }
+
+  function on(id, fn) {
+    const e = $(id);
+    if (e) e.addEventListener('click', fn);
+  }
+
+  function toast(msg) {
+    const t = $('toast');
+    if (!t) return;
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._h);
+    t._h = setTimeout(() => t.classList.remove('show'), 2600);
+  }
+
+  function startTest() {
+    const id = 'A' + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 1296).toString(36).toUpperCase();
+    ui.rec = {
+      id, at: new Date().toISOString(), person: ui.person.trim(), event: ui.event.trim(), sym: ui.sym.slice(),
+      R: [], L: [], cols: { R: 0, L: 0 }, rows: { R: 0, L: 0 }, source: metrics().source, invert: ui.invert,
+    };
+    ui.viewing = null;
+    ui.eye = 'R';
+    ui.step = 'R';
+    testScreen(true);
+    render();
+  }
+
+  function finishTest() {
+    testScreen(false);
+    ui.saved = saveRecord(ui.rec);
+    ui.viewing = null;
+    ui.step = 'result';
+    render();
+    if (ui.saved) toast(T('Test kaydedildi.'));
+  }
+
+  function wire() {
+    const body = $('amsler-body');
+    if (ui.step === 'intro') {
+      const p = $('am-person');
+      const e = $('am-event');
+      p.addEventListener('input', () => { ui.person = p.value; });
+      e.addEventListener('input', () => { ui.event = e.value; });
+      for (const c of body.querySelectorAll('[data-sym]')) {
+        c.addEventListener('change', () => {
+          ui.sym = Array.from(body.querySelectorAll('[data-sym]')).filter((x) => x.checked).map((x) => x.dataset.sym);
+        });
+      }
+      for (const b of body.querySelectorAll('[data-inv]')) {
+        b.addEventListener('click', () => {
+          ui.invert = b.dataset.inv === '1';
+          for (const x of body.querySelectorAll('[data-inv]')) x.setAttribute('aria-pressed', String(x === b));
+        });
+      }
+      on('am-calib', () => { ui.calSx = metrics().sx; ui.step = 'calib'; render(); });
+      on('am-history', () => { ui.step = 'history'; render(); });
+      on('am-paper', () => printHTML(paperHTML(), T('Amsler ızgarası (10 × 10 cm)')));
+      on('am-start', startTest);
+    } else if (ui.step === 'R' || ui.step === 'L') {
+      afterLayout(drawGrid);
+      on('am-quit', () => { testScreen(false); ui.step = 'intro'; render(); });
+      on('am-clear', () => { ui.rec[ui.eye] = []; drawGrid(); });
+      on('am-next', () => {
+        if (ui.eye === 'R') { ui.eye = 'L'; ui.step = 'L'; render(); } else finishTest();
+      });
+    } else if (ui.step === 'calib') {
+      drawCard();
+      const range = $('am-range');
+      range.addEventListener('input', () => { ui.calSx = Number(range.value); drawCard(true); });
+      for (const b of body.querySelectorAll('[data-k]')) b.addEventListener('click', () => { ui.calSx *= Number(b.dataset.k); drawCard(); });
+      on('am-cal-save', () => { saveCalibration(ui.calSx); ui.step = 'intro'; render(); toast(T('Ekran ölçüsü kaydedildi.')); });
+      on('am-cal-reset', () => { clearCalibration(); ui.step = 'intro'; render(); });
+      on('am-back', () => { ui.step = 'intro'; render(); });
+    } else if (ui.step === 'result') {
+      on('am-print', () => {
+        const rec = ui.viewing || ui.rec;
+        printHTML(reportHTML(rec, previousFor(rec)), T('Amsler testi - {0}', rec.person || fmtDate(rec.at)));
+      });
+      on('am-again', () => { ui.step = 'intro'; render(); });
+      on('am-history', () => { ui.step = 'history'; render(); });
+      on('am-back', () => { const v = ui.viewing; ui.viewing = null; ui.step = v ? 'history' : 'intro'; render(); });
+    } else if (ui.step === 'history') {
+      for (const b of body.querySelectorAll('[data-view]')) {
+        b.addEventListener('click', () => {
+          ui.viewing = loadHistory().find((r) => r.id === b.dataset.view) || null;
+          if (ui.viewing) { ui.step = 'result'; render(); }
+        });
+      }
+      for (const b of body.querySelectorAll('[data-del]')) {
+        b.addEventListener('click', () => {
+          const r = loadHistory().find((x) => x.id === b.dataset.del);
+          if (!r || !confirm(T('{0} tarihli test silinsin mi? Bu işlem geri alınamaz.', fmtDate(r.at) + (r.person ? ' (' + r.person + ')' : '')))) return;
+          removeRecord(r.id);
+          render();
+        });
+      }
+      on('am-back', () => { ui.step = 'intro'; render(); });
+    }
+  }
+
+  function afterLayout(fn) {
+    if (typeof requestAnimationFrame === 'function') requestAnimationFrame(() => requestAnimationFrame(fn));
+    else setTimeout(fn, 30);
+  }
+
+  /** Kart çerçevesi: sığarsa yatay, telefonda dikey (kartın uzun kenarı ekranın boyuna). */
+  function drawCard(fromRange) {
+    const card = $('am-card');
+    if (!card) return;
+    const sx = ui.calSx;
+    const wrap = card.parentElement;
+    const room = (wrap && wrap.clientWidth) || Number(root.innerWidth) || 400;
+    const landscape = CARD_MM[0] * sx <= room - 8;
+    card.style.width = (landscape ? CARD_MM[0] : CARD_MM[1]) * sx + 'px';
+    card.style.height = (landscape ? CARD_MM[1] : CARD_MM[0]) * sx + 'px';
+    card.style.borderRadius = CARD_R_MM * sx + 'px';
+    const ruler = $('am-ruler');
+    if (ruler) ruler.style.width = 50 * sx + 'px';
+    if (!fromRange) $('am-range').value = String(sx);
+    $('am-scale').textContent = T('Ölçek: {0} CSS piksel/mm', fmt(sx, 4));
+  }
+
+  /** Test ızgarası: gerçek 5 mm kareler, dokunarak ya da sürükleyerek işaretleme. */
+  function drawGrid() {
+    const wrap = $('am-gridwrap');
+    if (!wrap || !ui.rec) return;
+    const m = metrics();
+    const lay = layout(wrap.clientWidth - 8, wrap.clientHeight - 8, m.sx, m.sy);
+    const eye = ui.eye;
+    ui.rec.cols[eye] = lay.cols;
+    ui.rec.rows[eye] = lay.rows;
+    const NS = 'http://www.w3.org/2000/svg';
+    const el = (name, attrs) => {
+      const e = document.createElementNS(NS, name);
+      for (const k in attrs) e.setAttribute(k, attrs[k]);
+      return e;
+    };
+    const svg = el('svg', {
+      width: lay.widthPx, height: lay.heightPx, viewBox: '0 0 ' + lay.cols + ' ' + lay.rows, class: 'am-grid', role: 'img',
+      'aria-label': T('Amsler ızgarası, {0} × {1} kare', lay.cols, lay.rows),
+    });
+    const fg = ui.invert ? '#fff' : '#000';
+    svg.appendChild(el('rect', { x: 0, y: 0, width: lay.cols, height: lay.rows, fill: ui.invert ? '#000' : '#fff' }));
+    const marks = new Set(ui.rec[eye]);
+    const layer = el('g', {});
+    const cellRect = (c) => {
+      const [x, y] = cellXY(c);
+      const r = el('rect', { x: x + lay.cols / 2, y: y + lay.rows / 2, width: 1, height: 1, fill: '#e00', 'fill-opacity': 0.5 });
+      r.dataset.c = c;
+      return r;
+    };
+    for (const c of marks) layer.appendChild(cellRect(c));
+    svg.appendChild(layer);
+    // çizgi ≈ 0,25 mm (en az bir cihaz pikseli)
+    const sw = Math.max(0.25 * m.sx, 1 / dpr()) / lay.cw;
+    for (let i = 0; i <= lay.cols; i++) svg.appendChild(el('line', { x1: i, x2: i, y1: 0, y2: lay.rows, stroke: fg, 'stroke-width': sw }));
+    for (let j = 0; j <= lay.rows; j++) svg.appendChild(el('line', { y1: j, y2: j, x1: 0, x2: lay.cols, stroke: fg, 'stroke-width': sw }));
+    svg.appendChild(el('circle', { cx: lay.cols / 2, cy: lay.rows / 2, r: 1.1 / CELL_MM, fill: fg })); // ≈ 2,2 mm nokta
+    wrap.innerHTML = '';
+    wrap.appendChild(svg);
+
+    const count = () => {
+      const n = ui.rec[eye].length;
+      const c = $('am-count');
+      if (c) c.textContent = n ? T('{0} kare işaretli', n) : T('İşaret yok');
+    };
+    count();
+    const cellAt = (cx, cy) => {
+      const b = svg.getBoundingClientRect();
+      const x = Math.floor(((cx - b.left) / b.width) * lay.cols) - lay.cols / 2;
+      const y = Math.floor(((cy - b.top) / b.height) * lay.rows) - lay.rows / 2;
+      if (x < -lay.cols / 2 || x >= lay.cols / 2 || y < -lay.rows / 2 || y >= lay.rows / 2) return null;
+      return x + ',' + y;
+    };
+    const setCell = (c, onOff) => {
+      if (onOff === marks.has(c)) return;
+      if (onOff) { marks.add(c); layer.appendChild(cellRect(c)); }
+      else { marks.delete(c); for (const r of layer.querySelectorAll('rect')) if (r.dataset.c === c) r.remove(); }
+      ui.rec[eye] = Array.from(marks);
+      count();
+    };
+    // dokunma: aç/kapat; sürükleme: ilk karedeki yeni duruma göre işaretler ya da siler
+    let paint = null;
+    let last = null;
+    svg.addEventListener('pointerdown', (ev) => {
+      const c = cellAt(ev.clientX, ev.clientY);
+      if (!c) return;
+      paint = !marks.has(c);
+      last = [ev.clientX, ev.clientY];
+      setCell(c, paint);
+      try { svg.setPointerCapture(ev.pointerId); } catch (e) { /* yok */ }
+      ev.preventDefault();
+    });
+    svg.addEventListener('pointermove', (ev) => {
+      if (paint === null) return;
+      // hızlı sürüklemede olaylar seyrek gelir: önceki noktadan bu yana geçilen kareler de işaretlenir
+      const step = lay.cw / 3;
+      const n = Math.max(1, Math.ceil(Math.hypot(ev.clientX - last[0], ev.clientY - last[1]) / step));
+      for (let i = 1; i <= n; i++) {
+        const c = cellAt(last[0] + ((ev.clientX - last[0]) * i) / n, last[1] + ((ev.clientY - last[1]) * i) / n);
+        if (c) setCell(c, paint);
+      }
+      last = [ev.clientX, ev.clientY];
+    });
+    const stop = () => { paint = null; };
+    svg.addEventListener('pointerup', stop);
+    svg.addEventListener('pointercancel', stop);
+    checkZoom();
+  }
+
+  /** İki parmakla yakınlaştırılmış sayfada kareler 5 mm olmaz: uyarı göster. */
+  function checkZoom() {
+    const z = $('am-zoom');
+    const vv = root.visualViewport;
+    if (z) z.classList.toggle('hidden', !(vv && Math.abs(vv.scale - 1) > 0.02));
+  }
+
+  function printHTML(html, title) {
+    const box = $('report-print');
+    if (!box) return;
+    box.innerHTML = html;
+    const b = root.LazerAndroid;
+    if (b && typeof b.print === 'function') b.print(title);
+    else root.print();
+  }
+
+  /** Dil değişince açık ekranı yeniler (işaretler korunur). */
+  function refresh() {
+    if (isOpen()) render();
+  }
+
+  if (typeof document !== 'undefined' && root.addEventListener) {
+    let t = null;
+    root.addEventListener('resize', () => {
+      clearTimeout(t);
+      t = setTimeout(() => { if (isOpen() && (ui.step === 'R' || ui.step === 'L')) drawGrid(); }, 120);
+    });
+    if (root.visualViewport) root.visualViewport.addEventListener('resize', checkZoom);
+    const init = () => {
+      const d = $('dlg-amsler');
+      if (!d) return;
+      d.addEventListener('close', () => {
+        testScreen(false);
+        d.classList.remove('testing');
+        ui.step = 'intro';
+        ui.viewing = null;
+      });
+    };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+    else init();
+  }
+
+  LE.amsler = {
+    CELL_MM, DIST_MM, MAX_CELLS, CARD_MM,
+    degPerCell, distanceForOneDegree, layout, metrics, saveCalibration, clearCalibration,
+    loadHistory, saveRecord, removeRecord, eyeSummary, verdict, newCells, previousFor, recordSVG, paperSVG,
+    html: { intro: introHTML, calib: calibHTML, test: testHTML, result: resultHTML, history: historyHTML, report: reportHTML, paper: paperHTML },
+    open, back, isOpen, refresh,
+  };
 })(typeof globalThis !== 'undefined' ? globalThis : this);
 
 </script>
@@ -5308,6 +7205,9 @@ levels (+1). The standard results without margin are unchanged.</p>
     for (const el of document.querySelectorAll('[data-i18n-ph]')) el.setAttribute('placeholder', T(el.getAttribute('data-i18n-ph')));
     for (const el of document.querySelectorAll('[data-i18n-title]')) el.setAttribute('title', T(el.getAttribute('data-i18n-title')));
     for (const el of document.querySelectorAll('[data-i18n-aria]')) el.setAttribute('aria-label', T(el.getAttribute('data-i18n-aria')));
+    document.title = T('Lazer Emniyet Analizi');
+    const ver = $('drawer-ver');
+    if (ver) ver.textContent = T('Uygulama {0} · hesap motoru {1}', LE.APP_VERSION || '', LE.analysis.ENGINE_VERSION);
   }
 
   /** Ayarları uygular. first: açılışta (form henüz kurulmadı). */
@@ -5330,6 +7230,8 @@ levels (+1). The standard results without margin are unchanged.</p>
       recalc();
       if ($('dlg-inventory').open) renderInventory();
       if ($('dlg-help').open) $('help-body').innerHTML = LE.help.html(selftest);
+      if ($('dlg-about').open) showAbout(true);
+      if (LE.amsler) LE.amsler.refresh();
       if ($('dlg-selftest').open) showSelftest(true);
       if ($('dlg-report').open && lastOut) $('rep-body').innerHTML = LE.report.build(lastOut, LE.form.getState(), { reportId: LE.report.reportId({}), selftest });
     }
@@ -5364,7 +7266,10 @@ levels (+1). The standard results without margin are unchanged.</p>
     const b = $('selftest');
     if (!selftest.total) return;
     const ok = selftest.passed === selftest.total;
-    b.textContent = (ok ? '✓ ' : '✗ ') + T('Öz-denetim {0}/{1}', selftest.passed, selftest.total);
+    // telefonda yalnız "✓ 64/64" görünür (.st-word gizlenir); tam metin başlıkta ve ekran okuyucuda
+    b.innerHTML = (ok ? '✓' : '✗') + ' <span class="st-word">' + esc(T('Öz-denetim')) + ' </span>' + selftest.passed + '/' + selftest.total;
+    b.setAttribute('aria-label', T('Öz-denetim {0}/{1}', selftest.passed, selftest.total));
+    b.title = T('Hesap motoru öz-denetimi') + ': ' + selftest.passed + '/' + selftest.total;
     b.classList.toggle('fail', !ok);
     if (!ok) {
       const bn = $('selftest-banner');
@@ -5457,7 +7362,78 @@ levels (+1). The standard results without margin are unchanged.</p>
   }
 
   // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  // ☰ çekmece ve ⋮ menüsü
+  // ---------------------------------------------------------------------------
+  function openDrawer() {
+    closeMore();
+    const d = $('drawer');
+    if (!d.open) d.showModal();
+    $('btn-menu').setAttribute('aria-expanded', 'true');
+  }
+  function closeDrawer() {
+    const d = $('drawer');
+    if (d.open) d.close();
+  }
+  function setExamplesOpen(open) {
+    $('menu-examples').classList.toggle('hidden', !open);
+    $('btn-examples').setAttribute('aria-expanded', String(open));
+  }
+  function moreOpen() {
+    return !$('menu-more').classList.contains('hidden');
+  }
+  function openMore() {
+    $('menu-more').classList.remove('hidden');
+    $('btn-more').setAttribute('aria-expanded', 'true');
+    const first = $('menu-more').querySelector('button');
+    if (first) first.focus();
+  }
+  function closeMore(focusButton) {
+    if (!moreOpen()) return;
+    $('menu-more').classList.add('hidden');
+    $('btn-more').setAttribute('aria-expanded', 'false');
+    if (focusButton) $('btn-more').focus();
+  }
+
+  function showAbout(refreshOnly) {
+    $('about-body').innerHTML = LE.about.html(selftest);
+    LE.about.attach($('about-body'));
+    if (!refreshOnly) $('dlg-about').showModal();
+  }
+
+  function wireMenus() {
+    const drawer = $('drawer');
+    $('btn-menu').addEventListener('click', openDrawer);
+    drawer.addEventListener('close', () => $('btn-menu').setAttribute('aria-expanded', 'false'));
+    // çekmecenin dışına (karartılmış zemine) dokunmak kapatır
+    drawer.addEventListener('click', (e) => { if (e.target === drawer) closeDrawer(); });
+    // komutlar önce çekmeceyi kapatır (onay pencereleri ve diyaloglar çekmecenin üstünde kalmasın)
+    for (const id of ['btn-new', 'btn-save', 'btn-inventory', 'btn-report', 'btn-amsler']) $(id).addEventListener('click', closeDrawer);
+    $('btn-examples').addEventListener('click', () => setExamplesOpen($('menu-examples').classList.contains('hidden')));
+
+    const more = $('menu-more');
+    $('btn-more').addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (moreOpen()) closeMore(); else openMore();
+    });
+    for (const b of more.querySelectorAll('button')) b.addEventListener('click', () => closeMore());
+    document.addEventListener('click', (e) => {
+      if (moreOpen() && !more.contains(e.target)) closeMore();
+    });
+    more.addEventListener('keydown', (e) => {
+      const items = Array.from(more.querySelectorAll('button'));
+      const i = items.indexOf(document.activeElement);
+      if (e.key === 'Escape') { e.preventDefault(); closeMore(true); }
+      else if (e.key === 'ArrowDown') { e.preventDefault(); items[(i + 1) % items.length].focus(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); items[(i - 1 + items.length) % items.length].focus(); }
+      else if (e.key === 'Tab') closeMore();
+    });
+    $('btn-about').addEventListener('click', () => showAbout());
+    $('btn-amsler').addEventListener('click', () => LE.amsler.open());
+  }
+
   function wire() {
+    wireMenus();
     $('btn-new').addEventListener('click', () => {
       if (!confirm(T('Form varsayılan değerlere sıfırlansın mı? (Kaydedilmemiş değişiklikler kaybolur.)'))) return;
       LE.form.setState(LE.form.defaultState());
@@ -5484,16 +7460,6 @@ levels (+1). The standard results without margin are unchanged.</p>
         applyPrefs(false);
       });
     }
-    const exBtn = $('btn-examples');
-    const exMenu = $('menu-examples');
-    exBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const open = exMenu.classList.toggle('hidden') === false;
-      exBtn.setAttribute('aria-expanded', String(open));
-    });
-    document.addEventListener('click', (e) => {
-      if (!exMenu.contains(e.target)) { exMenu.classList.add('hidden'); exBtn.setAttribute('aria-expanded', 'false'); }
-    });
     for (const btn of document.querySelectorAll('[data-close]')) {
       btn.addEventListener('click', () => btn.closest('dialog').close());
     }
@@ -5555,11 +7521,11 @@ levels (+1). The standard results without margin are unchanged.</p>
       const t = exText(ex);
       const b = document.createElement('button');
       b.type = 'button';
-      b.setAttribute('role', 'menuitem');
       b.innerHTML = esc(t.title) + '<small>' + esc(t.desc) + '</small>';
       b.addEventListener('click', () => {
+        closeDrawer();
+        setExamplesOpen(false);
         loadExample(i);
-        m.classList.add('hidden');
       });
       m.appendChild(b);
     });
@@ -5632,7 +7598,7 @@ levels (+1). The standard results without margin are unchanged.</p>
     const cols = [['name', T('Tanım')], ['maker', T('Üretici / model')], ['serial', T('Seri no')], ['cls', T('Sınıf')], ['loc', T('Konum')], ['wl', 'λ (nm)'], ['nohd', 'NOHD'], ['odWorst', 'OD'], ['marking', 'EN 207'], ['date', T('Tarih')]];
     const body = $('inv-body');
     if (!LE.store.loadInventory().length) {
-      body.innerHTML = '<p class="muted">' + T('Envanter boş. Bir analizi "Kaydet" düğmesiyle (Ctrl+S) ekleyin ya da daha önce dışa aktarılmış bir JSON dosyasını içe aktarın.') + '</p>';
+      body.innerHTML = '<p class="muted">' + T('Envanter boş. Bir analizi ☰ menüsündeki "Envantere kaydet" ile (Ctrl+S) ekleyin ya da daha önce dışa aktarılmış bir JSON dosyasını içe aktarın.') + '</p>';
       return;
     }
     const head = cols.map(([k, t]) => '<th><button class="minibtn" data-sort="' + k + '">' + t + (sortKey === k ? (sortDir > 0 ? ' ▲' : ' ▼') : '') + '</button></th>').join('') + '<th></th>';
@@ -5702,18 +7668,14 @@ levels (+1). The standard results without margin are unchanged.</p>
   }
 
   /**
-   * Geri tuşu (Android): açık diyaloğu ya da Örnekler menüsünü kapatır.
+   * Geri tuşu (Android): Amsler testinde bir adım geri; yoksa en üstteki diyaloğu (çekmece dahil) ya da ⋮ menüsünü kapatır.
    * @returns {boolean} bir şey kapatıldıysa true; false ise uygulama kapanabilir.
    */
   function back() {
-    const open = document.querySelector('dialog[open]');
-    if (open) { open.close(); return true; }
-    const m = $('menu-examples');
-    if (m && !m.classList.contains('hidden')) {
-      m.classList.add('hidden');
-      $('btn-examples').setAttribute('aria-expanded', 'false');
-      return true;
-    }
+    if (LE.amsler && LE.amsler.isOpen()) return LE.amsler.back();
+    const open = document.querySelectorAll('dialog[open]');
+    if (open.length) { open[open.length - 1].close(); return true; }
+    if (moreOpen()) { closeMore(); return true; }
     return false;
   }
   LE.app = { back, applyPrefs };

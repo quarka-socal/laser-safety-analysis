@@ -18,9 +18,10 @@ mercek ve fiber çıkışı tehlikeleri. İnternet bağlantısı gerektirmez; ve
   bilimsel gösterim için <span class="mono">1e-9</span> ya da <span class="mono">2×10^-4</span> kullanabilirsiniz. Her alanın altındaki gri satır,
   girdinin nasıl yorumlandığını gösterir — lütfen kontrol edin.</li>
   <li><b>Işın</b>: çap ve ıraksamayı üretici verisindeki ölçütle (çoğunlukla 1/e²) girin; program 1/e'ye çevirir.</li>
-  <li>Sonuçlar anında güncellenir. <b>Kaydet</b> ile envantere ekleyin, <b>Rapor</b> ile yazdırılabilir rapor (PDF) alın.</li>
+  <li>Sonuçlar anında güncellenir. Sol üstteki <b>☰</b> menüsünde <b>Yeni analiz</b>, <b>Örnekler</b>, <b>Envantere kaydet</b> (Ctrl+S),
+  <b>Envanter</b>, yazdırılabilir <b>Rapor</b> (PDF) ve <b>Amsler Grid testi</b> bulunur. Sağ üstteki <b>⋮</b> menüsünde Yardım, Ayarlar ve Hakkında vardır.</li>
   <li>Ekran sade kalsın diye açıklamalar gizlidir: alanın yanındaki <span class="mono">i</span> düğmesine ya da sonuçların altındaki <b>Açıklama</b>
-  satırına dokunun (Ayarlar → Açıklamalar → Her zaman ile hepsi görünür).</li>
+  satırına dokunun (⋮ → Ayarlar → Açıklamalar → Her zaman ile hepsi görünür).</li>
 </ol>
 
 <h3>Mesafe–OD grafiğini okuma</h3>
@@ -100,6 +101,18 @@ seviyeleri (+1). Standart (paysız) sonuçlar değişmez.</p>
   yaygın yansıma sonuçlarıyla birebir karşılaştırıldı.</li>
 </ul>
 
+<h3>Amsler Grid testi</h3>
+<ul>
+  <li>Lazer maruziyeti şüphesinde merkezi görmeyi her göz için ayrı ayrı yoklayan hızlı saha testidir (☰ → Amsler Grid testi).
+  Kareler gerçek 5 mm çizilir; telefon ≈ 30 cm uzakta tutulunca her kare ≈ 1°'dir (Amsler 1953: 10 × 10 cm, 20 × 20 kare).</li>
+  <li>Ekran ölçüsü Android'in bildirdiği piksel yoğunluğundan alınır; bir banka ya da kimlik kartıyla (85,60 × 53,98 mm) doğrulanabilir.
+  Tarayıcıda kart ayarı yapılmadan kareler 5 mm olmayabilir.</li>
+  <li>Bozuk, eksik ya da karanlık görülen karelere dokunularak işaretlenir. İşaret ya da belirti varsa sonuç "bulgu var"dır: aynı gün göz hekimine
+  başvurulmalı ve olay lazer güvenlik sorumlusuna bildirilmelidir.</li>
+  <li>Normal sonuç hasarı dışlamaz (duyarlılık sınırlı; Crossland ve Rubin 2007). Sonuçlar bu cihazda saklanır, aynı kişinin önceki testiyle karşılaştırılır
+  ve PDF olarak yazdırılabilir. Gerçek boyutlu kâğıt ızgara da yazdırılabilir.</li>
+</ul>
+
 <h3>Kapsam dışı</h3>
 <ul>
   <li>Lazer sınıflandırması (AEL hesabı), çoklu dalga boyu toplama, taramalı ışınlar, darbe grupları (burst), aynasal yansıma geometrisi.</li>
@@ -120,9 +133,10 @@ lens and fibre output hazards. It needs no internet connection; data are stored 
   <span class="mono">1e-9</span> or <span class="mono">2×10^-4</span> for scientific notation. The grey line under each field shows
   how the input was interpreted — please check it.</li>
   <li><b>Beam</b>: enter the diameter and divergence in the definition used by the manufacturer (usually 1/e²); the program converts to 1/e.</li>
-  <li>Results update immediately. <b>Save</b> adds the analysis to the inventory, <b>Report</b> gives a printable report (PDF).</li>
+  <li>Results update immediately. The <b>☰</b> menu at the top left holds <b>New analysis</b>, <b>Examples</b>, <b>Save to inventory</b> (Ctrl+S),
+  <b>Inventory</b>, the printable <b>Report</b> (PDF) and the <b>Amsler grid test</b>. The <b>⋮</b> menu at the top right holds Help, Settings and About.</li>
   <li>Explanations are hidden to keep the screen calm: tap <span class="mono">i</span> next to a field or <b>Explanation</b> under a result to show them
-  (Settings → Explanations → Always to show all).</li>
+  (⋮ → Settings → Explanations → Always to show all).</li>
 </ol>
 
 <h3>Reading the distance–OD chart</h3>
@@ -197,6 +211,18 @@ levels (+1). The standard results without margin are unchanged.</p>
   4 distances and a 2176-point MPE scan — never less protective for any output; differences are documented in OKUBENI.md.</li>
   <li>The 2006/25/EC set was compared one-to-one with the MPE, OD, NOHD, lens, fibre and diffuse reflection results of the 12 EasyHaz example files
   from 2010 (ANSI Z136.1-2007 ≈ ICNIRP 2000).</li>
+</ul>
+
+<h3>Amsler grid test</h3>
+<ul>
+  <li>A quick field test of the central vision of each eye after a suspected laser exposure (☰ → Amsler grid test).
+  The squares are drawn 5 mm wide; with the phone held ≈ 30 cm away each square subtends ≈ 1° (Amsler 1953: 10 × 10 cm, 20 × 20 squares).</li>
+  <li>The screen size comes from the pixel density reported by Android and can be checked with a bank or ID card (85.60 × 53.98 mm).
+  In a browser the squares may not be 5 mm until the card calibration is done.</li>
+  <li>Squares seen as distorted, missing or dark are marked by tapping. Any mark or symptom makes the result abnormal: an eye doctor must be seen
+  the same day and the incident reported to the laser safety officer.</li>
+  <li>A normal result does not rule out injury (limited sensitivity; Crossland and Rubin 2007). Results are stored on this device, compared with the same
+  person's previous test and can be printed as PDF. An actual-size paper grid can be printed as well.</li>
 </ul>
 
 <h3>Out of scope</h3>

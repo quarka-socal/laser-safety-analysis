@@ -6,6 +6,7 @@ import android.app.AlertDialog
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Color
 import android.net.Uri
@@ -18,6 +19,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
 import android.view.WindowInsetsController
+import android.view.WindowManager
 import android.webkit.JavascriptInterface
 import android.webkit.JsResult
 import android.webkit.ValueCallback
@@ -29,6 +31,7 @@ import android.webkit.WebViewClient
 import android.widget.FrameLayout
 import android.widget.Toast
 import android.window.OnBackInvokedDispatcher
+import org.json.JSONObject
 import java.io.ByteArrayInputStream
 import java.io.File
 
@@ -41,7 +44,10 @@ import java.io.File
  *  - JSON / CSV / HTML kaydetme: SAF dosya seçici (ACTION_CREATE_DOCUMENT)
  *  - JSON içe aktarma: SAF dosya seçici (ACTION_OPEN_DOCUMENT)
  *  - geri tuşu: önce açık diyaloğu kapatır
- *  - kalıcı localStorage (envanter ve son oturum), açık/koyu tema
+ *  - kalıcı localStorage (envanter, son oturum, Amsler test geçmişi), açık/koyu tema
+ *  - Amsler Grid testi: fiziksel ekran yoğunluğu (5 mm kare), test sırasında ekran açık ve parlak
+ *
+ * Copyright © 2026 S.ÖCAL — SPDX-License-Identifier: GPL-3.0-or-later
  *
  * Sayfa, ağa hiç çıkmayan sabit bir https kökenden sunulur (shouldInterceptRequest); uygulamanın
  * INTERNET izni yoktur.
@@ -126,7 +132,7 @@ class MainActivity : Activity() {
         return when (key) {
             "ok" -> if (en) "OK" else getString(R.string.ok)
             "cancel" -> if (en) "Cancel" else getString(R.string.cancel)
-            "title" -> if (en) "Laser Safety" else getString(R.string.app_name)
+            "title" -> if (en) getString(R.string.app_name) else "Lazer Emniyet Analizi"
             "saved" -> if (en) "Saved: %1\$s" else getString(R.string.saved)
             "save_failed" -> if (en) "Could not save: %1\$s" else getString(R.string.save_failed)
             "no_picker" -> if (en) "Could not open the file picker." else getString(R.string.no_picker)
@@ -268,11 +274,67 @@ class MainActivity : Activity() {
             }
         }
 
+        /**
+         * Amsler testi: ekranın fiziksel piksel yoğunluğu. Sayfa 5 mm'lik kareleri buradan çizer
+         * (CSS px/mm = xdpi / 25,4 / devicePixelRatio). Köşegen denetimi için tam ekran boyutu da verilir.
+         */
+        @JavascriptInterface
+        fun screenMetrics(): String {
+            val dm = resources.displayMetrics
+            val full = windowManager.maximumWindowMetrics.bounds
+            return JSONObject()
+                .put("xdpi", dm.xdpi.toDouble())
+                .put("ydpi", dm.ydpi.toDouble())
+                .put("density", dm.density.toDouble())
+                .put("densityDpi", dm.densityDpi)
+                .put("widthPixels", full.width())
+                .put("heightPixels", full.height())
+                .toString()
+        }
+
+        /** Amsler testi sırasında ekran açık kalır, parlaklık en yükseğe çıkar ve sayfa yakınlaştırması sıfırlanır. */
+        @JavascriptInterface
+        fun testScreen(on: Boolean) {
+            runOnUiThread {
+                val lp = window.attributes
+                if (on) {
+                    window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    lp.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_FULL
+                    var n = 0
+                    // iki parmakla büyütülmüşse kareler 5 mm olmaz: sayfa normal ölçeğe döner
+                    while (web.zoomOut() && n++ < 20) {
+                    }
+                } else {
+                    window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    lp.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
+                }
+                window.attributes = lp
+            }
+        }
+
+        /** Hakkında: Android uygulamasının sürümü, cihaz, Android ve WebView sürümü. */
+        @JavascriptInterface
+        fun appInfo(): String {
+            val pi = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                packageManager.getPackageInfo(packageName, PackageManager.PackageInfoFlags.of(0))
+            } else {
+                @Suppress("DEPRECATION") packageManager.getPackageInfo(packageName, 0)
+            }
+            return JSONObject()
+                .put("versionName", pi.versionName ?: "")
+                .put("versionCode", pi.longVersionCode)
+                .put("release", Build.VERSION.RELEASE)
+                .put("sdk", Build.VERSION.SDK_INT)
+                .put("device", "${Build.MANUFACTURER} ${Build.MODEL}".trim())
+                .put("webview", WebView.getCurrentWebViewPackage()?.versionName ?: "")
+                .toString()
+        }
+
         /** Rapor: sayfanın yazdırma görünümü (#report-print) sistem yazdırma ekranına verilir. */
         @JavascriptInterface
         fun print(title: String) {
             runOnUiThread {
-                val job = title.ifBlank { getString(R.string.app_name) }
+                val job = title.ifBlank { msg("title") }
                 val pm = getSystemService(PRINT_SERVICE) as PrintManager
                 pm.print(
                     job,

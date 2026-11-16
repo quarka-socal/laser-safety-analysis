@@ -9,7 +9,7 @@ const fs = require('fs');
 const path = require('path');
 const { LE, gauss } = require('./helpers');
 const UI = path.join(__dirname, '..', 'js', 'ui');
-for (const m of ['version', 'i18n', 'lang_en', 'examples', 'form', 'render', 'report', 'store', 'help']) require(path.join(UI, m + '.js'));
+for (const m of ['version', 'i18n', 'lang_en', 'examples', 'form', 'render', 'report', 'store', 'help', 'license', 'about', 'amsler']) require(path.join(UI, m + '.js'));
 const I = LE.i18n;
 const A = LE.analysis;
 
@@ -21,7 +21,7 @@ const fake = () => ({ innerHTML: '', querySelector: () => null });
 function allKeys() {
   const keys = new Set();
   const unq = (s) => s.replace(/\\'/g, "'").replace(/\\"/g, '"').replace(/\\n/g, '\n').replace(/\\\\/g, '\\');
-  for (const f of ['form', 'render', 'report', 'app', 'store']) {
+  for (const f of ['form', 'render', 'report', 'app', 'store', 'about', 'amsler']) {
     const src = fs.readFileSync(path.join(UI, f + '.js'), 'utf8');
     for (const m of src.matchAll(/\bT\(\s*'((?:[^'\\]|\\.)*)'/g)) keys.add(unq(m[1]));
     // üçlü ifadeler: T(koşul ? 'a' : 'b', …)
@@ -112,6 +112,25 @@ test('İngilizce: sonuç ekranı, rapor, yardım, öz-denetim adlarında Türkç
     for (const v of LE.selftest.VECTORS) assert.deepEqual(englishProblems(I.X(v[0])), [], v[0]);
     // form: etiket, açıklama ve seçenekler
     for (const k of allKeys()) assert.deepEqual(englishProblems(I.T(k)), [], k);
+    assert.deepEqual(I.missing().filter((k) => /[A-Za-zÇĞİÖŞÜçğıöşü]/.test(k)), [], 'çalışırken karşılığı bulunmayan anahtar');
+  } finally {
+    I.setLang('tr');
+  }
+});
+
+test('İngilizce: Amsler testi ekranları, rapor ve Hakkında Türkçe metin içermez', () => {
+  const AM = LE.amsler;
+  const bad = { id: 'r1', at: '2026-11-16T09:00:00.000Z', person: 'John Smith', event: '532 nm DPSS', R: ['0,0', '3,-4'], L: ['-1,0'], sym: ['blur', 'spot', 'after', 'pain'], cols: { R: 12, L: 12 }, rows: { R: 20, L: 20 }, source: 'card' };
+  const ok = Object.assign({}, bad, { id: 'r2', at: '2026-11-17T09:00:00.000Z', R: [], L: [], sym: [], source: 'none' });
+  I.setLang('en');
+  try {
+    const pages = {
+      intro: AM.html.intro(), calib: AM.html.calib(), testR: AM.html.test('R'), testL: AM.html.test('L'),
+      resultBad: AM.html.result(bad, null, true), resultOk: AM.html.result(ok, bad, false), resultUnsaved: AM.html.result(bad, ok, null),
+      history: AM.html.history([ok, bad]), historyEmpty: AM.html.history([]), report: AM.html.report(bad, ok), reportOk: AM.html.report(ok, null), paper: AM.html.paper(),
+      about: LE.about.html({ passed: 64, total: 64 }).replace(/S\.ÖCAL/g, ''),
+    };
+    for (const [k, h] of Object.entries(pages)) assert.deepEqual(englishProblems(h), [], k);
     assert.deepEqual(I.missing().filter((k) => /[A-Za-zÇĞİÖŞÜçğıöşü]/.test(k)), [], 'çalışırken karşılığı bulunmayan anahtar');
   } finally {
     I.setLang('tr');
