@@ -24,9 +24,17 @@ Sınır değerler iki set hâlinde uygulanır ve varsayılan olarak **en koruyuc
 | Doğrudan | `index.html` dosyasını Firefox/Chrome ile açın |
 | Komut satırı | `./baslat.sh` |
 | Tek dosya (taşınabilir) | `dist/LazerEmniyet.html` — tek başına kopyalanıp her bilgisayarda açılabilir |
+| Masaüstü kısayolu (Linux) | `tools/kisayol-kur.sh` — uygulama menüsüne (Bilim) ve masaüstüne **Laser Safety Analysis** simgesi; tek dosya sürümünü varsayılan tarayıcıda açar. Kaldırmak için `tools/kisayol-kur.sh --kaldir` |
 | Android (11 ve üstü) | `android/` klasöründeki uygulama — aşağıdaki **Android sürümü** bölümü |
 
-Klasör istenen yere taşınabilir; tüm dosyalar göreli yollarla bağlıdır.
+Klasör istenen yere taşınabilir; tüm dosyalar göreli yollarla bağlıdır. Taşıdıktan sonra kısayolu yeniden kurun
+(`tools/kisayol-kur.sh`).
+
+**Kayıtlar ve dosya yolu (PC).** Tarayıcı, dosyadan açılan sayfanın yerel deposunu (envanter, ayarlar, Amsler geçmişi)
+dosya yoluna göre ayrı tutar (Firefox 160'ta denendi: aynı dosya yeniden açılınca kayıtlar duruyor, başka klasördeki dosya
+onları görmüyor). Bu yüzden hep aynı dosyayı kullanın; kısayol `dist/LazerEmniyet.html` dosyasını açar. Program daha önce
+`index.html` ile kullanıldıysa oradaki kayıtları **Envanter → JSON dışa aktar** ile alıp kısayolla açılan sürümde
+**JSON içe aktar** ile yükleyin. Yeni sürüm derlemesi aynı dosyanın üzerine yazıldığı için kayıtları etkilemez.
 
 ## Kullanım
 
@@ -182,7 +190,7 @@ Standart tablolarındaki yuvarlamadan doğan küçük basamaklar olduğu gibi uy
 elle hesaplanmış değerler, EasyHaz LSO örnek dosyalarındaki sonuçlar, yayımlanmış EN 207/208 örnekleri).
 Biri bile başarısız olursa kırmızı uyarı bandı çıkar. Başlıktaki yeşil rozete tıklayarak ayrıntıyı görebilirsiniz.
 
-**Geliştirme testleri** — `node --test test/*.test.js` (Node ≥ 18; Node 18 ve 24 ile denenir): 117 test.
+**Geliştirme testleri** — `node --test test/*.test.js` (Node ≥ 18; Node 18 ve 24 ile denenir): 119 test.
 
 - ICNIRP Tablo 5, 7, 8 satır noktaları; düzeltme faktörleri; ölçüm açıklıkları
 - Tüm dalga boylarında MPE'nin süreyle azalmadığı (bilinen tablo basamakları hariç) ve sürekliliği
@@ -444,6 +452,8 @@ js/ui/                form, sonuç ekranı, envanter, rapor, yardım, örnekler
   lang_en.js          İngilizce sözlük
 test/                 Node testleri; test/data: EasyHaz 2014 doğrulama verisi ve 2010 örnek dosyaları
 LICENSE               GNU GPL v3 tam metni
+tools/kisayol-kur.sh  Linux masaüstü kısayolu (uygulama menüsü + masaüstü); --kaldir ile kaldırır
+tools/laser-safety-analysis.svg  kısayol simgesi
 tools/build-single.js tek dosya derlemesi → dist/LazerEmniyet.html (derleme zamanını da yazar)
 tools/easyhaz_oracle.py  EasyHaz çapraz doğrulama aracı (LibreOffice UNO, makrosuz)
 android/              Android uygulaması (WebView kabuğu; dist/LazerEmniyet.html'i gömer)
@@ -469,6 +479,10 @@ Klasör bir git deposudur. İlk commit `1be12d6`, inceleme öncesi v1.3 durumudu
 `git log` ile görülebilir.
 
 ## Sürüm notları
+
+**PC masaüstü kısayolu (16.11.2026, uygulama 1.5.1)** — `tools/kisayol-kur.sh`: Linux uygulama menüsüne ve masaüstüne
+"Laser Safety Analysis" simgesi; tek dosya sürümünü varsayılan tarayıcıda açar. `desktop-file-validate` ile geçerli;
+test/kisayol.test.js geçici bir ev klasöründe kurup kaldırarak denetler. Testler 119.
 
 **Uygulama 1.5.1 (16.11.2026, motor 1.3.1 değişmedi)**
 - Geliştirici adı "S.OCAL" olarak düzeltildi (Hakkında, telif satırları).
