@@ -5,6 +5,8 @@
   'use strict';
   const LE = (root.LE = root.LE || {});
   const U = LE.units;
+  const T = (s, ...a) => (LE.i18n ? LE.i18n.T(s, ...a) : s.replace(/\{(\d+)\}/g, (m, i) => a[i]));
+  const X = (s) => (LE.i18n ? LE.i18n.X(s) : s);
 
   const UL = {
     wavelength: ['nm', 'µm'],
@@ -181,9 +183,10 @@
   function build(container, changeCb) {
     onChange = changeCb || onChange;
     container.innerHTML = '';
+    for (const k in els) delete els[k];
     for (const s of SECTIONS) {
       const det = h('details', { class: 'sec', id: 'sec-' + s.id, open: s.open ? true : null });
-      det.appendChild(h('summary', null, [s.title, h('span', { class: 'hint', id: 'hint-' + s.id })]));
+      det.appendChild(h('summary', null, [T(s.title), h('span', { class: 'hint', id: 'hint-' + s.id })]));
       const body = h('div', { class: 'sec-body' });
       for (const f of s.fields) body.appendChild(buildField(f));
       det.appendChild(body);
@@ -192,77 +195,101 @@
     refresh();
   }
 
+  /** Birim adı (dk/sa İngilizcede min/h). */
+  const unitText = (u) => (u === 'dk' || u === 'sa' ? T(u) : u);
+
+  /**
+   * Alan açıklaması: varsayılan olarak gizli, etiketin yanındaki (i) düğmesine dokununca açılır.
+   * "Açıklamalar: her zaman" ayarında body.help-always ile hepsi görünür.
+   */
+  function helpParts(f) {
+    if (!f.help) return { btn: null, box: null };
+    const hid = 'help-' + f.id;
+    const box = h('div', { class: 'help', id: hid, text: T(f.help) });
+    const btn = h('button', { type: 'button', class: 'info-btn', 'aria-expanded': 'false', 'aria-controls': hid, 'aria-label': T('Açıklama'), title: T('Açıklama'), text: 'i' });
+    btn.addEventListener('click', () => {
+      const open = !box.classList.contains('show');
+      box.classList.toggle('show', open);
+      btn.setAttribute('aria-expanded', String(open));
+    });
+    return { btn, box };
+  }
+
+  const lrow = (labelEl, btn) => (btn ? h('div', { class: 'lrow' }, [labelEl, btn]) : labelEl);
+
   function buildField(f) {
     const wrap = h('div', { class: 'field', id: 'f-' + f.id });
     const rec = { wrap };
     els[f.id] = rec;
     const inputId = 'in-' + f.id;
+    const hp = helpParts(f);
     if (f.type === 'num') {
-      const lab = h('label', { for: inputId, text: f.label });
+      const lab = h('label', { for: inputId, text: T(f.label) });
       rec.label = lab;
       const input = h('input', { id: inputId, inputmode: 'decimal', autocomplete: 'off', spellcheck: 'false' });
       input.value = state.v[f.id];
       input.addEventListener('input', () => { state.v[f.id] = input.value; changed(); });
-      const sel = h('select', { 'aria-label': f.label + ' birimi' });
-      for (const un of UL[f.units]) sel.appendChild(h('option', { value: un, text: un }));
+      const sel = h('select', { 'aria-label': T('{0} birimi', T(f.label)) });
+      for (const un of UL[f.units]) sel.appendChild(h('option', { value: un, text: unitText(un) }));
       sel.value = state.u[f.id];
       sel.addEventListener('change', () => { state.u[f.id] = sel.value; changed(); });
       const ctl = h('div', { class: 'ctl unit' }, [input, sel]);
       const echo = h('div', { class: 'echo', id: 'echo-' + f.id });
-      wrap.append(lab, ctl, echo);
-      if (f.help) wrap.appendChild(h('div', { class: 'help', text: f.help }));
+      wrap.append(lrow(lab, hp.btn), ctl, echo);
+      if (hp.box) wrap.appendChild(hp.box);
       Object.assign(rec, { input, unit: sel, echo });
     } else if (f.type === 'text') {
-      const lab = h('label', { for: inputId, text: f.label });
-      const input = h('input', { id: inputId, autocomplete: 'off', placeholder: f.placeholder || null });
+      const lab = h('label', { for: inputId, text: T(f.label) });
+      const input = h('input', { id: inputId, autocomplete: 'off', placeholder: f.placeholder ? T(f.placeholder) : null });
       input.value = state.v[f.id];
       input.addEventListener('input', () => { state.v[f.id] = input.value; changed(); });
       const echo = h('div', { class: 'echo', id: 'echo-' + f.id });
-      wrap.append(lab, input, echo);
-      if (f.help) wrap.appendChild(h('div', { class: 'help', text: f.help }));
+      wrap.append(lrow(lab, hp.btn), input, echo);
+      if (hp.box) wrap.appendChild(hp.box);
       Object.assign(rec, { input, echo });
     } else if (f.type === 'textarea') {
-      const lab = h('label', { for: inputId, text: f.label });
+      const lab = h('label', { for: inputId, text: T(f.label) });
       const input = h('textarea', { id: inputId });
       input.value = state.v[f.id];
       input.addEventListener('input', () => { state.v[f.id] = input.value; changed(true); });
       wrap.append(lab, input);
       Object.assign(rec, { input });
     } else if (f.type === 'select') {
-      const lab = h('label', { for: inputId, text: f.label });
+      const lab = h('label', { for: inputId, text: T(f.label) });
       const sel = h('select', { id: inputId });
-      for (const [val, txt] of f.options) sel.appendChild(h('option', { value: val, text: txt }));
+      for (const [val, txt] of f.options) sel.appendChild(h('option', { value: val, text: T(txt) }));
       sel.value = state.v[f.id];
       sel.addEventListener('change', () => { state.v[f.id] = sel.value; changed(); });
-      wrap.append(lab, sel);
-      if (f.help) wrap.appendChild(h('div', { class: 'help', text: f.help }));
+      wrap.append(lrow(lab, hp.btn), sel);
+      if (hp.box) wrap.appendChild(hp.box);
       Object.assign(rec, { input: sel });
     } else if (f.type === 'seg') {
-      wrap.appendChild(h('div', { class: 'lbl', text: f.label }));
-      const seg = h('div', { class: 'seg', role: 'group', 'aria-label': f.label });
+      wrap.appendChild(lrow(h('div', { class: 'lbl', text: T(f.label) }), hp.btn));
+      const seg = h('div', { class: 'seg', role: 'group', 'aria-label': T(f.label) });
       rec.buttons = [];
       for (const [val, txt] of f.options) {
-        const b = h('button', { type: 'button', 'aria-pressed': String(state.v[f.id] === val), text: txt });
+        const b = h('button', { type: 'button', 'aria-pressed': String(state.v[f.id] === val), text: T(txt) });
         b.addEventListener('click', () => { state.v[f.id] = val; changed(); });
         b.dataset.val = val;
         rec.buttons.push(b);
         seg.appendChild(b);
       }
       wrap.appendChild(seg);
+      if (hp.box) wrap.appendChild(hp.box);
     } else if (f.type === 'check') {
       const input = h('input', { type: 'checkbox', id: inputId });
       input.checked = !!state.v[f.id];
       input.addEventListener('change', () => { state.v[f.id] = input.checked; changed(); });
-      wrap.appendChild(h('label', { class: 'chk', for: inputId }, [input, f.label]));
+      wrap.appendChild(lrow(h('label', { class: 'chk', for: inputId }, [input, T(f.label)]), hp.btn));
       const echo = h('div', { class: 'echo', id: 'echo-' + f.id });
       wrap.appendChild(echo);
-      if (f.help) wrap.appendChild(h('div', { class: 'help', text: f.help }));
+      if (hp.box) wrap.appendChild(hp.box);
       Object.assign(rec, { input, echo });
     } else if (f.type === 'presets') {
       const box = h('div', { class: 'presets' });
       for (const [val, un, txt] of f.items) {
         box.appendChild(h('button', {
-          type: 'button', class: 'chip', text: txt,
+          type: 'button', class: 'chip', text: T(txt),
           onclick: () => {
             state.v[f.target] = val; state.u[f.target] = un;
             if (f.target === 'T') state.v.T_auto = false;
@@ -272,10 +299,10 @@
       }
       wrap.appendChild(box);
     } else if (f.type === 'calc') {
-      wrap.appendChild(h('div', { class: 'lbl', text: f.label }));
+      wrap.appendChild(h('div', { class: 'lbl', text: T(f.label) }));
       const line = h('div', { class: 'presets' });
       const out = h('span', { class: 'mono', id: 'm2-out', text: '—' });
-      const btn = h('button', { type: 'button', class: 'minibtn', text: 'Kırınım sınırı ıraksamasını yaz (M² = 1)', onclick: setDiffractionLimit });
+      const btn = h('button', { type: 'button', class: 'minibtn', text: T('Kırınım sınırı ıraksamasını yaz (M² = 1)'), onclick: setDiffractionLimit });
       line.append(out, btn);
       wrap.appendChild(line);
       rec.out = out;
@@ -314,7 +341,7 @@
       if (r.input) r.input.disabled = dis;
       if (r.unit) r.unit.disabled = dis;
       if (r.buttons) for (const b of r.buttons) b.setAttribute('aria-pressed', String(state.v[id] === b.dataset.val));
-      if (r.label && f.labelEllip) r.label.textContent = state.v.ellip ? f.labelEllip : f.label;
+      if (r.label && f.labelEllip) r.label.textContent = T(state.v.ellip ? f.labelEllip : f.label);
     }
   }
 
@@ -325,24 +352,24 @@
     const f = FIELDS[id];
     const unit = state.u[id];
     // İçe aktarılan / eski kayıtta listede olmayan birim: sessizce başka birimle yorumlanmaz
-    if (UL[f.units].indexOf(unit) < 0) { errs[id] = 'Bilinmeyen birim "' + String(unit) + '": listeden bir birim seçin.'; return NaN; }
+    if (UL[f.units].indexOf(unit) < 0) { errs[id] = T('Bilinmeyen birim "{0}": listeden bir birim seçin.', String(unit)); return NaN; }
     const r = U.parseNumber(state.v[id]);
-    if (!r.ok) { errs[id] = r.error; return NaN; }
+    if (!r.ok) { errs[id] = X(r.error); return NaN; }
     const kind = KIND[f.units] || f.units;
     const si = U.toSI(r.value, kind, state.u[id]);
-    if (f.min !== undefined && si < f.min) { errs[id] = 'Değer çok küçük (en az ' + U.fmt(U.fromSI(f.min, kind, state.u[id])) + ' ' + state.u[id] + ').'; return NaN; }
-    if (f.max !== undefined && si > f.max) { errs[id] = 'Değer çok büyük (en çok ' + U.fmt(U.fromSI(f.max, kind, state.u[id])) + ' ' + state.u[id] + ').'; return NaN; }
-    if (r.warning) warns[id] = r.warning;
+    if (f.min !== undefined && si < f.min) { errs[id] = T('Değer çok küçük (en az {0} {1}).', U.fmt(U.fromSI(f.min, kind, state.u[id])), unitText(state.u[id])); return NaN; }
+    if (f.max !== undefined && si > f.max) { errs[id] = T('Değer çok büyük (en çok {0} {1}).', U.fmt(U.fromSI(f.max, kind, state.u[id])), unitText(state.u[id])); return NaN; }
+    if (r.warning) warns[id] = X(r.warning);
     echo[id] = echoText(si, f.units);
     return si;
   }
 
   function readPlain(id, errs, warns, echo, min, max, unitTxt) {
     const r = U.parseNumber(state.v[id]);
-    if (!r.ok) { errs[id] = r.error; return NaN; }
-    if (r.value < min || r.value > max) { errs[id] = 'Değer ' + U.fmt(min) + ' ile ' + U.fmt(max) + ' arasında olmalı.'; return NaN; }
-    if (r.warning) warns[id] = r.warning;
-    echo[id] = unitTxt === '%' ? '= %' + U.fmt(r.value, 4) : '= ' + U.fmt(r.value, 4) + (unitTxt ? ' ' + unitTxt : '');
+    if (!r.ok) { errs[id] = X(r.error); return NaN; }
+    if (r.value < min || r.value > max) { errs[id] = T('Değer {0} ile {1} arasında olmalı.', U.fmt(min), U.fmt(max)); return NaN; }
+    if (r.warning) warns[id] = X(r.warning);
+    echo[id] = unitTxt === '%' ? '= ' + U.fmtPct(r.value / 100, 4) : '= ' + U.fmt(r.value, 4) + (unitTxt ? ' ' + unitTxt : '');
     return r.value;
   }
 
@@ -375,7 +402,7 @@
     // hesaba giren seçimler listedeki bir değer olmalı (bozuk kayıt sessizce varsayılana dönmez)
     for (const id of CALC_CHOICES) {
       const f = FIELDS[id];
-      if (!f.options.some((o) => o[0] === state.v[id])) errs[id] = 'Geçersiz seçim "' + String(state.v[id]) + '": listeden seçin.';
+      if (!f.options.some((o) => o[0] === state.v[id])) errs[id] = T('Geçersiz seçim "{0}": listeden seçin.', String(state.v[id]));
     }
     const mode = g('mode');
     const lambda = num('wl');
@@ -399,7 +426,7 @@
     if (mode !== 'sp') {
       if (g('T_auto')) {
         inp.T = def;
-        echo.T = 'Standart: ' + U.fmtTime(def) + (lambda < 400 ? ' (UV, tam vardiya)' : lambda < 700 ? ' (görünür, kazara bakış — göz kırpma)' : ' (IR, kazara bakış)');
+        echo.T = T(lambda < 400 ? 'Standart: {0} (UV, tam vardiya)' : lambda < 700 ? 'Standart: {0} (görünür, kazara bakış — göz kırpma)' : 'Standart: {0} (IR, kazara bakış)', U.fmtTime(def));
       } else inp.T = num('T');
     }
 
@@ -416,8 +443,8 @@
     inp.model = g('model');
     inp.range = num('range');
     inp.alpha = num('alpha') * 1e3; // mrad
-    if (inp.alpha > 0) echo.alpha = '= ' + U.fmt(inp.alpha, 4) + ' mrad (genişletilmiş kaynak)';
-    else echo.alpha = 'Nokta kaynak (α ≤ 1,5 mrad)';
+    if (inp.alpha > 0) echo.alpha = T('= {0} mrad (genişletilmiş kaynak)', U.fmt(inp.alpha, 4));
+    else echo.alpha = T('Nokta kaynak (α ≤ {0} mrad)', U.fmt(1.5));
     // M²
     const lam = lambda * 1e-9;
     let m2 = NaN;
@@ -428,11 +455,11 @@
     const m2el = els.m2 && els.m2.out;
     if (m2el) {
       if (Number.isFinite(m2)) {
-        m2el.textContent = 'M² ≈ ' + U.fmt(m2, 3) + (m2 < 0.98 ? '  ⚠ kırınım sınırının altında — çap/ıraksamayı kontrol edin' : '');
+        m2el.textContent = 'M² ≈ ' + U.fmt(m2, 3) + (m2 < 0.98 ? '  ⚠ ' + T('kırınım sınırının altında — çap/ıraksamayı kontrol edin') : '');
         m2el.style.color = m2 < 0.98 ? 'var(--danger)' : '';
-      } else m2el.textContent = profile === 'gauss' ? '—' : 'Düz tepe profilde hesaplanmaz';
+      } else m2el.textContent = profile === 'gauss' ? '—' : T('Düz tepe profilde hesaplanmaz');
     }
-    if (Number.isFinite(m2) && m2 < 0.98) warns.phix = 'Çap × ıraksama kırınım sınırından küçük (M² < 1): fiziksel olarak mümkün değil.';
+    if (Number.isFinite(m2) && m2 < 0.98) warns.phix = T('Çap × ıraksama kırınım sınırından küçük (M² < 1): fiziksel olarak mümkün değil.');
 
     // optik ve atmosfer
     if (g('oav')) {
@@ -443,9 +470,9 @@
       if (lambda > 0) {
         if (lambda >= LE.analysis.OAV_MIN_NM && lambda < LE.analysis.OAV_MAX_NM) {
           const tAuto = lambda >= 400 && lambda < 700 ? 0.9 : 0.7;
-          echo.oav = 'Hesaplanıyor: M = ' + U.fmt(Math.max(1, (D > 0 ? D : 0.05) / 7e-3), 3) + '×, τ = ' + U.fmtPct(tau > 0 ? tau : tAuto) + (tau > 0 ? '' : ' (otomatik)');
+          echo.oav = T(tau > 0 ? 'Hesaplanıyor: M = {0}×, τ = {1}' : 'Hesaplanıyor: M = {0}×, τ = {1} (otomatik)', U.fmt(Math.max(1, (D > 0 ? D : 0.05) / 7e-3), 3), U.fmtPct(tau > 0 ? tau : tAuto));
         } else {
-          warns.oav = U.fmt(lambda, 5) + ' nm\'de dürbün etkisi hesaplanmaz: cam optikler 302,5 nm altını ve 4 µm üstünü geçirmez.';
+          warns.oav = T('{0} nm\'de dürbün etkisi hesaplanmaz: cam optikler 302,5 nm altını ve 4 µm üstünü geçirmez.', U.fmt(lambda, 5));
         }
       }
     }
@@ -458,7 +485,7 @@
       const thetaDeg = readPlain('theta', errs, warns, echo, 0, 89.9, '°');
       const d = { rho, thetaDeg, r: num('dr_r') };
       if (mode !== 'sp') {
-        if (g('dr_T_auto')) { d.T = 600; echo.dr_T = 'Varsayılan: 600 s (göz maruziyet süresinden uzunsa o kullanılır)'; } else d.T = num('dr_T');
+        if (g('dr_T_auto')) { d.T = 600; echo.dr_T = T('Varsayılan: 600 s (göz maruziyet süresinden uzunsa o kullanılır)'); } else d.T = num('dr_T');
       }
       if (g('dr_ext')) { d.extended = true; d.spotD = num('dr_spot'); }
       inp.diffuse = d;
@@ -467,7 +494,7 @@
     // mercek / fiber
     if (g('lens_on')) {
       const fl = num('lens_f');
-      if (fl === 0) errs.lens_f = 'Odak uzaklığı sıfır olamaz.';
+      if (fl === 0) errs.lens_f = T('Odak uzaklığı sıfır olamaz.');
       inp.lens = { f: fl, b: conv(num('lens_b')), range: num('lens_r') };
     }
     if (g('fiber') === 'multi') inp.fiber = { type: 'multi', NA: readPlain('fiber_NA', errs, warns, echo, 0.01, 0.99, ''), range: num('fiber_r') };

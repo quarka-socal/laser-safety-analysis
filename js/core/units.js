@@ -62,8 +62,17 @@
   }
 
   // ---------------------------------------------------------------------------
-  // Biçimlendirme (Türkçe: ondalık virgül)
+  // Biçimlendirme. Varsayılan Türkçe (ondalık virgül, "%90", "sa"); setLocale('en') ile
+  // İngilizce (ondalık nokta, "90%", "h"). Yalnız gösterimi değiştirir, hesabı etkilemez.
   // ---------------------------------------------------------------------------
+
+  let LOC = 'tr';
+  const DEC = () => (LOC === 'en' ? '.' : ',');
+
+  /** Sayı yazım dili: 'tr' (varsayılan) ya da 'en'. */
+  function setLocale(l) {
+    LOC = l === 'en' ? 'en' : 'tr';
+  }
 
   const SUP = { '-': '⁻', '+': '', 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹' };
 
@@ -89,17 +98,17 @@
     const e = Math.floor(Math.log10(a));
     let m = v / Math.pow(10, e);
     let ms = m.toFixed(sig - 1);
-    if (Math.abs(Number(ms)) >= 10) { ms = (m / 10).toFixed(sig - 1); return ms.replace('.', ',').replace('-', '−') + '×10' + supExp(e + 1); }
-    return ms.replace('.', ',').replace('-', '−') + '×10' + supExp(e);
+    if (Math.abs(Number(ms)) >= 10) { ms = (m / 10).toFixed(sig - 1); return ms.replace('.', DEC()).replace('-', '−') + '×10' + supExp(e + 1); }
+    return ms.replace('.', DEC()).replace('-', '−') + '×10' + supExp(e);
   }
 
-  /** Tamsayı kısmında binlik grup (ince boşluk), ondalık virgül. */
+  /** Tamsayı kısmında binlik grup (ince boşluk), ondalık işareti dile göre. */
   function grp(s) {
     const neg = s[0] === '−';
     if (neg) s = s.slice(1);
     const [i, d] = s.split('.');
     const ig = i.length > 4 ? i.replace(/\B(?=(\d{3})+(?!\d))/g, ' ') : i;
-    return (neg ? '−' : '') + ig + (d !== undefined ? ',' + d : '');
+    return (neg ? '−' : '') + ig + (d !== undefined ? DEC() + d : '');
   }
 
   /** Ön ekli otomatik birim: fmtPrefixed(2.5e-3, 'J') → "2,50 mJ" */
@@ -117,7 +126,7 @@
 
   function fmtTime(t) {
     if (!(t > 0)) return fmt(t);
-    if (t >= 3600) return fmt(t, 4) + ' s (' + fmt(t / 3600, 3) + ' sa)';
+    if (t >= 3600) return fmt(t, 4) + ' s (' + fmt(t / 3600, 3) + (LOC === 'en' ? ' h)' : ' sa)');
     if (t >= 0.1) return fmt(t, 4) + ' s';
     return fmtPrefixed(t, 's');
   }
@@ -133,13 +142,13 @@
 
   function fmtOD(x) {
     if (!(x > 0)) return '0';
-    return x.toFixed(2).replace('.', ',');
+    return x.toFixed(2).replace('.', DEC());
   }
 
-  /** Oranı Türkçe yüzde yazımıyla verir: 0,9 → "%90". */
+  /** Oranı yüzde yazımıyla verir: Türkçe 0,9 → "%90", İngilizce → "90%". */
   function fmtPct(frac, sig) {
-    return '%' + fmt(frac * 100, sig || 3);
+    return LOC === 'en' ? fmt(frac * 100, sig || 3) + '%' : '%' + fmt(frac * 100, sig || 3);
   }
 
-  LE.units = { UNITS, parseNumber, toSI, fromSI, fmt, fmtPrefixed, fmtTime, fmtDist, fmtOD, fmtPct, supExp };
+  LE.units = { UNITS, parseNumber, toSI, fromSI, fmt, fmtPrefixed, fmtTime, fmtDist, fmtOD, fmtPct, supExp, setLocale, locale: () => LOC };
 })(typeof globalThis !== 'undefined' ? globalThis : this);

@@ -6,6 +6,14 @@
   <title>Lazer Emniyet Analizi</title>
   <meta name="description" content="Lazer tehlike analizi: MPE, NOHD, OD, EN 207/EN 208 göz koruyucu seçimi (ICNIRP 2013 · IEC 60825-1:2014 · 2006/25/AT · ANSI Z136.1-2014).">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 4 62 58H2Z' fill='%23ffd400' stroke='%23111' stroke-width='4' stroke-linejoin='round'/%3E%3Ccircle cx='32' cy='40' r='5' fill='%23111'/%3E%3Cpath d='M32 40 20 28M32 40l14-6M32 40l-2 12' stroke='%23111' stroke-width='3'/%3E%3C/svg%3E">
+  <script>
+    // Kayıtlı tema ve dil sayfa çizilmeden uygulanır (açılışta yanlış renkte kare görünmesin).
+    try {
+      var p = JSON.parse(localStorage.getItem('lazerEmniyet.ayarlar.v1') || '{}') || {};
+      if (p.theme === 'light' || p.theme === 'dark') document.documentElement.setAttribute('data-theme', p.theme);
+      if (p.lang === 'en') document.documentElement.lang = 'en';
+    } catch (e) { /* depolama kapalı: varsayılanlar */ }
+  </script>
   <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
@@ -13,41 +21,42 @@
     <div class="brand">
       <svg width="30" height="27" viewBox="0 0 64 58" aria-hidden="true"><path d="M32 3 61 55H3Z" fill="#ffd400" stroke="#111" stroke-width="4" stroke-linejoin="round"/><circle cx="32" cy="37" r="5" fill="#111"/><path d="M32 37 19 25M32 37l15-6M32 37l-2 12M32 37h-14" stroke="#111" stroke-width="3" stroke-linecap="round"/></svg>
       <div>
-        <h1>Lazer Emniyet Analizi</h1>
-        <div class="std">ICNIRP 2013 · IEC 60825-1:2014 · 2006/25/AT · ANSI Z136.1-2014 · EN 207 / EN 208</div>
+        <h1 data-i18n="Lazer Emniyet Analizi">Lazer Emniyet Analizi</h1>
+        <div class="std" data-i18n="ICNIRP 2013 · IEC 60825-1:2014 · 2006/25/AT · ANSI Z136.1-2014 · EN 207 / EN 208">ICNIRP 2013 · IEC 60825-1:2014 · 2006/25/AT · ANSI Z136.1-2014 · EN 207 / EN 208</div>
       </div>
     </div>
-    <nav class="toolbar" aria-label="Komutlar">
-      <button class="tbtn" id="btn-new" title="Yeni analiz (varsayılan değerler)">Yeni</button>
+    <nav class="toolbar" aria-label="Komutlar" data-i18n-aria="Komutlar">
+      <button class="tbtn" id="btn-new" title="Yeni analiz (varsayılan değerler)" data-i18n="Yeni" data-i18n-title="Yeni analiz (varsayılan değerler)">Yeni</button>
       <div class="menu">
-        <button class="tbtn" id="btn-examples" aria-haspopup="true" aria-expanded="false">Örnekler ▾</button>
+        <button class="tbtn" id="btn-examples" aria-haspopup="true" aria-expanded="false"><span data-i18n="Örnekler">Örnekler</span> ▾</button>
         <div class="menu-list hidden" id="menu-examples" role="menu"></div>
       </div>
-      <button class="tbtn" id="btn-save" title="Envantere kaydet">Kaydet</button>
-      <button class="tbtn" id="btn-inventory">Envanter</button>
-      <button class="tbtn primary" id="btn-report">Rapor</button>
-      <button class="tbtn" id="btn-help">Yardım</button>
-      <button class="selftest" id="selftest" title="Hesap motoru öz-denetimi">Öz-denetim…</button>
+      <button class="tbtn" id="btn-save" title="Envantere kaydet" data-i18n="Kaydet" data-i18n-title="Envantere kaydet">Kaydet</button>
+      <button class="tbtn" id="btn-inventory" data-i18n="Envanter">Envanter</button>
+      <button class="tbtn primary" id="btn-report" data-i18n="Rapor">Rapor</button>
+      <button class="tbtn" id="btn-help" data-i18n="Yardım">Yardım</button>
+      <button class="tbtn icon" id="btn-settings" title="Ayarlar: tema, dil, açıklamalar" aria-label="Ayarlar" data-i18n-title="Ayarlar: tema, dil, açıklamalar" data-i18n-aria="Ayarlar"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M10.6 2h2.8l.5 2.6a7.6 7.6 0 0 1 1.9 1.1l2.5-.9 1.4 2.4-2 1.7a7.7 7.7 0 0 1 0 2.2l2 1.7-1.4 2.4-2.5-.9a7.6 7.6 0 0 1-1.9 1.1l-.5 2.6h-2.8l-.5-2.6a7.6 7.6 0 0 1-1.9-1.1l-2.5.9-1.4-2.4 2-1.7a7.7 7.7 0 0 1 0-2.2l-2-1.7 1.4-2.4 2.5.9a7.6 7.6 0 0 1 1.9-1.1ZM12 8.6a3.4 3.4 0 1 0 0 6.8 3.4 3.4 0 0 0 0-6.8Z" transform="translate(0 2)"/></svg></button>
+      <button class="selftest" id="selftest" title="Hesap motoru öz-denetimi" data-i18n-title="Hesap motoru öz-denetimi">…</button>
     </nav>
   </header>
   <div id="selftest-banner" class="banner fail hidden" role="alert"></div>
 
   <main class="layout">
-    <section class="col" id="inputs" aria-label="Girişler"></section>
-    <section class="col" id="results" aria-label="Sonuçlar" aria-live="polite"></section>
+    <section class="col" id="inputs" aria-label="Girişler" data-i18n-aria="Girişler"></section>
+    <section class="col" id="results" aria-label="Sonuçlar" aria-live="polite" data-i18n-aria="Sonuçlar"></section>
   </main>
 
   <!-- Envanter -->
   <dialog id="dlg-inventory" aria-labelledby="inv-title">
     <div class="dlg-head">
-      <h2 id="inv-title">Lazer envanteri</h2>
-      <input class="search" id="inv-search" placeholder="Ara: tanım, model, seri no, konum…" aria-label="Envanterde ara">
+      <h2 id="inv-title" data-i18n="Lazer envanteri">Lazer envanteri</h2>
+      <input class="search" id="inv-search" placeholder="Ara: tanım, model, seri no, konum…" aria-label="Envanterde ara" data-i18n-ph="Ara: tanım, model, seri no, konum…" data-i18n-aria="Envanterde ara">
       <div class="sp">
-        <button class="btn" id="inv-export">JSON dışa aktar</button>
-        <button class="btn" id="inv-csv">CSV (Excel)</button>
-        <button class="btn" id="inv-import" type="button">JSON içe aktar</button>
+        <button class="btn" id="inv-export" data-i18n="JSON dışa aktar">JSON dışa aktar</button>
+        <button class="btn" id="inv-csv" data-i18n="CSV (Excel)">CSV (Excel)</button>
+        <button class="btn" id="inv-import" type="button" data-i18n="JSON içe aktar">JSON içe aktar</button>
         <input type="file" id="inv-import-file" accept=".json,application/json" class="hidden">
-        <button class="btn" data-close>Kapat</button>
+        <button class="btn" data-close data-i18n="Kapat">Kapat</button>
       </div>
     </div>
     <div class="dlg-body" id="inv-body"></div>
@@ -56,11 +65,11 @@
   <!-- Rapor önizleme -->
   <dialog id="dlg-report" aria-labelledby="rep-title">
     <div class="dlg-head">
-      <h2 id="rep-title">Lazer tehlike analizi raporu</h2>
+      <h2 id="rep-title" data-i18n="Lazer tehlike analizi raporu">Lazer tehlike analizi raporu</h2>
       <div class="sp">
-        <button class="btn primary" id="rep-print">Yazdır / PDF</button>
-        <button class="btn" id="rep-html">HTML olarak kaydet</button>
-        <button class="btn" data-close>Kapat</button>
+        <button class="btn primary" id="rep-print" data-i18n="Yazdır / PDF">Yazdır / PDF</button>
+        <button class="btn" id="rep-html" data-i18n="HTML olarak kaydet">HTML olarak kaydet</button>
+        <button class="btn" data-close data-i18n="Kapat">Kapat</button>
       </div>
     </div>
     <div class="dlg-body"><div class="report-preview" id="rep-body"></div></div>
@@ -69,17 +78,50 @@
   <!-- Yardım -->
   <dialog id="dlg-help" aria-labelledby="help-title">
     <div class="dlg-head">
-      <h2 id="help-title">Yardım ve yöntem</h2>
-      <div class="sp"><button class="btn" data-close>Kapat</button></div>
+      <h2 id="help-title" data-i18n="Yardım ve yöntem">Yardım ve yöntem</h2>
+      <div class="sp"><button class="btn" data-close data-i18n="Kapat">Kapat</button></div>
     </div>
     <div class="dlg-body help-doc" id="help-body"></div>
+  </dialog>
+
+  <!-- Ayarlar -->
+  <dialog id="dlg-settings" class="small" aria-labelledby="set-title">
+    <div class="dlg-head">
+      <h2 id="set-title" data-i18n="Ayarlar">Ayarlar</h2>
+      <div class="sp"><button class="btn" data-close data-i18n="Kapat">Kapat</button></div>
+    </div>
+    <div class="dlg-body settings">
+      <div class="field">
+        <div class="lbl" data-i18n="Tema">Tema</div>
+        <div class="seg" role="group" aria-label="Tema" data-i18n-aria="Tema">
+          <button type="button" data-pref="theme" data-val="system" data-i18n="Sistem">Sistem</button>
+          <button type="button" data-pref="theme" data-val="light" data-i18n="Açık">Açık</button>
+          <button type="button" data-pref="theme" data-val="dark" data-i18n="Koyu">Koyu</button>
+        </div>
+      </div>
+      <div class="field">
+        <div class="lbl">Dil / Language</div>
+        <div class="seg" role="group" aria-label="Dil / Language">
+          <button type="button" data-pref="lang" data-val="tr" lang="tr">Türkçe</button>
+          <button type="button" data-pref="lang" data-val="en" lang="en">English</button>
+        </div>
+      </div>
+      <div class="field">
+        <div class="lbl" data-i18n="Açıklamalar">Açıklamalar</div>
+        <div class="seg" role="group" aria-label="Açıklamalar" data-i18n-aria="Açıklamalar">
+          <button type="button" data-pref="help" data-val="tap" data-i18n="Dokununca göster">Dokununca göster</button>
+          <button type="button" data-pref="help" data-val="always" data-i18n="Her zaman göster">Her zaman göster</button>
+        </div>
+        <div class="help show" data-i18n="Gizli açıklamalar alanların yanındaki (i) düğmesiyle ve sonuçlardaki Açıklama satırlarıyla açılır. Uyarılar her zaman görünür.">Gizli açıklamalar alanların yanındaki (i) düğmesiyle ve sonuçlardaki Açıklama satırlarıyla açılır. Uyarılar her zaman görünür.</div>
+      </div>
+    </div>
   </dialog>
 
   <!-- Öz-denetim ayrıntısı -->
   <dialog id="dlg-selftest" aria-labelledby="st-title">
     <div class="dlg-head">
-      <h2 id="st-title">Hesap motoru öz-denetimi</h2>
-      <div class="sp"><button class="btn" data-close>Kapat</button></div>
+      <h2 id="st-title" data-i18n="Hesap motoru öz-denetimi">Hesap motoru öz-denetimi</h2>
+      <div class="sp"><button class="btn" data-close data-i18n="Kapat">Kapat</button></div>
     </div>
     <div class="dlg-body" id="st-body"></div>
   </dialog>
@@ -94,6 +136,9 @@
   <script src="js/core/eyewear.js"></script>
   <script src="js/core/analysis.js"></script>
   <script src="js/core/selftest.js"></script>
+  <script src="js/ui/version.js"></script>
+  <script src="js/ui/i18n.js"></script>
+  <script src="js/ui/lang_en.js"></script>
   <script src="js/ui/examples.js"></script>
   <script src="js/ui/form.js"></script>
   <script src="js/ui/render.js"></script>

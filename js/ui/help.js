@@ -6,6 +6,7 @@
   const LE = (root.LE = root.LE || {});
 
   function html(st) {
+    if (LE.i18n && LE.i18n.lang() === 'en') return htmlEn(st);
     return `
 <p><b>Lazer Emniyet Analizi</b>, bir lazerin göz ve deri için tehlikesini hesaplar: maksimum izin verilen maruziyet (MPE),
 göz tehlike mesafesi (NOHD), gerekli optik yoğunluk (OD), EN 207 / EN 208 göz koruyucu seviyeleri, yaygın yansıma,
@@ -18,6 +19,8 @@ mercek ve fiber çıkışı tehlikeleri. İnternet bağlantısı gerektirmez; ve
   girdinin nasıl yorumlandığını gösterir — lütfen kontrol edin.</li>
   <li><b>Işın</b>: çap ve ıraksamayı üretici verisindeki ölçütle (çoğunlukla 1/e²) girin; program 1/e'ye çevirir.</li>
   <li>Sonuçlar anında güncellenir. <b>Kaydet</b> ile envantere ekleyin, <b>Rapor</b> ile yazdırılabilir rapor (PDF) alın.</li>
+  <li>Ekran sade kalsın diye açıklamalar gizlidir: alanın yanındaki <span class="mono">i</span> düğmesine ya da sonuçların altındaki <b>Açıklama</b>
+  satırına dokunun (Ayarlar → Açıklamalar → Her zaman ile hepsi görünür).</li>
 </ol>
 
 <h3>Mesafe–OD grafiğini okuma</h3>
@@ -102,7 +105,106 @@ seviyeleri (+1). Standart (paysız) sonuçlar değişmez.</p>
   <li>Lazer sınıflandırması (AEL hesabı), çoklu dalga boyu toplama, taramalı ışınlar, darbe grupları (burst), aynasal yansıma geometrisi.</li>
   <li>Sonuçlar girilen verilere dayanır. Bu yazılım yetkin bir lazer güvenlik sorumlusunun değerlendirmesinin yerine geçmez.</li>
 </ul>
-<p class="muted">Hesap motoru sürümü ${LE.analysis.ENGINE_VERSION}.</p>`;
+<p class="muted">Uygulama ${LE.APP_VERSION || ''} · hesap motoru ${LE.analysis.ENGINE_VERSION}.</p>`;
+  }
+
+  function htmlEn(st) {
+    return `
+<p><b>Laser Safety Analysis</b> calculates the hazard of a laser to the eye and skin: maximum permissible exposure (MPE),
+nominal ocular hazard distance (NOHD), required optical density (OD), EN 207 / EN 208 eyewear levels, diffuse reflection,
+lens and fibre output hazards. It needs no internet connection; data are stored only on this device.</p>
+
+<h3>Quick start</h3>
+<ol>
+  <li><b>Laser parameters</b>: wavelength, operating mode and power/energy. Use a comma or a dot as the decimal mark and
+  <span class="mono">1e-9</span> or <span class="mono">2×10^-4</span> for scientific notation. The grey line under each field shows
+  how the input was interpreted — please check it.</li>
+  <li><b>Beam</b>: enter the diameter and divergence in the definition used by the manufacturer (usually 1/e²); the program converts to 1/e.</li>
+  <li>Results update immediately. <b>Save</b> adds the analysis to the inventory, <b>Report</b> gives a printable report (PDF).</li>
+  <li>Explanations are hidden to keep the screen calm: tap <span class="mono">i</span> next to a field or <b>Explanation</b> under a result to show them
+  (Settings → Explanations → Always to show all).</li>
+</ol>
+
+<h3>Reading the distance–OD chart</h3>
+<ul>
+  <li>The distance axis is <b>logarithmic</b>: dark lines are decades (10 cm, 1 m, 10 m …), faint lines intermediate values.
+  OD is logarithmic too (OD 3 = attenuation by 1000); therefore the curves fall as straight lines in the far field (≈ 2 OD per decade of distance).</li>
+  <li>Above zero is the required OD; the <b>green band</b> below is where the exposure stays below the MPE. Where a curve crosses the zero
+  line is its hazard distance (NOHD, ENOHD and scintillation NOHD are marked with dashed vertical lines).</li>
+  <li><b>Reading values</b>: hover with the mouse or touch and drag; the value of every curve at the chosen distance is shown (the required OD if the MPE
+  is exceeded, otherwise the exposure-to-MPE ratio). Keyboard: Tab to the chart, ←/→ to move (Shift for 10 steps), Home/End for the ends, Esc to close.
+  Values are not read from the drawing; they are recalculated by the engine for that distance.</li>
+</ul>
+
+<h3>Limit sets</h3>
+<ul>
+  <li><b>Most protective (recommended, default)</b>: ICNIRP 2013 and 2006/25/EC applied together. Each set is evaluated with its own
+  limiting aperture, pulse grouping time and Rule 3; the most restrictive result governs. The result tables show which set governs.</li>
+  <li><b>ICNIRP 2013 / IEC 60825-1:2014 Annex A</b>: current scientific limits (consistent with ANSI Z136.1-2014).</li>
+  <li><b>2006/25/EC Annex II</b>: occupational exposure limit values of the EU artificial optical radiation directive (also used in Turkey).
+  Based on the ICNIRP 2000 generation: short-pulse retinal limit 5·10⁻³ C_E J/m² (ICNIRP 2013: 2·10⁻³), C_C = 8 at 1200–1400 nm,
+  α_max = 100 mrad fixed, Rule 3 with C_P = N^−0.25 for all thermal limits (N: pulses in the exposure duration; pulses within T_min count as one).</li>
+</ul>
+
+<h3>Standard exposure durations</h3>
+<ul>
+  <li>Visible (400–700 nm): <b>0.25 s</b> — accidental viewing, blink/aversion response.</li>
+  <li>Invisible IR (≥ 700 nm): <b>10 s</b> — accidental viewing; eye movements limit longer exposure.</li>
+  <li>UV (&lt; 400 nm): <b>30 000 s</b> — full working day (cumulative photochemical effect).</li>
+  <li>Diffuse reflection: <b>600 s</b> (viewing during alignment). Increase the duration for intentional viewing.</li>
+</ul>
+
+<h3>Terms</h3>
+<dl>
+  <dt>MPE / ELV</dt><dd>Maximum permissible exposure (ICNIRP, IEC, ANSI) / exposure limit value (2006/25/EC). Same concept; both are shown as "MPE" here.</dd>
+  <dt>NOHD / ENOHD</dt><dd>Distance at which intrabeam exposure falls to the MPE; ENOHD is for viewing with binoculars (default 7×50: 50 mm objective,
+  magnification 7.1×, transmittance 90% in the visible, 70% in UV and IR). Applied at 302.5–4000 nm (IEC 60825-1:2014 Condition 1); outside this range glass optics do not transmit.
+  The optics carry a region of diameter M × (limiting aperture) at the entrance to the eye: 50 mm for the retina, ≈ 7 mm for the cornea (1 mm aperture) — the same as the IEC Condition 1 apertures.</dd>
+  <dt>NHZ</dt><dd>Distance within which a diffuse (Lambertian) reflection is hazardous.</dd>
+  <dt>OD</dt><dd>Required optical density, OD = log₁₀(exposure / MPE). "Worst case" assumes that the whole power passes the limiting aperture.</dd>
+  <dt>LB (EN 207)</dt><dd>European laser protective eyewear level. D: continuous wave, I: 1 µs–0.25 s, R: 1 ns–1 µs, M: ≤ 1 ns pulses.
+  For repetitive pulses both the pulse (I/R/M) and the average power (D) levels must be met.</dd>
+  <dt>RB (EN 208)</dt><dd>Alignment eyewear for visible beams; reduces the beam to the level protected by the blink reflex.</dd>
+  <dt>Rules 1–3</dt><dd>For repetitive pulses: (1) single-pulse limit, (2) limit for every pulse group over time T (including sub-groups),
+  (3) correction factor C_P for the retinal thermal limit. Pulses within Tᵢ (5 µs / 13 µs) count as a single pulse.</dd>
+</dl>
+
+<h3>Atmospheric turbulence (scintillation) margin</h3>
+<p>Over long outdoor beam paths, turbulence cells caused by temperature differences act as weak, momentary lenses;
+hot spots form in the beam and the local irradiance can exceed the average. When the option is on (default) a margin of irradiance ×10, i.e.
+<b>+1 OD</b>, is applied and given as an additional result: NOHD with margin, OD at the observation distance, minimum recommended OD (+1) and EN 207
+levels (+1). The standard results without margin are unchanged.</p>
+<ul>
+  <li>The energy entering the limiting aperture cannot exceed the total beam energy; distance-dependent values are therefore capped at "all power in the pupil".</li>
+  <li>Sources differ: ICNIRP 2013 notes that scintillation hot spots rarely give a significant increase for averaging apertures of 3.5 mm and above,
+  ANSI Z136.6-2015 Annex C says the hazard evaluation is unchanged; the UK military guideline JSP 390 increases the hazard distance by up to
+  2.66× (≈ ×7 irradiance in the far field, ≈ +0.85 OD). +1 OD is a rounded-up, conservative form of this value.</li>
+  <li>The margin is not needed for short indoor beam paths; you can switch the option off.</li>
+</ul>
+
+<h3>Conservative choices</h3>
+<ul>
+  <li>Where the standards differ, the more protective value: 302–315 nm (smaller of the continuous IEC/ANSI C₂ and the ICNIRP steps),
+  1200–1400 nm (ANSI 2014 cornea/lens limit as an additional dual limit).</li>
+  <li>For beams smaller than 1 mm, the peak value instead of the aperture average for the UV/IR eye (t &lt; 0.35 s) and the skin (ICNIRP footnotes).</li>
+  <li>Defaults: point source, no atmospheric attenuation, Gaussian/quadrature beam growth, 10 s pulse-counting window for EN 207.</li>
+</ul>
+
+<h3>Validation</h3>
+<ul>
+  <li>Start-up self-test: <b>${st.passed}/${st.total}</b> test vectors (values calculated by hand from the ICNIRP tables and published examples).</li>
+  <li>Development tests (<span class="mono">node --test</span>): compared with the Kentek EasyHaz LSO 2014 (ANSI Z136.1-2014) workbook in 400 random cases ×
+  4 distances and a 2176-point MPE scan — never less protective for any output; differences are documented in OKUBENI.md.</li>
+  <li>The 2006/25/EC set was compared one-to-one with the MPE, OD, NOHD, lens, fibre and diffuse reflection results of the 12 EasyHaz example files
+  from 2010 (ANSI Z136.1-2007 ≈ ICNIRP 2000).</li>
+</ul>
+
+<h3>Out of scope</h3>
+<ul>
+  <li>Laser classification (AEL), multi-wavelength summation, scanning beams, pulse bursts, specular reflection geometry.</li>
+  <li>Results depend on the data entered. This software does not replace the assessment of a competent laser safety officer.</li>
+</ul>
+<p class="muted">Application ${LE.APP_VERSION || ''} · calculation engine ${LE.analysis.ENGINE_VERSION}.</p>`;
   }
 
   LE.help = { html };

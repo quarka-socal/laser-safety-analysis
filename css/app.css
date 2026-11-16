@@ -96,6 +96,7 @@ a { color: var(--accent); }
 .tbtn:hover { background: #2f384a; }
 .tbtn.primary { background: var(--laser); color: #111; border-color: var(--laser); font-weight: 600; }
 .tbtn.primary:hover { filter: brightness(.95); }
+.tbtn.icon { padding: 5px 8px; line-height: 0; }
 .selftest {
   font-size: 12px; padding: 4px 9px; border-radius: 999px; cursor: pointer; border: 1px solid transparent;
   background: #1f3a26; color: #a9f0bd; border-color: #2f5a3a; white-space: nowrap;
@@ -136,7 +137,29 @@ details.sec > summary .hint { margin-left: auto; font-weight: 400; color: var(--
 
 .field { display: grid; gap: 4px; }
 .field > label, .field > .lbl { font-size: 12.5px; color: var(--muted); font-weight: 550; }
-.field .help { font-size: 11.5px; color: var(--muted); }
+.field .help { font-size: 11.5px; color: var(--muted); display: none; }
+/* açıklamalar: (i) düğmesiyle açılır; Ayarlar → Açıklamalar → Her zaman ile hepsi görünür */
+.field .help.show, body.help-always .field .help { display: block; }
+body.help-always .info-btn { display: none; }
+.lrow { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.lrow > label, .lrow > .lbl { min-width: 0; }
+.lrow > label.chk { flex: 0 1 auto; }
+.info-btn {
+  flex: none; width: 20px; height: 20px; padding: 0; border-radius: 50%; border: 1px solid var(--line-strong);
+  background: var(--panel-2); color: var(--muted); font: italic 700 12px/18px Georgia, "Times New Roman", serif; cursor: pointer;
+}
+.info-btn[aria-expanded="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+details.more { margin-top: 6px; }
+details.more > summary {
+  cursor: pointer; font-size: 12px; color: var(--muted); list-style: none; display: inline-flex; align-items: center; gap: 6px; user-select: none;
+}
+details.more > summary::-webkit-details-marker { display: none; }
+details.more > summary::before {
+  content: "i"; display: inline-block; width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--line-strong);
+  font: italic 700 10.5px/14px Georgia, "Times New Roman", serif; text-align: center; color: var(--muted); background: var(--panel-2);
+}
+details.more[open] > summary { color: var(--ink); }
+details.more > .note:first-of-type, details.more > ul { margin-top: 4px; }
 .ctl { display: flex; align-items: stretch; min-width: 0; }
 .ctl input[type="text"], .ctl input:not([type]), .ctl select, .field textarea, .field > select, .field > input {
   width: 100%; min-width: 0; padding: 7px 9px; border: 1px solid var(--line-strong); border-radius: 7px;
@@ -270,6 +293,8 @@ dialog::backdrop { background: rgba(10, 14, 22, .55); }
 .dlg-head h2 { margin: 0; font-size: 16px; }
 .dlg-head .sp { margin-left: auto; display: flex; gap: 6px; flex-wrap: wrap; }
 .dlg-body { padding: 14px 16px 18px; overflow: auto; }
+dialog.small { width: min(460px, calc(100vw - 32px)); }
+.settings { display: grid; gap: 16px; }
 .btn {
   border: 1px solid var(--line-strong); background: var(--panel-2); border-radius: 7px; padding: 6px 12px; cursor: pointer;
 }

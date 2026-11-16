@@ -27,11 +27,13 @@ if (/<script src=|<link rel="stylesheet"/.test(html)) {
   process.exit(1);
 }
 
-// motor sürümü ve derleme zamanı
+// uygulama ve motor sürümü, derleme zamanı
 global.LE = undefined;
 require(path.join(root, 'js', 'core', 'analysis.js'));
+require(path.join(root, 'js', 'ui', 'version.js'));
 const ver = globalThis.LE.analysis.ENGINE_VERSION;
-html = html.replace('<head>', '<head>\n  <!-- Lazer Emniyet Analizi, motor v' + ver + ', tek dosya derlemesi ' + new Date().toISOString() + ' -->');
+const app = globalThis.LE.APP_VERSION;
+html = html.replace('<head>', '<head>\n  <!-- Lazer Emniyet Analizi ' + app + ', motor v' + ver + ', tek dosya derlemesi ' + new Date().toISOString() + ' -->');
 
 const out = path.join(root, 'dist', 'LazerEmniyet.html');
 fs.mkdirSync(path.dirname(out), { recursive: true });

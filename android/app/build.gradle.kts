@@ -8,11 +8,13 @@ plugins {
 // Android sürümü bu dosyayı değiştirmeden varlık (asset) olarak gömer; sonuçlar masaüstüyle birebir aynıdır.
 val webRoot: File = rootProject.file("..")
 
-// Sürüm, hesap motorunun sürümünden türetilir (js/core/analysis.js → ENGINE_VERSION).
-val engineVersion: String = Regex("ENGINE_VERSION = '([0-9]+\\.[0-9]+\\.[0-9]+)'")
-    .find(File(webRoot, "js/core/analysis.js").readText())
-    ?.groupValues?.get(1)
-    ?: error("js/core/analysis.js içinde ENGINE_VERSION bulunamadı")
+// Sürümler: uygulama (js/ui/version.js → APP_VERSION) Android sürüm numarasını verir;
+// hesap motoru (js/core/analysis.js → ENGINE_VERSION) gömülen dosyanın güncelliği için denetlenir.
+fun webVersion(file: String, pattern: String): String =
+    Regex(pattern).find(File(webRoot, file).readText())?.groupValues?.get(1)
+        ?: error("$file içinde sürüm bulunamadı")
+val engineVersion: String = webVersion("js/core/analysis.js", "ENGINE_VERSION = '([0-9]+\\.[0-9]+\\.[0-9]+)'")
+val appVersion: String = webVersion("js/ui/version.js", "APP_VERSION = '([0-9]+\\.[0-9]+\\.[0-9]+)'")
 
 /**
  * dist/LazerEmniyet.html dosyasını oluşturulan varlık klasörüne kopyalar.
@@ -25,6 +27,9 @@ abstract class CopyWebApp : DefaultTask() {
     @get:Input
     abstract val expectedEngine: Property<String>
 
+    @get:Input
+    abstract val expectedApp: Property<String>
+
     @get:OutputDirectory
     abstract val outputDir: DirectoryProperty
 
@@ -32,10 +37,12 @@ abstract class CopyWebApp : DefaultTask() {
     fun copy() {
         val src = source.get().asFile
         val html = src.readText()
-        val ver = Regex("motor v([0-9.]+), tek dosya derlemesi").find(html)?.groupValues?.get(1)
-        if (ver != expectedEngine.get()) {
+        val m = Regex("Lazer Emniyet Analizi ([0-9.]+), motor v([0-9.]+), tek dosya derlemesi").find(html)
+        val app = m?.groupValues?.get(1)
+        val ver = m?.groupValues?.get(2)
+        if (ver != expectedEngine.get() || app != expectedApp.get()) {
             throw GradleException(
-                "dist/LazerEmniyet.html eski (motor v$ver, kaynak v${expectedEngine.get()}). " +
+                "dist/LazerEmniyet.html eski (uygulama $app, motor v$ver; kaynak ${expectedApp.get()}, v${expectedEngine.get()}). " +
                     "Önce web klasöründe çalıştırın: node tools/build-single.js"
             )
         }
@@ -52,6 +59,7 @@ abstract class CopyWebApp : DefaultTask() {
 val copyWebApp = tasks.register<CopyWebApp>("copyWebApp") {
     source.set(File(webRoot, "dist/LazerEmniyet.html"))
     expectedEngine.set(engineVersion)
+    expectedApp.set(appVersion)
 }
 
 android {
@@ -68,9 +76,9 @@ android {
         // Android 11+: WindowInsets.Type ve setDecorFitsSystemWindows ile tek bir kenardan kenara yolu.
         minSdk = 30
         targetSdk = 35
-        val (major, minor, patch) = engineVersion.split('.').map { it.toInt() }
+        val (major, minor, patch) = appVersion.split('.').map { it.toInt() }
         versionCode = major * 10000 + minor * 100 + patch
-        versionName = engineVersion
+        versionName = appVersion
     }
 
     buildTypes {

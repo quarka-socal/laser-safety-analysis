@@ -7,6 +7,7 @@
 (function (root) {
   'use strict';
   const LE = (root.LE = root.LE || {});
+  const T = (s, ...a) => (LE.i18n ? LE.i18n.T(s, ...a) : s.replace(/\{(\d+)\}/g, (m, i) => a[i]));
 
   const KEY_INV = 'lazerEmniyet.envanter.v1';
   const KEY_SES = 'lazerEmniyet.oturum.v1';
@@ -66,11 +67,11 @@
   }
 
   /** Kaydın kopyası (yeni kimlik, "(kopya)" ekli ad). Özeti olmayan içe aktarılmış kayıtlarda da çalışır. */
-  function duplicate(rec) {
+  function duplicate(rec, suffix) {
     const c = JSON.parse(JSON.stringify(rec));
     c.id = newId();
     c.savedAt = new Date().toISOString();
-    c.state.v.name = (c.state.v.name || '') + ' (kopya)';
+    c.state.v.name = (c.state.v.name || '') + (suffix || ' (kopya)');
     c.summary = Object.assign({}, c.summary || {}, { name: c.state.v.name });
     return c;
   }
@@ -118,7 +119,7 @@
 
   function exportJSON(list) {
     const doc = { format: 'lazer-emniyet-envanter', version: 1, exportedAt: new Date().toISOString(), engine: LE.analysis.ENGINE_VERSION, records: list };
-    download('lazer-envanter-' + stamp() + '.json', JSON.stringify(doc, null, 1), 'application/json');
+    download(T('lazer-envanter-{0}.json', stamp()), JSON.stringify(doc, null, 1), 'application/json');
   }
 
   /** İçe aktarma: geçerli kayıtları ekler, aynı kimlikli kayıtları günceller. */
@@ -151,13 +152,15 @@
   }
 
   function exportCSV(list) {
-    const head = ['Tanım', 'Üretici', 'Model', 'Seri no', 'Envanter no', 'Sınıf', 'Konum', 'Sorumlu', 'LGS', 'Durum', 'Dalga boyu (nm)', 'Mod', 'NOHD (m)', 'En kötü OD', 'EN 207', 'Yaygın NHZ (m)', 'Analiz tarihi', 'Kayıt'];
-    const modeTxt = { cw: 'Sürekli', sp: 'Tek darbe', rp: 'Tekrarlı darbe' };
+    const head = ['Tanım', 'Üretici', 'Model', 'Seri no', 'Envanter no', 'Sınıf', 'Konum', 'Sorumlu', 'LGS', 'Durum', 'Dalga boyu (nm)', 'Mod', 'NOHD (m)', 'En kötü OD', 'EN 207', 'Yaygın NHZ (m)', 'Analiz tarihi', 'Kayıt'].map((h) => T(h));
+    const modeTxt = { cw: T('Sürekli'), sp: T('Tek darbe'), rp: T('Tekrarlı darbe') };
+    const en = LE.i18n && LE.i18n.lang() === 'en';
     const rows = list.map((r) => {
       const s = r.summary || {};
-      return [s.name, s.maker, s.modelNo, s.serial, s.inv, s.cls, s.loc, s.owner, s.lso, s.status, num(s.wl, 1), modeTxt[s.mode] || s.mode, num(s.nohd, 2), num(s.odWorst, 2), s.marking, num(s.nhz, 3), s.date, (r.savedAt || '').slice(0, 10)].map(csvCell).join(';');
+      const n = (v, d) => (en ? num(v, d).replace(',', '.') : num(v, d));
+      return [s.name, s.maker, s.modelNo, s.serial, s.inv, s.cls, s.loc, s.owner, s.lso, s.status ? T(s.status) : '', n(s.wl, 1), modeTxt[s.mode] || s.mode, n(s.nohd, 2), n(s.odWorst, 2), s.marking, n(s.nhz, 3), s.date, (r.savedAt || '').slice(0, 10)].map(csvCell).join(';');
     });
-    download('lazer-envanter-' + stamp() + '.csv', '﻿' + head.join(';') + '\r\n' + rows.join('\r\n'), 'text/csv;charset=utf-8');
+    download(T('lazer-envanter-{0}.csv', stamp()), '﻿' + head.join(';') + '\r\n' + rows.join('\r\n'), 'text/csv;charset=utf-8');
   }
 
   LE.store = {

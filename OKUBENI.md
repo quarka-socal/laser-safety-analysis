@@ -46,6 +46,27 @@ girdinin nasıl yorumlandığını gösterir (ör. `= 1064 nm`).
 Envanter bu bilgisayarda tarayıcının yerel deposunda tutulur. Yedek için **Envanter → JSON dışa aktar**;
 Excel için **CSV**.
 
+### Ayarlar (dişli düğmesi)
+
+| Ayar | Seçenekler | Varsayılan |
+|---|---|---|
+| Tema | Sistem / Açık / Koyu | Sistem |
+| Dil / Language | Türkçe / English | Türkçe |
+| Açıklamalar | Dokununca göster / Her zaman göster | Dokununca göster |
+
+Ayarlar bu cihazda saklanır.
+
+**Açıklamalar:** Ekranı sade tutmak için alan açıklamaları gizlidir. Etiketin yanındaki **(i)** düğmesiyle açılır.
+Sonuçlardaki yöntem notları "Açıklama" satırıyla açılır. Notlar ve varsayımlar da katlanmış bir başlık altındadır.
+Uyarılar ve tehlike sonuçları her zaman görünür.
+
+**Dil:** İngilizce seçilince her şey İngilizce olur: arayüz, sonuçlar, rapor, CSV başlıkları, yardım ve motorun ürettiği
+uyarı, not ve formül metinleri. Sayılar İngilizce yazımla gösterilir: ondalık nokta, "90%", saat için "h".
+- Çeviri yalnız gösterim katmanındadır: `js/ui/i18n.js` ve `js/ui/lang_en.js`. Hesap motorunun kodu ve sayısal sonuçları
+  dilden bağımsızdır.
+- 2006/25/AT İngilizce görünümde 2006/25/EC olarak yazılır.
+- Kullanıcının girdiği metinler (lazer adı, notlar) çevrilmez.
+
 ## Hesaplanan büyüklükler
 
 - **Göz MPE**: retina termal, retina fotokimyasal (400–600 nm), kornea UV/IR, ikili sınırlar; genişletilmiş
@@ -151,7 +172,7 @@ Standart tablolarındaki yuvarlamadan doğan küçük basamaklar olduğu gibi uy
 elle hesaplanmış değerler, EasyHaz LSO örnek dosyalarındaki sonuçlar, yayımlanmış EN 207/208 örnekleri).
 Biri bile başarısız olursa kırmızı uyarı bandı çıkar. Başlıktaki yeşil rozete tıklayarak ayrıntıyı görebilirsiniz.
 
-**Geliştirme testleri** — `node --test test/*.test.js` (Node ≥ 18; Node 18 ve 24 ile denenir): 88 test.
+**Geliştirme testleri** — `node --test test/*.test.js` (Node ≥ 18; Node 18 ve 24 ile denenir): 92 test.
 
 - ICNIRP Tablo 5, 7, 8 satır noktaları; düzeltme faktörleri; ölçüm açıklıkları
 - Tüm dalga boylarında MPE'nin süreyle azalmadığı (bilinen tablo basamakları hariç) ve sürekliliği
@@ -172,6 +193,9 @@ Biri bile başarısız olursa kırmızı uyarı bandı çıkar. Başlıktaki ye�
   "Evet" diye yazılmaz, notlarda ondalık virgül, yüzde "%x" yazımı, NOHD yokken karar metni; Android köprüsüyle kaydetme
 - Stil sözleşmesi: telefon genişliğinde menü ve diyalog başlıkları ekrana sığar, başlık yapışkan değildir; koyu ve açık
   temada vurgu rengi üstündeki yazının kontrastı ≥ 4,5:1 (WCAG AA). Yerleşim ayrıca tarayıcıda 375 px'te ölçüldü.
+- Dil: kaynak koddaki her çeviri anahtarının İngilizce karşılığı vardır. Denetim 12 örnek ve 160 rastgele girişle yapılır.
+  İngilizce sonuç ekranında, raporda, yardımda ve öz-denetim adlarında Türkçe harf, Türkçe sözcük, ondalık virgül ya da
+  "2006/25/AT" kalmaz. Hesap sonuçları iki dilde aynıdır.
 
 **Kentek EasyHaz LSO 2014 (ANSI Z136.1-2014) ile çapraz doğrulama** — Kullanıcının EasyHaz çalışma kitabı
 LibreOffice'te **makrolar kapalıyken** salt okunur açıldı, hücre formülleri yeniden hesaplatıldı
@@ -241,12 +265,13 @@ içine gömen çevrimdışı bir **WebView kabuğudur**. Hesap motoru, arayüz, 
 | JSON içe aktarma | "JSON içe aktar" → sistem dosya seçici |
 | Envanter ve son oturum | Uygulamanın kendi deposunda kalıcı (localStorage); kapatıp açınca geri gelir |
 | Geri tuşu | Önce açık pencereyi/menüyü kapatır, sonra uygulamadan çıkar |
-| Tema | Sistemin açık/koyu ayarını izler; durum çubuğu başlık renginde |
+| Tema ve dil | Uygulama içi Ayarlar (Sistem/Açık/Koyu, Türkçe/English); durum çubuğu şeridi, gezinme çubuğu, Android bildirimleri ve onay pencereleri de seçimi izler |
 | Ağ | **INTERNET izni yok, hiçbir izin istenmez.** Sayfa APK'nın içinden, ağa çıkmayan sabit bir https kökenden sunulur |
 | Yedek | Bulut yedeği kapalıdır (`allowBackup=false`); envanter yalnız cihazda kalır, yedek için **JSON dışa aktar** |
 
 Gereksinim: Android 11 veya üstü (minSdk 30); hedef Android 15 (targetSdk 35). Uygulama kimliği `com.quarka.lazeremniyet`.
-Sürüm numarası hesap motorundan otomatik alınır: motor 1.3.1 → versionName 1.3.1, versionCode 10301.
+Sürüm numarası `js/ui/version.js` dosyasındaki uygulama sürümünden otomatik alınır: 1.4.0 → versionName 1.4.0, versionCode 10400.
+Hesap motorunun sürümü ayrıdır: `js/core/analysis.js` → `ENGINE_VERSION`, şu an 1.3.1.
 
 ### Derleme
 
@@ -262,7 +287,7 @@ export JAVA_HOME=~/Downloads/android-studio/jbr
 (Open → `android`).
 
 Derleme `copyWebApp` göreviyle `../dist/LazerEmniyet.html` dosyasını varlık olarak kopyalar. Dosya eskiyse görev derlemeyi
-durdurur. Bunun iki ölçütü var: gömülü motor sürümü `js/core/analysis.js` ile aynı değilse ya da Android köprüsü
+durdurur. Bunun iki ölçütü var: gömülü uygulama ya da motor sürümü kaynaktakiyle aynı değilse, ya da Android köprüsü
 (`LazerAndroid`) yoksa. Uyarı mesajı ne yapılacağını söyler.
 
 ### Kurulum
@@ -303,8 +328,15 @@ durdurur. Bunun iki ölçütü var: gömülü motor sürümü `js/core/analysis.
 - Gece modu: sayfa koyu temaya geçti, kayıtlar yerinde.
 - Klavye: açıldığında sayfa küçülür, odaktaki alan görünür kalır; ondalık klavyede virgül ve nokta var.
 
-Henüz yapılmadı: gerçek telefonda (Honor 400, MagicOS) deneme. Üreticinin yazdırma ve dosya seçici ekranları farklı
-görünebilir; akış aynıdır.
+Uygulama 1.4.0 (aynı gün, aynı emülatör):
+- Sonuç ekranının bütün metni 12 örnekte masaüstüyle karşılaştırıldı: kutular, karar, tablolar, formüller, notlar.
+  SHA-256 parmak izi **iki dilde de aynı** (İngilizce `2b6877a9…`, Türkçe `dabf77d4…`).
+- Uygulama içinde İngilizce ve Koyu seçilince durum şeridi ve gezinme alanı koyulaştı. Android onay penceresi
+  İngilizce çıktı ("Laser Safety", Cancel/OK).
+
+Gerçek telefon (Honor 400, MagicOS): APK dosya aktarımıyla İndirilenler klasörüne kopyalandı (1.3.1, sonra 1.4.0).
+Kurulum ve deneme kullanıcıda. USB hata ayıklama açılırsa yukarıdaki otomatik doğrulama telefonda da çalıştırılabilir.
+Üreticinin yazdırma ve dosya seçici ekranları farklı görünebilir; akış aynıdır.
 
 ## Klasör yapısı
 
@@ -321,12 +353,15 @@ js/core/              hesap motoru (DOM'suz; Node ve tarayıcıda aynı kod)
   units.js            sayı ayrıştırma, birimler, Türkçe biçim
   selftest.js         gömülü öz-denetim vektörleri
 js/ui/                form, sonuç ekranı, envanter, rapor, yardım, örnekler
+  version.js          uygulama sürümü (Android sürüm numarası buradan)
+  i18n.js             dil desteği: T() arayüz, X() motor metinleri (kalıplarla, motora dokunmadan)
+  lang_en.js          İngilizce sözlük
 test/                 Node testleri; test/data: EasyHaz 2014 doğrulama verisi ve 2010 örnek dosyaları
 tools/build-single.js tek dosya derlemesi → dist/LazerEmniyet.html
 tools/easyhaz_oracle.py  EasyHaz çapraz doğrulama aracı (LibreOffice UNO, makrosuz)
 android/              Android uygulaması (WebView kabuğu; dist/LazerEmniyet.html'i gömer)
-  app/build.gradle.kts           sürüm motor sürümünden; copyWebApp görevi
-  app/src/main/java/.../MainActivity.kt  WebView, PDF, dosya seçici, geri tuşu, kenardan kenara düzen
+  app/build.gradle.kts           sürüm js/ui/version.js'ten; copyWebApp görevi
+  app/src/main/java/.../MainActivity.kt  WebView, PDF, dosya seçici, geri tuşu, tema/dil köprüsü, kenardan kenara düzen
 ```
 
 ## Geliştirme
@@ -346,6 +381,15 @@ Klasör bir git deposudur. İlk commit `1be12d6`, inceleme öncesi v1.3 durumudu
 `git log` ile görülebilir.
 
 ## Sürüm notları
+
+**Uygulama 1.4.0 (16.11.2026, motor 1.3.1 değişmedi)**
+- Ayarlar penceresi: tema (Sistem/Açık/Koyu), dil (Türkçe/English), açıklamalar (dokununca / her zaman).
+- Dil desteği: İngilizce arayüz, sonuçlar, rapor, CSV, yardım ve motor metinleri. Sayı yazımı dile göre.
+- Sade görünüm: alan açıklamaları (i) düğmesinin arkasında; yöntem notları, notlar ve varsayımlar katlanabilir.
+  Uyarılar her zaman görünür.
+- Türkçe görünümde de büyük darbe sayıları artık "2,40×10⁹" biçiminde yazılıyor (önce "2.40e+9" idi).
+- Android: tema ve dil köprüsü (`setUi`). Sürüm numarası uygulama sürümünden geliyor (10400).
+- Testler 92 (yeni: i18n.test.js).
 
 **Motor 1.3.1 (16.11.2026)** — Satır satır inceleme. ICNIRP 2013 metniyle karşılaştırılanlar:
 Tablo 2, 3, 4, 5, 7, 8; Tablo 5'in c ve d dipnotları; Kural 1–3 ve C_P koşulları; 1 ns altı ara yaklaşım.

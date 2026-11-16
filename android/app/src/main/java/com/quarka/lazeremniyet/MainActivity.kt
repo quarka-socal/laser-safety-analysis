@@ -49,8 +49,12 @@ import java.io.File
 class MainActivity : Activity() {
 
     private lateinit var web: WebView
+    private lateinit var root: FrameLayout
     private lateinit var statusScrim: View
     private var fileCallback: ValueCallback<Array<Uri>>? = null
+
+    /** Sayfanın seçtiği dil (Ayarlar); yerel iletiler buna uyar. */
+    private var uiLang = "tr"
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,7 +80,7 @@ class MainActivity : Activity() {
         web.addJavascriptInterface(Bridge(), "LazerAndroid")
 
         statusScrim = View(this).apply { setBackgroundColor(getColor(R.color.header_bg)) }
-        val root = FrameLayout(this).apply { setBackgroundColor(getColor(R.color.page_bg)) }
+        root = FrameLayout(this).apply { setBackgroundColor(getColor(R.color.page_bg)) }
         root.addView(web, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
         root.addView(statusScrim, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, Gravity.TOP))
         root.setOnApplyWindowInsetsListener { _, insets -> applyInsets(insets) }
@@ -98,12 +102,35 @@ class MainActivity : Activity() {
             window.navigationBarColor = Color.TRANSPARENT
         }
         val night = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
-        // durum çubuğu simgeleri koyu başlık üstünde açık renk; gezinme çubuğu simgeleri sayfaya göre
-        window.decorView.post {
-            window.insetsController?.setSystemBarsAppearance(
-                if (night) 0 else WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS,
-                WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS or WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS,
-            )
+        window.decorView.post { setBarIcons(night) }
+    }
+
+    /** Durum çubuğu simgeleri koyu başlık üstünde açık renk; gezinme çubuğu simgeleri sayfaya göre. */
+    private fun setBarIcons(dark: Boolean) {
+        window.insetsController?.setSystemBarsAppearance(
+            if (dark) 0 else WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS,
+            WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS or WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS,
+        )
+    }
+
+    /** Sayfanın (uygulama içi Ayarlar) teması: css/app.css ile aynı başlık ve zemin renkleri. */
+    private fun applyPageTheme(dark: Boolean) {
+        statusScrim.setBackgroundColor(if (dark) 0xFF0B0E14.toInt() else 0xFF151A24.toInt())
+        root.setBackgroundColor(if (dark) 0xFF0F131A.toInt() else 0xFFF3F4F7.toInt())
+        setBarIcons(dark)
+    }
+
+    /** Yerel iletiler (bildirim, onay düğmeleri) sayfada seçilen dilde. */
+    private fun msg(key: String): String {
+        val en = uiLang == "en"
+        return when (key) {
+            "ok" -> if (en) "OK" else getString(R.string.ok)
+            "cancel" -> if (en) "Cancel" else getString(R.string.cancel)
+            "title" -> if (en) "Laser Safety" else getString(R.string.app_name)
+            "saved" -> if (en) "Saved: %1\$s" else getString(R.string.saved)
+            "save_failed" -> if (en) "Could not save: %1\$s" else getString(R.string.save_failed)
+            "no_picker" -> if (en) "Could not open the file picker." else getString(R.string.no_picker)
+            else -> key
         }
     }
 
@@ -164,9 +191,9 @@ class MainActivity : Activity() {
     private inner class Chrome : WebChromeClient() {
         override fun onJsAlert(view: WebView, url: String, message: String, result: JsResult): Boolean {
             AlertDialog.Builder(this@MainActivity)
-                .setTitle(R.string.app_name)
+                .setTitle(msg("title"))
                 .setMessage(message)
-                .setPositiveButton(R.string.ok) { _, _ -> result.confirm() }
+                .setPositiveButton(msg("ok")) { _, _ -> result.confirm() }
                 .setOnCancelListener { result.confirm() }
                 .show()
             return true
@@ -174,10 +201,10 @@ class MainActivity : Activity() {
 
         override fun onJsConfirm(view: WebView, url: String, message: String, result: JsResult): Boolean {
             AlertDialog.Builder(this@MainActivity)
-                .setTitle(R.string.app_name)
+                .setTitle(msg("title"))
                 .setMessage(message)
-                .setPositiveButton(R.string.ok) { _, _ -> result.confirm() }
-                .setNegativeButton(R.string.cancel) { _, _ -> result.cancel() }
+                .setPositiveButton(msg("ok")) { _, _ -> result.confirm() }
+                .setNegativeButton(msg("cancel")) { _, _ -> result.cancel() }
                 .setOnCancelListener { result.cancel() }
                 .show()
             return true
@@ -200,7 +227,7 @@ class MainActivity : Activity() {
                 true
             } catch (_: ActivityNotFoundException) {
                 fileCallback = null
-                toast(getString(R.string.no_picker))
+                toast(msg("no_picker"))
                 false
             }
         }
@@ -225,10 +252,19 @@ class MainActivity : Activity() {
                     @Suppress("DEPRECATION")
                     startActivityForResult(intent, REQ_SAVE)
                 } catch (e: ActivityNotFoundException) {
-                    toast(getString(R.string.no_picker))
+                    toast(msg("no_picker"))
                 } catch (e: Exception) {
-                    toast(getString(R.string.save_failed, e.message ?: e.javaClass.simpleName))
+                    toast(msg("save_failed").format(e.message ?: e.javaClass.simpleName))
                 }
+            }
+        }
+
+        /** Sayfa Ayarlar'ından: dil ("tr"/"en") ve etkin tema (koyu mu). */
+        @JavascriptInterface
+        fun setUi(lang: String, dark: Boolean) {
+            runOnUiThread {
+                uiLang = if (lang == "en") "en" else "tr"
+                applyPageTheme(dark)
             }
         }
 
@@ -268,10 +304,10 @@ class MainActivity : Activity() {
                             requireNotNull(out) { "çıkış akışı açılamadı" }
                             src.inputStream().use { it.copyTo(out) }
                         }
-                        toast(getString(R.string.saved, name))
+                        toast(msg("saved").format(name))
                     }
                 } catch (e: Exception) {
-                    toast(getString(R.string.save_failed, e.message ?: e.javaClass.simpleName))
+                    toast(msg("save_failed").format(e.message ?: e.javaClass.simpleName))
                 } finally {
                     src.delete()
                 }

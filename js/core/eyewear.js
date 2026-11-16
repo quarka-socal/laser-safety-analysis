@@ -165,11 +165,13 @@
   }
 
   function fmtWl(l) {
-    return Number.isInteger(l) ? String(l) : String(Math.round(l * 10) / 10).replace('.', ',');
+    // ondalık dalga boyu (632,8): Türkçede virgül, İngilizce görünümde nokta
+    const dec = LE.units && LE.units.locale && LE.units.locale() === 'en' ? '.' : ',';
+    return Number.isInteger(l) ? String(l) : String(Math.round(l * 10) / 10).replace('.', dec);
   }
 
   function fmtN(N) {
-    return N >= 1e5 ? N.toExponential(1).replace('.', ',').replace('e+', '×10^') : String(Math.round(N));
+    return N >= 1e5 ? LE.units.fmt(N, 2) : String(Math.round(N));
   }
 
   /** Gerekli OD'den önerilen tamsayı OD. */

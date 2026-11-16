@@ -79,7 +79,7 @@
   }
 
   function fmtInt(n) {
-    return n >= 1e6 ? n.toExponential(2) : String(Math.round(n));
+    return n >= 1e6 ? LE.units.fmt(n, 3) : String(Math.round(n));
   }
 
   /** Sınır değer setleri. */

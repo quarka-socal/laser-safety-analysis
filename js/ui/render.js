@@ -1,10 +1,15 @@
 /*
  * Lazer Emniyet — sonuçların gösterimi (özet, grafik, tablolar)
+ *
+ * Metinler T() (arayüz) ve X() (hesap motoru metni) ile seçili dile çevrilir. Yöntem açıklamaları
+ * dokununca açılan kutulardadır (more()); uyarılar her zaman görünür.
  */
 (function (root) {
   'use strict';
   const LE = (root.LE = root.LE || {});
   const U = LE.units;
+  const T = (s, ...a) => (LE.i18n ? LE.i18n.T(s, ...a) : s.replace(/\{(\d+)\}/g, (m, i) => a[i]));
+  const X = (s) => (LE.i18n ? LE.i18n.X(s) : s);
 
   const MECH = {
     'retina-termal': 'Retina — termal',
@@ -22,7 +27,7 @@
     'deri-IR': 'Deri — IR',
   };
   const SETNAME = { ICNIRP: 'ICNIRP 2013', AB: '2006/25/AT' };
-  const setName = (id) => SETNAME[id] || id || '';
+  const setName = (id) => (SETNAME[id] ? T(SETNAME[id]) : id || '');
 
   const RULE = {
     CW: 'Sürekli dalga',
@@ -32,11 +37,18 @@
     K2a: 'Kural 2 (alt grup)',
     K3: 'Kural 3 (C_P)',
   };
+  const rule = (r) => (RULE[r] ? T(RULE[r]) : r);
 
   function esc(s) {
     return String(s === undefined || s === null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
-  const mech = (m) => MECH[m] || m;
+  const mech = (m) => (MECH[m] ? T(MECH[m]) : m);
+
+  /** Açıklamalar: "dokununca" (varsayılan) kapalı, "her zaman" ayarında açık gelir. */
+  function more(html, summary) {
+    const open = LE.prefs && LE.prefs.help === 'always';
+    return '<details class="more"' + (open ? ' open' : '') + '><summary>' + (summary || T('Açıklama')) + '</summary>' + html + '</details>';
+  }
 
   /** H (J/m²) ve süre t için "H J/m² (E W/m²)" ve ANSI karşılığı. */
   function limitText(H, t) {
@@ -53,16 +65,16 @@
   }
 
   function distOrNone(d, inf) {
-    if (inf || d === Infinity) return '∞ (sınırsız)';
-    if (!(d > 0)) return 'Yok';
+    if (inf || d === Infinity) return T('∞ (sınırsız)');
+    if (!(d > 0)) return T('Yok');
     return U.fmtDist(d);
   }
 
   // ---------------------------------------------------------------------------
   function render(container, out, ctx) {
     if (!out || !out.ok) {
-      const errs = (out && out.errors) || [];
-      container.innerHTML = '<div class="verdict err"><h2>Hesap yapılamadı</h2><p>Girişlerdeki hataları düzeltin:</p><ul class="msgs">' +
+      const errs = ((out && out.errors) || []).map(X);
+      container.innerHTML = '<div class="verdict err"><h2>' + T('Hesap yapılamadı') + '</h2><p>' + T('Girişlerdeki hataları düzeltin:') + '</p><ul class="msgs">' +
         (ctx.formErrors || []).concat(errs).map((e) => '<li class="err">' + esc(e) + '</li>').join('') + '</ul></div>';
       return;
     }
@@ -70,7 +82,7 @@
     const parts = [];
     parts.push(verdict(o));
     parts.push(tiles(o));
-    parts.push('<div class="card chart"><h3>Mesafeye göre gerekli optik yoğunluk (OD)</h3><div class="body">' + chart(o) + '</div></div>');
+    parts.push('<div class="card chart"><h3>' + T('Mesafeye göre gerekli optik yoğunluk (OD)') + '</h3><div class="body">' + chart(o) + '</div></div>');
     parts.push('<div class="grid2">' + eyewearCard(o) + mpeCard(o) + '</div>');
     parts.push(criteriaCard(o));
     parts.push('<div class="grid2">' + diffuseCard(o) + skinCard(o) + (o.lens ? lensCard(o) : '') + (o.fiber ? fiberCard(o) : '') + factorsCard(o) + derivedCard(o) + '</div>');
@@ -87,44 +99,55 @@
     const hazEye = e.at0.ratio > 1 || e.odWorst > 0;
     if (hazEye) {
       cls = 'danger';
-      title = 'Doğrudan ışına bakış göz için TEHLİKELİ';
+      title = T('Doğrudan ışına bakış göz için TEHLİKELİ');
       const worstRatio = Math.max(e.at0.ratio, e.worst.ratio);
-      lines.push('Maruziyet, MPE\'nin <b>' + U.fmt(worstRatio, 3) + ' katına</b> kadar çıkabilir' + (worstRatio < 2 ? ' (sınırda aşım — yine de kontrol önlemi gerekir)' : '') + '.');
-      lines.push('Göz tehlike mesafesi (NOHD): <b>' + distOrNone(e.nohd, e.nohdInf) + '</b>' + (e.enohd !== null ? ' · dürbünle (ENOHD): <b>' + distOrNone(e.enohd, e.enohdInf) + '</b>' : '') + '.');
-      if (e.oav.notApplicable) lines.push('Dürbünle bakış seçildi ancak bu dalga boyunda hesaba katılmadı (cam optikler 302,5 nm altını ve 4 µm üstünü geçirmez).');
-      const ewTxt = (o.eyewear ? ': <b class="mono">' + esc(o.eyewear.marking) + '</b>' : '') + ' (en az OD ' + LE.eyewear.recommendedOD(e.odWorst) + ')';
+      lines.push(worstRatio < 2
+        ? T('Maruziyet, MPE\'nin <b>{0} katına</b> kadar çıkabilir (sınırda aşım — yine de kontrol önlemi gerekir).', U.fmt(worstRatio, 3))
+        : T('Maruziyet, MPE\'nin <b>{0} katına</b> kadar çıkabilir.', U.fmt(worstRatio, 3)));
+      lines.push(e.enohd !== null
+        ? T('Göz tehlike mesafesi (NOHD): <b>{0}</b> · dürbünle (ENOHD): <b>{1}</b>.', distOrNone(e.nohd, e.nohdInf), distOrNone(e.enohd, e.enohdInf))
+        : T('Göz tehlike mesafesi (NOHD): <b>{0}</b>.', distOrNone(e.nohd, e.nohdInf)));
+      if (e.oav.notApplicable) lines.push(T('Dürbünle bakış seçildi ancak bu dalga boyunda hesaba katılmadı (cam optikler 302,5 nm altını ve 4 µm üstünü geçirmez).'));
+      const ewTxt = (o.eyewear ? ': <b class="mono">' + esc(o.eyewear.marking) + '</b>' : '') + T(' (en az OD {0})', LE.eyewear.recommendedOD(e.odWorst));
       if (e.nohd > 0 || e.nohdInf) {
-        lines.push('Bu mesafe içinde lazer kontrollü alan ve uygun göz koruyucu gereklidir' + ewTxt + '.');
+        lines.push(T('Bu mesafe içinde lazer kontrollü alan ve uygun göz koruyucu gereklidir{0}.', ewTxt));
       } else if (e.enohd > 0 || e.enohdInf) {
-        lines.push('Çıplak gözle doğrudan bakışta MPE aşılmıyor; dürbünle bakışta ENOHD içinde aşılır. Bu mesafe içinde optik destekli bakış engellenmeli ya da göz koruyucu kullanılmalıdır' + ewTxt + '.');
+        lines.push(T('Çıplak gözle doğrudan bakışta MPE aşılmıyor; dürbünle bakışta ENOHD içinde aşılır. Bu mesafe içinde optik destekli bakış engellenmeli ya da göz koruyucu kullanılmalıdır{0}.', ewTxt));
       } else {
         // en kötü durum (tüm güç ölçüm açıklığında) MPE'yi aşıyor, gerçek ışın aşmıyor
-        lines.push('Işın ölçüm açıklığından (göz bebeğinden) geniş olduğu için çıplak gözle doğrudan bakışta MPE aşılmıyor; ışın daraltılır ya da odaklanırsa (tüm güç göz bebeğine girerse) aşılır. Bu durumlar için göz koruyucu' + ewTxt + '.');
+        lines.push(T('Işın ölçüm açıklığından (göz bebeğinden) geniş olduğu için çıplak gözle doğrudan bakışta MPE aşılmıyor; ışın daraltılır ya da odaklanırsa (tüm güç göz bebeğine girerse) aşılır. Bu durumlar için göz koruyucu{0}.', ewTxt));
       }
-      if (e.scint) lines.push('Atmosferik türbülans (sintilasyon) payıyla (+' + e.scint.odPlus + ' OD): önerilen en az <b>OD ' + e.scint.recOD + '</b>' + (o.eyewear && o.eyewear.markingScint ? ', EN 207 <b class="mono">' + esc(o.eyewear.markingScint) + '</b>' : '') + '; tehlike mesafesi <b>' + distOrNone(e.scint.nohd, e.scint.nohdInf) + '</b>' + (e.scint.enohd !== null ? ' (dürbünle ' + distOrNone(e.scint.enohd, e.scint.enohdInf) + ')' : '') + '.');
+      if (e.scint) {
+        lines.push(T('Atmosferik türbülans (sintilasyon) payıyla (+{0} OD): önerilen en az <b>OD {1}</b>{2}; tehlike mesafesi <b>{3}</b>{4}.',
+          e.scint.odPlus, e.scint.recOD,
+          o.eyewear && o.eyewear.markingScint ? ', EN 207 <b class="mono">' + esc(o.eyewear.markingScint) + '</b>' : '',
+          distOrNone(e.scint.nohd, e.scint.nohdInf),
+          e.scint.enohd !== null ? T(' (dürbünle {0})', distOrNone(e.scint.enohd, e.scint.enohdInf)) : ''));
+      }
       const gc = e.worst.ratio >= e.at0.ratio ? e.worst.crit : e.at0.crit;
       if (o.sets.length > 1 && gc) {
         const ri = (e.worstBySet || {}).ICNIRP;
         const ra = (e.worstBySet || {}).AB;
         if (ri > 0 && ra > 0 && Math.abs(Math.log10(ri / ra)) < 0.002) {
-          lines.push('Belirleyici sınır: <b>iki sette aynı</b> (ICNIRP 2013 ve 2006/25/AT) — ' + esc(RULE[gc.rule]) + ', ' + esc(mech(gc.mech)) + '.');
+          lines.push(T('Belirleyici sınır: <b>iki sette aynı</b> (ICNIRP 2013 ve 2006/25/AT) — {0}, {1}.', esc(rule(gc.rule)), esc(mech(gc.mech))));
         } else {
           const k = ri > 0 && ra > 0 ? Math.max(ri, ra) / Math.min(ri, ra) : null;
           const lead = ri > ra ? 'ICNIRP' : 'AB';
-          lines.push('Belirleyici sınır: <b>' + setName(gc.set) + '</b> — ' + esc(RULE[gc.rule]) + ', ' + esc(mech(gc.mech)) + (k && lead === gc.set ? ' (diğer setten ' + U.fmt(k, 3) + ' kat daha kısıtlayıcı)' : '') + '.');
+          lines.push(T('Belirleyici sınır: <b>{0}</b> — {1}, {2}{3}.', setName(gc.set), esc(rule(gc.rule)), esc(mech(gc.mech)),
+            k && lead === gc.set ? T(' (diğer setten {0} kat daha kısıtlayıcı)', U.fmt(k, 3)) : ''));
         }
       }
     } else {
-      title = 'Doğrudan ışın, seçilen maruziyet süresi için MPE\'nin altında';
-      lines.push('Çıkışta MPE oranı ' + U.fmt(e.at0.ratio, 3) + ' (≤ 1). Daha uzun bakış süreleri için süreyi artırarak kontrol edin.');
+      title = T('Doğrudan ışın, seçilen maruziyet süresi için MPE\'nin altında');
+      lines.push(T('Çıkışta MPE oranı {0} (≤ 1). Daha uzun bakış süreleri için süreyi artırarak kontrol edin.', U.fmt(e.at0.ratio, 3)));
     }
     if (o.diffuse && o.diffuse.eye.nhz > 0) {
       if (cls === 'ok') cls = 'warn';
-      lines.push('Yaygın yansımalar <b>' + distOrNone(o.diffuse.eye.nhz, o.diffuse.eye.inf) + '</b> mesafeye kadar göz için tehlikeli (ρ = ' + U.fmtPct(o.diffuse.rho) + ', ' + U.fmtTime(o.diffuse.T) + ').');
+      lines.push(T('Yaygın yansımalar <b>{0}</b> mesafeye kadar göz için tehlikeli (ρ = {1}, {2}).', distOrNone(o.diffuse.eye.nhz, o.diffuse.eye.inf), U.fmtPct(o.diffuse.rho), U.fmtTime(o.diffuse.T)));
     }
     if (o.skin.timesMPE > 1) {
       if (cls === 'ok') cls = 'warn';
-      lines.push('Deri için tehlikeli: deri MPE\'sinin ' + U.fmt(o.skin.timesMPE, 3) + ' katı; deri tehlike mesafesi (NSHD) <b>' + distOrNone(o.skin.nshd, o.skin.nshdInf) + '</b>.');
+      lines.push(T('Deri için tehlikeli: deri MPE\'sinin {0} katı; deri tehlike mesafesi (NSHD) <b>{1}</b>.', U.fmt(o.skin.timesMPE, 3), distOrNone(o.skin.nshd, o.skin.nshdInf)));
     }
     return '<div class="verdict ' + cls + '"><h2>' + title + '</h2>' + lines.map((l) => '<p>' + l + '</p>').join('') + '</div>';
   }
@@ -133,24 +156,27 @@
     const e = o.eye;
     const s = e.summary;
     const t = [];
-    t.push(tile(e.nohd > 0 ? 'danger' : 'ok', 'Göz — NOHD', distOrNone(e.nohd, e.nohdInf),
-      (e.enohd !== null ? 'Dürbünle ENOHD: ' + distOrNone(e.enohd, e.enohdInf) : (e.oav.notApplicable ? 'Dürbün: bu dalga boyunda uygulanmaz' : 'Çıplak gözle doğrudan bakış')) +
-      (e.scint && e.nohd > 0 ? ' · türbülans payıyla ' + distOrNone(e.scint.nohd, e.scint.nohdInf) + (e.scint.enohd !== null ? ' (dürbünle ' + distOrNone(e.scint.enohd, e.scint.enohdInf) + ')' : '') : '')));
-    t.push(tile(e.odWorst > 0 ? 'danger' : 'ok', 'Gerekli OD (en kötü durum)', U.fmtOD(e.odWorst),
-      'Önerilen en az OD ' + LE.eyewear.recommendedOD(e.odWorst) + (e.scint && e.odWorst > 0 ? ' · türbülans payıyla (+' + e.scint.odPlus + ') OD ' + e.scint.recOD : '') + ' · ' + (e.atRange.r > 0 ? U.fmtDist(e.atRange.r, 3) + ' mesafede' : 'çıkışta') + ' OD ' + U.fmtOD(e.odAtRange)));
+    t.push(tile(e.nohd > 0 ? 'danger' : 'ok', T('Göz — NOHD'), distOrNone(e.nohd, e.nohdInf),
+      (e.enohd !== null ? T('Dürbünle ENOHD: {0}', distOrNone(e.enohd, e.enohdInf)) : (e.oav.notApplicable ? T('Dürbün: bu dalga boyunda uygulanmaz') : T('Çıplak gözle doğrudan bakış'))) +
+      (e.scint && e.nohd > 0 ? T(' · türbülans payıyla {0}', distOrNone(e.scint.nohd, e.scint.nohdInf)) + (e.scint.enohd !== null ? T(' (dürbünle {0})', distOrNone(e.scint.enohd, e.scint.enohdInf)) : '') : '')));
+    t.push(tile(e.odWorst > 0 ? 'danger' : 'ok', T('Gerekli OD (en kötü durum)'), U.fmtOD(e.odWorst),
+      T('Önerilen en az OD {0}', LE.eyewear.recommendedOD(e.odWorst)) +
+      (e.scint && e.odWorst > 0 ? T(' · türbülans payıyla (+{0}) OD {1}', e.scint.odPlus, e.scint.recOD) : '') + ' · ' +
+      (e.atRange.r > 0 ? T('{0} mesafede OD {1}', U.fmtDist(e.atRange.r, 3), U.fmtOD(e.odAtRange)) : T('çıkışta OD {0}', U.fmtOD(e.odAtRange)))));
     if (o.eyewear) {
-      t.push(tile(o.eyewear.en207.some((i) => i.over) ? 'danger' : 'info', 'EN 207 koruma seviyesi', esc(o.eyewear.marking) + (o.eyewear.markingScint && e.odWorst > 0 ? '<div class="s">türbülans payıyla: ' + esc(o.eyewear.markingScint) + '</div>' : ''),
-        o.eyewear.en208 ? (o.eyewear.en208.applicable ? 'EN 208 ayar gözlüğü: RB' + o.eyewear.en208.rb : 'EN 208: uygun değil') : 'Gözlükteki ışın çapı: ' + U.fmt(o.eyewear.sec.dx * 1e3, 3) + ' mm', true));
+      t.push(tile(o.eyewear.en207.some((i) => i.over) ? 'danger' : 'info', T('EN 207 koruma seviyesi'),
+        esc(o.eyewear.marking) + (o.eyewear.markingScint && e.odWorst > 0 ? '<div class="s">' + T('türbülans payıyla: {0}', esc(o.eyewear.markingScint)) + '</div>' : ''),
+        o.eyewear.en208 ? (o.eyewear.en208.applicable ? T('EN 208 ayar gözlüğü: RB{0}', o.eyewear.en208.rb) : T('EN 208: uygun değil')) : T('Gözlükteki ışın çapı: {0} mm', U.fmt(o.eyewear.sec.dx * 1e3, 3)), true));
     }
     const g = s.governing;
     let mpeV;
     let mpeS;
     if (o.input.mode === 'cw') { mpeV = U.fmt(s.E) + ' W/m²'; mpeS = U.fmt(s.E * 1e-4) + ' W/cm² · t = ' + U.fmtTime(o.derived.T); }
     else if (o.input.mode === 'sp') { mpeV = U.fmt(s.H) + ' J/m²'; mpeS = U.fmt(s.H * 1e-4) + ' J/cm² · τ = ' + U.fmtTime(o.input.tau); }
-    else { mpeV = U.fmt(s.H) + ' J/m²'; mpeS = 'darbe başına · ' + U.fmt(s.H * 1e-4) + ' J/cm² · ' + RULE[g.rule]; }
-    t.push(tile('info', 'Göz MPE (belirleyici)', mpeV, mpeS + ' · ' + esc(mech(g.crit.mech)) + ' · ' + setName(g.crit.set), true));
-    if (o.diffuse) t.push(tile(o.diffuse.eye.nhz > 0 ? 'warn' : 'ok', 'Yaygın yansıma NHZ (göz)', distOrNone(o.diffuse.eye.nhz, o.diffuse.eye.inf), U.fmtDist(o.diffuse.r) + '\'de OD ' + U.fmtOD(o.diffuse.eye.odAtR)));
-    t.push(tile(o.skin.timesMPE > 1 ? 'warn' : 'ok', 'Deri', o.skin.timesMPE > 1 ? U.fmt(o.skin.timesMPE, 3) + ' × MPE' : 'MPE altında', 'NSHD: ' + distOrNone(o.skin.nshd, o.skin.nshdInf) + ' · t = ' + U.fmtTime(o.skin.T)));
+    else { mpeV = U.fmt(s.H) + ' J/m²'; mpeS = T('darbe başına · {0} J/cm² · {1}', U.fmt(s.H * 1e-4), rule(g.rule)); }
+    t.push(tile('info', T('Göz MPE (belirleyici)'), mpeV, mpeS + ' · ' + esc(mech(g.crit.mech)) + ' · ' + setName(g.crit.set), true));
+    if (o.diffuse) t.push(tile(o.diffuse.eye.nhz > 0 ? 'warn' : 'ok', T('Yaygın yansıma NHZ (göz)'), distOrNone(o.diffuse.eye.nhz, o.diffuse.eye.inf), T('{0}\'de OD {1}', U.fmtDist(o.diffuse.r), U.fmtOD(o.diffuse.eye.odAtR))));
+    t.push(tile(o.skin.timesMPE > 1 ? 'warn' : 'ok', T('Deri'), o.skin.timesMPE > 1 ? U.fmt(o.skin.timesMPE, 3) + ' × MPE' : T('MPE altında'), 'NSHD: ' + distOrNone(o.skin.nshd, o.skin.nshdInf) + ' · t = ' + U.fmtTime(o.skin.T)));
     return '<div class="tiles">' + t.join('') + '</div>';
   }
 
@@ -179,30 +205,30 @@
     const e = o.eye;
     const A = LE.analysis;
     const ctx = { beam: inp.beam, model: inp.model === 'linear' ? 'linear' : 'quad', mu: inp.mu || 0, oav: { on: false } };
-    const list = [{ key: 'skin', label: 'Deri (göstergesel)', color: 'var(--warn)', dash: '2 4', style: 'dotted', width: 2,
+    const list = [{ key: 'skin', label: T('Deri (göstergesel)'), color: 'var(--warn)', dash: '2 4', style: 'dotted', width: 2,
       ratio: (r) => A.intrabeamEval(o.skin.criteria, ctx, r).ratio }];
     if (e.scint) {
       const c = Object.assign({}, ctx, { scint: e.scint.factor });
-      list.push({ key: 'scint', label: 'Göz, türbülans payıyla (+' + e.scint.odPlus + ' OD)', color: 'var(--scint)', dash: '3 3', style: 'dotted', width: 2,
+      list.push({ key: 'scint', label: T('Göz, türbülans payıyla (+{0} OD)', e.scint.odPlus), color: 'var(--scint)', dash: '3 3', style: 'dotted', width: 2,
         ratio: (r) => A.intrabeamEval(e.criteria, c, r).ratio });
     }
     if (e.oav.on) {
       const c = Object.assign({}, ctx, { oav: e.oav });
-      list.push({ key: 'oav', label: 'Göz, dürbünle', color: 'var(--accent)', dash: '7 5', style: 'dashed', width: 2.2,
+      list.push({ key: 'oav', label: T('Göz, dürbünle'), color: 'var(--accent)', dash: '7 5', style: 'dashed', width: 2.2,
         ratio: (r) => A.intrabeamEval(e.criteria, c, r).ratio });
     }
-    list.push({ key: 'eye', label: 'Göz, çıplak gözle', color: 'var(--danger)', dash: '', style: 'solid', width: 2.8,
+    list.push({ key: 'eye', label: T('Göz, çıplak gözle'), color: 'var(--danger)', dash: '', style: 'solid', width: 2.8,
       ratio: (r) => A.intrabeamEval(e.criteria, ctx, r).ratio });
     return list;
   }
 
   /** Okuma metni: MPE aşılıyorsa gereken OD, aşılmıyorsa maruziyetin MPE'ye oranı. */
   function readoutText(ratio) {
-    if (!(ratio > 0)) return 'MPE altında';
+    if (!(ratio > 0)) return T('MPE altında');
     const v = Math.log10(ratio);
-    if (v > 0) return 'OD ' + (v < 0.01 ? '< 0,01' : U.fmtOD(v));
+    if (v > 0) return 'OD ' + (v < 0.01 ? '< ' + U.fmtOD(0.01) : U.fmtOD(v));
     // MPE'nin hemen altındaki değer "1 × MPE" diye yuvarlanmaz
-    return 'MPE altında (' + U.fmt(Math.min(ratio, 0.99), 2) + ' × MPE)';
+    return T('MPE altında ({0} × MPE)', U.fmt(Math.min(ratio, 0.99), 2));
   }
 
   /**
@@ -219,7 +245,8 @@
   function chart(o) {
     const inp = o.input;
     const e = o.eye;
-    const { W, H, L, R, T, B, OD_MIN, N } = CH;
+    const { W, H, L, R, B, OD_MIN, N } = CH;
+    const TOP = CH.T;
     const rMin = CH.R_MIN;
     const rMax = chartRange(o);
     // Eğriler log10(maruziyet / MPE) olarak çizilir ve sıfırda kesilmez: sıfırın üstü gereken OD,
@@ -240,9 +267,9 @@
     }
     odMax = Math.ceil(odMax + 0.25);
     const x = (r) => L + ((Math.log10(r) - Math.log10(rMin)) / (Math.log10(rMax) - Math.log10(rMin))) * (W - L - R);
-    const y = (v) => T + (1 - (v - OD_MIN) / (odMax - OD_MIN)) * (H - T - B);
+    const y = (v) => TOP + (1 - (v - OD_MIN) / (odMax - OD_MIN)) * (H - TOP - B);
     const svg = [];
-    svg.push('<svg class="odchart" viewBox="0 0 ' + W + ' ' + H + '" data-odmax="' + odMax + '" role="img" aria-label="Mesafeye göre gerekli optik yoğunluk grafiği. Değer okumak için fareyle üzerine gelin, dokunun ya da odaklanıp ok tuşlarını kullanın.">');
+    svg.push('<svg class="odchart" viewBox="0 0 ' + W + ' ' + H + '" data-odmax="' + odMax + '" role="img" aria-label="' + esc(T('Mesafeye göre gerekli optik yoğunluk grafiği. Değer okumak için fareyle üzerine gelin, dokunun ya da odaklanıp ok tuşlarını kullanın.')) + '">');
     // MPE altı bandı (sıfırın altı)
     svg.push('<rect class="safe-band" x="' + L + '" y="' + y(0) + '" width="' + (W - L - R) + '" height="' + (y(OD_MIN) - y(0)) + '" fill="var(--ok-bg)"/>');
     // ızgara — logaritmik mesafe ekseni (logaritmik kâğıt gibi): 10 katları koyu ve etiketli, 2…9 katları
@@ -254,7 +281,7 @@
         const v = m * Math.pow(10, d);
         if (v < rMin * (1 - 1e-9) || v > rMax * (1 + 1e-9)) continue;
         const xx = x(v);
-        svg.push('<line x1="' + xx + '" y1="' + T + '" x2="' + xx + '" y2="' + (H - B) + '" stroke="var(--line)" stroke-width="1"' + (m === 1 ? '' : ' stroke-opacity="0.45"') + '/>');
+        svg.push('<line x1="' + xx + '" y1="' + TOP + '" x2="' + xx + '" y2="' + (H - B) + '" stroke="var(--line)" stroke-width="1"' + (m === 1 ? '' : ' stroke-opacity="0.45"') + '/>');
         if (m !== 1 && !minorLabels.includes(m)) continue;
         const label = U.fmtDist(v);
         const atEdge = xx + label.length * 3.2 > W - 1; // sağ kenara taşacak etiket
@@ -262,16 +289,16 @@
         svg.push('<text x="' + (atEdge ? W - 1 : xx) + '" y="' + (H - B + 16) + '" font-size="11" text-anchor="' + (atEdge ? 'end' : 'middle') + '" fill="var(--muted)">' + label + '</text>');
       }
     }
-    svg.push('<text x="' + (L + (W - L - R) / 2) + '" y="' + (H - 6) + '" font-size="11" text-anchor="middle" fill="var(--muted)">Mesafe (logaritmik ölçek)</text>');
+    svg.push('<text x="' + (L + (W - L - R) / 2) + '" y="' + (H - 6) + '" font-size="11" text-anchor="middle" fill="var(--muted)">' + T('Mesafe (logaritmik ölçek)') + '</text>');
     const step = odMax > 10 ? 2 : 1;
     for (let v = 0; v <= odMax; v += step) {
       const yy = y(v);
       svg.push('<line x1="' + L + '" y1="' + yy + '" x2="' + (W - R) + '" y2="' + yy + '" stroke="' + (v === 0 ? 'var(--ok)' : 'var(--line)') + '" stroke-width="1"/>');
       svg.push('<text x="' + (L - 6) + '" y="' + (yy + 4) + '" font-size="11" text-anchor="end" fill="var(--muted)">' + v + '</text>');
     }
-    const yMid = (T + y(0)) / 2;
-    svg.push('<text x="12" y="' + yMid + '" font-size="11" fill="var(--muted)" transform="rotate(-90 12 ' + yMid + ')" text-anchor="middle">Gerekli OD</text>');
-    svg.push('<text x="' + (L + 6) + '" y="' + ((y(0) + y(OD_MIN)) / 2 + 4) + '" font-size="11" fill="var(--ok)" stroke="var(--ok-bg)" stroke-width="3" paint-order="stroke">MPE altında — koruma gerekmez</text>');
+    const yMid = (TOP + y(0)) / 2;
+    svg.push('<text x="12" y="' + yMid + '" font-size="11" fill="var(--muted)" transform="rotate(-90 12 ' + yMid + ')" text-anchor="middle">' + T('Gerekli OD') + '</text>');
+    svg.push('<text x="' + (L + 6) + '" y="' + ((y(0) + y(OD_MIN)) / 2 + 4) + '" font-size="11" fill="var(--ok)" stroke="var(--ok-bg)" stroke-width="3" paint-order="stroke">' + T('MPE altında — koruma gerekmez') + '</text>');
     // bandın altına inen kısım çizilmez (eğri bandın alt kenarından çıkar)
     const path = (pts, color, dash, wdt) => {
       let d = '';
@@ -291,16 +318,16 @@
     // tehlike mesafesi işaretleri: her biri kendi eğrisinin sıfır (MPE) çizgisini kestiği yer (sonsuz olanlar çizilmez)
     const marks = [
       { d: e.nohdInf ? null : e.nohd, label: 'NOHD', color: 'var(--danger)' },
-      { d: e.enohd !== null && !e.enohdInf ? e.enohd : null, label: 'ENOHD (dürbün)', color: 'var(--accent)' },
-      { d: e.scint && !e.scint.nohdInf ? e.scint.nohd : null, label: 'NOHD (türbülans +' + (e.scint ? e.scint.odPlus : 1) + ' OD)', color: 'var(--scint)' },
+      { d: e.enohd !== null && !e.enohdInf ? e.enohd : null, label: T('ENOHD (dürbün)'), color: 'var(--accent)' },
+      { d: e.scint && !e.scint.nohdInf ? e.scint.nohd : null, label: T('NOHD (türbülans +{0} OD)', e.scint ? e.scint.odPlus : 1), color: 'var(--scint)' },
     ];
     let row = 0;
     for (const m of marks) {
       if (!(m.d > rMin && m.d < rMax)) continue;
       const xx = x(m.d);
-      svg.push('<line class="mark" x1="' + xx + '" y1="' + T + '" x2="' + xx + '" y2="' + (H - B) + '" stroke="' + m.color + '" stroke-width="1.5" stroke-dasharray="4 3"/>');
+      svg.push('<line class="mark" x1="' + xx + '" y1="' + TOP + '" x2="' + xx + '" y2="' + (H - B) + '" stroke="' + m.color + '" stroke-width="1.5" stroke-dasharray="4 3"/>');
       const right = xx > W - 190;
-      svg.push('<text x="' + (right ? xx - 5 : xx + 5) + '" y="' + (T + 12 + row * 15) + '" font-size="11.5" fill="' + m.color + '" font-weight="700" stroke="var(--panel)" stroke-width="3" paint-order="stroke" text-anchor="' + (right ? 'end' : 'start') + '">' + m.label + ' ' + U.fmtDist(m.d) + '</text>');
+      svg.push('<text x="' + (right ? xx - 5 : xx + 5) + '" y="' + (TOP + 12 + row * 15) + '" font-size="11.5" fill="' + m.color + '" font-weight="700" stroke="var(--panel)" stroke-width="3" paint-order="stroke" text-anchor="' + (right ? 'end' : 'start') + '">' + m.label + ' ' + U.fmtDist(m.d) + '</text>');
       row++;
     }
     if (inp.range > rMin && inp.range < rMax) {
@@ -310,11 +337,8 @@
     }
     svg.push('</svg>');
     const legend = '<div class="legend">' + defs.slice().reverse().map((s) => '<span><i style="border-color:' + s.color + (s.style === 'solid' ? '' : ';border-top-style:' + s.style) + '"></i>' + esc(s.label) + '</span>').join('') +
-      (inp.range > rMin ? '<span>● gözlem mesafesi</span>' : '') + '</div>';
-    const howTo = '<p class="note">Mesafe ekseni logaritmiktir: koyu çizgiler 10 katlar, soluk çizgiler ara değerler. ' +
-      'OD de logaritmik bir büyüklüktür (OD 3 = 1000 kat zayıflatma); ışın ölçüm açıklığından büyüdükten sonra mesafe ' +
-      '10 katına çıktıkça OD yaklaşık 2 azalır (1/r²). Eğrinin sıfır çizgisini kestiği yer tehlike mesafesidir; ' +
-      'yeşil bant maruziyetin MPE\'nin altında kaldığı bölgedir.</p>';
+      (inp.range > rMin ? '<span>' + T('● gözlem mesafesi') + '</span>' : '') + '</div>';
+    const howTo = more('<p class="note">' + T('Mesafe ekseni logaritmiktir: koyu çizgiler 10 katlar, soluk çizgiler ara değerler. OD de logaritmik bir büyüklüktür (OD 3 = 1000 kat zayıflatma); ışın ölçüm açıklığından büyüdükten sonra mesafe 10 katına çıktıkça OD yaklaşık 2 azalır (1/r²). Eğrinin sıfır çizgisini kestiği yer tehlike mesafesidir; yeşil bant maruziyetin MPE\'nin altında kaldığı bölgedir.') + '</p>', T('Grafik nasıl okunur?'));
     return svg.join('') + legend + howTo;
   }
 
@@ -327,7 +351,8 @@
     if (!host || typeof document === 'undefined') return;
     const svg = host.querySelector('svg.odchart');
     if (!svg) return;
-    const { W, H, L, R, T, B, OD_MIN, N } = CH;
+    const { W, H, L, R, B, OD_MIN, N } = CH;
+    const TOP = CH.T;
     const rMin = CH.R_MIN;
     const rMax = chartRange(o);
     const odMax = Number(svg.getAttribute('data-odmax')) || 1;
@@ -335,7 +360,7 @@
     const lMax = Math.log10(rMax);
     const x = (r) => L + ((Math.log10(r) - lMin) / (lMax - lMin)) * (W - L - R);
     const rAt = (px) => Math.pow(10, lMin + ((px - L) / (W - L - R)) * (lMax - lMin));
-    const y = (v) => T + (1 - (v - OD_MIN) / (odMax - OD_MIN)) * (H - T - B);
+    const y = (v) => TOP + (1 - (v - OD_MIN) / (odMax - OD_MIN)) * (H - TOP - B);
     const NS = 'http://www.w3.org/2000/svg';
     const el = (tag, attrs) => {
       const n = document.createElementNS(NS, tag);
@@ -343,7 +368,7 @@
       return n;
     };
     const g = el('g', { class: 'hover', 'pointer-events': 'none', visibility: 'hidden' });
-    const vline = el('line', { y1: T, y2: H - B, stroke: 'var(--ink)', 'stroke-width': 1, 'stroke-opacity': 0.6 });
+    const vline = el('line', { y1: TOP, y2: H - B, stroke: 'var(--ink)', 'stroke-width': 1, 'stroke-opacity': 0.6 });
     g.appendChild(vline);
     const dots = {};
     for (const s of chartSeries(o)) {
@@ -387,7 +412,7 @@
       const px = sr.left - hr.left + xx * k;
       const tw = tip.offsetWidth;
       let left = px + 14;
-      let top = sr.top - hr.top + (T + 2) * k;
+      let top = sr.top - hr.top + (TOP + 2) * k;
       if (left + tw > hr.width) left = px - 14 - tw;
       if (left < 0) {
         // dar ekran: çizginin yanına sığmıyor — eğrileri örtmemek için grafiğin altına
@@ -448,29 +473,30 @@
   function eyewearCard(o) {
     const w = o.eyewear;
     if (!w) return '';
-    const rows = w.en207.map((i) => '<tr><td>' + i.mode + '</td><td class="num">' + U.fmt(i.density) + ' ' + i.unit + '</td><td>' + esc(i.basis) + '</td><td class="num"><b>LB' + i.lb + '</b>' + (i.over ? ' ⚠' : '') + '</td></tr>').join('');
+    const rows = w.en207.map((i) => '<tr><td>' + i.mode + '</td><td class="num">' + U.fmt(i.density) + ' ' + i.unit + '</td><td>' + esc(X(i.basis)) + '</td><td class="num"><b>LB' + i.lb + '</b>' + (i.over ? ' ⚠' : '') + '</td></tr>').join('');
     let en208 = '';
     if (w.en208) {
-      en208 = '<h4 style="margin:14px 0 4px">EN 208 — görünür ışın ayar gözlüğü</h4>' +
-        (w.en208.applicable ? '<p><span class="marking">RB' + w.en208.rb + '</span></p>' : '<p class="muted">Uygun değil.</p>') +
-        '<p class="note">' + esc(w.en208.note) + '</p>';
+      en208 = '<h4 style="margin:14px 0 4px">' + T('EN 208 — görünür ışın ayar gözlüğü') + '</h4>' +
+        (w.en208.applicable ? '<p><span class="marking">RB' + w.en208.rb + '</span></p>' : '<p class="muted">' + T('Uygun değil.') + '</p>') +
+        '<p class="note">' + esc(X(w.en208.note)) + '</p>';
     }
     const odW = o.eye.odWorst;
-    return '<div class="card"><h3>Göz koruyucu seçimi</h3><div class="body">' +
+    const where = w.dGiven ? T('elle girilen çap') : (w.r > 0 ? T('{0} mesafedeki çap', U.fmtDist(w.r)) : T('çıkış çapı'));
+    return '<div class="card"><h3>' + T('Göz koruyucu seçimi') + '</h3><div class="body">' +
       '<div><span class="marking">' + esc(w.marking) + '</span></div>' +
-      '<p class="note">EN 207 işaretlemesi: mod harfi, dalga boyu (nm), koruma seviyesi. Gözlük ve çerçeve bu değerlerin <b>tümünü</b> sağlamalıdır.</p>' +
-      '<div class="tablewrap"><table class="t"><thead><tr><th>Mod</th><th>Yoğunluk</th><th>Esas</th><th>Seviye</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
-      '<p class="note">Gözlükteki ışın: ' + (w.dGiven ? 'elle girilen çap ' : (w.r > 0 ? U.fmtDist(w.r) + ' mesafedeki çap ' : 'çıkış çapı ')) + U.fmt(w.sec.dx * 1e3, 3) + (w.sec.dy !== w.sec.dx ? ' × ' + U.fmt(w.sec.dy * 1e3, 3) : '') + ' mm (1/e), alan ' + U.fmt(w.A * 1e6, 3) + ' mm².</p>' +
+      more('<p class="note">' + T('EN 207 işaretlemesi: mod harfi, dalga boyu (nm), koruma seviyesi. Gözlük ve çerçeve bu değerlerin <b>tümünü</b> sağlamalıdır.') + '</p>') +
+      '<div class="tablewrap"><table class="t"><thead><tr><th>' + T('Mod') + '</th><th>' + T('Yoğunluk') + '</th><th>' + T('Esas') + '</th><th>' + T('Seviye') + '</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      '<p class="note">' + T('Gözlükteki ışın: {0} {1} mm (1/e), alan {2} mm².', where, U.fmt(w.sec.dx * 1e3, 3) + (w.sec.dy !== w.sec.dx ? ' × ' + U.fmt(w.sec.dy * 1e3, 3) : ''), U.fmt(w.A * 1e6, 3)) + '</p>' +
       en208 +
-      '<h4 style="margin:14px 0 4px">OD (ANSI Z136.1 yöntemi)</h4><table class="t kv"><tbody>' +
-      '<tr><td>En kötü durum (tüm güç açıklıktan)</td><td>' + U.fmtOD(odW) + ' → en az OD ' + LE.eyewear.recommendedOD(odW) + '</td></tr>' +
-      '<tr><td>Çıkışta (gerçek ışın)</td><td>' + U.fmtOD(o.eye.at0.od) + '</td></tr>' +
-      (o.eye.atRange.r > 0 ? '<tr><td>Gözlem mesafesinde (' + U.fmtDist(o.eye.atRange.r) + ')</td><td>' + U.fmtOD(o.eye.odAtRange) + (o.eye.atRange.viaOptics ? ' (dürbünle)' : '') + '</td></tr>' : '') +
-      (o.eye.scint ? '<tr><td>Atmosferik türbülans (sintilasyon) payı</td><td>+' + o.eye.scint.odPlus + ' OD → en az OD ' + o.eye.scint.recOD + (o.eye.atRange.r > 0 ? '; ' + U.fmtDist(o.eye.atRange.r) + '\'de OD ' + U.fmtOD(o.eye.scint.odAtRange) : '') + '</td></tr>' : '') +
+      '<h4 style="margin:14px 0 4px">' + T('OD (ANSI Z136.1 yöntemi)') + '</h4><table class="t kv"><tbody>' +
+      '<tr><td>' + T('En kötü durum (tüm güç açıklıktan)') + '</td><td>' + T('{0} → en az OD {1}', U.fmtOD(odW), LE.eyewear.recommendedOD(odW)) + '</td></tr>' +
+      '<tr><td>' + T('Çıkışta (gerçek ışın)') + '</td><td>' + U.fmtOD(o.eye.at0.od) + '</td></tr>' +
+      (o.eye.atRange.r > 0 ? '<tr><td>' + T('Gözlem mesafesinde ({0})', U.fmtDist(o.eye.atRange.r)) + '</td><td>' + U.fmtOD(o.eye.odAtRange) + (o.eye.atRange.viaOptics ? T(' (dürbünle)') : '') + '</td></tr>' : '') +
+      (o.eye.scint ? '<tr><td>' + T('Atmosferik türbülans (sintilasyon) payı') + '</td><td>' + T('+{0} OD → en az OD {1}', o.eye.scint.odPlus, o.eye.scint.recOD) + (o.eye.atRange.r > 0 ? T('; {0}\'de OD {1}', U.fmtDist(o.eye.atRange.r), U.fmtOD(o.eye.scint.odAtRange)) : '') + '</td></tr>' : '') +
       '</tbody></table>' +
-      (w.markingScint ? '<p class="note">Türbülans payıyla EN 207: <b class="mono">' + esc(w.markingScint) + '</b> (yoğunluk ×10 → her seviye +1).</p>' : '') +
-      (o.eye.scint ? '<p class="note">Türbülans payı açık havada uzun ışın yolu için muhafazakâr bir eklemedir; ICNIRP 2013 ve ANSI Z136.6-2015 zorunlu tutmaz, İngiltere JSP 390 tehlike mesafesini en çok 2,66 katına çıkarır (≈ +0,85 OD). Ölçüm açıklığına giren güç, ışının toplam gücünü aşamayacağı için mesafeye bağlı değerler bu üst sınırla kırpılır.</p>' : '') +
-      w.warnings.concat(w.notes).map((m) => '<p class="note">⚠ ' + esc(m) + '</p>').join('') +
+      (w.markingScint ? '<p class="note">' + T('Türbülans payıyla EN 207: <b class="mono">{0}</b> (yoğunluk ×10 → her seviye +1).', esc(w.markingScint)) + '</p>' : '') +
+      (o.eye.scint ? more('<p class="note">' + T('Türbülans payı açık havada uzun ışın yolu için muhafazakâr bir eklemedir; ICNIRP 2013 ve ANSI Z136.6-2015 zorunlu tutmaz, İngiltere JSP 390 tehlike mesafesini en çok 2,66 katına çıkarır (≈ +0,85 OD). Ölçüm açıklığına giren güç, ışının toplam gücünü aşamayacağı için mesafeye bağlı değerler bu üst sınırla kırpılır.') + '</p>', T('Türbülans payı hakkında')) : '') +
+      w.warnings.concat(w.notes).map((m) => '<p class="note">⚠ ' + esc(X(m)) + '</p>').join('') +
       '</div></div>';
   }
 
@@ -482,22 +508,22 @@
     for (const id of o.sets) {
       const ss = o.eye.summaryBySet[id];
       if (!ss) continue;
-      if (multi) rows.push('<tr><th colspan="4">' + esc(LE.analysis.SETS[id].label) + '</th></tr>');
+      if (multi) rows.push('<tr><th colspan="4">' + esc(X(LE.analysis.SETS[id].label)) + '</th></tr>');
       for (const r of order) {
         const b = ss.byRule[r];
         if (!b) continue;
         const c = b.crit;
         const isGov = s.governing.crit === c || (s.governing.rule === r && s.governing.crit.set === id && s.governing.perPulseH === b.perPulseH);
-        rows.push('<tr' + (isGov ? ' class="gov"' : '') + '><td>' + RULE[r] + (c.k > 1 ? ' <span class="muted">(' + U.fmt(c.k, 3) + ' darbe)</span>' : '') + '</td><td class="num">' + U.fmt(b.perPulseH) + '</td><td class="num">' + U.fmt(b.perPulseH * 1e-4) + '</td><td>' + esc(mech(c.mech)) + '</td></tr>');
+        rows.push('<tr' + (isGov ? ' class="gov"' : '') + '><td>' + rule(r) + (c.k > 1 ? ' <span class="muted">' + T('({0} darbe)', U.fmt(c.k, 3)) + '</span>' : '') + '</td><td class="num">' + U.fmt(b.perPulseH) + '</td><td class="num">' + U.fmt(b.perPulseH * 1e-4) + '</td><td>' + esc(mech(c.mech)) + '</td></tr>');
       }
     }
     const mode = o.input.mode;
-    const head = mode === 'rp' ? 'Darbe başına MPE' : 'MPE';
+    const head = mode === 'rp' ? T('Darbe başına MPE') : 'MPE';
     let extra = '';
-    if (mode === 'rp') extra = '<p class="note">Ortalama ışınım cinsinden: ' + U.fmt(s.Eavg) + ' W/m² (' + U.fmt(s.Eavg * 1e-4) + ' W/cm²). Belirleyici: <b>' + RULE[s.governing.rule] + ' · ' + setName(s.governing.crit.set) + '</b>.</p>';
-    if (mode === 'cw') extra = '<p class="note">' + U.fmtTime(o.derived.T) + ' için ışınım maruziyeti ' + U.fmt(s.H) + ' J/m² (' + U.fmt(s.H * 1e-4) + ' J/cm²) · ' + setName(s.governing.crit.set) + '.</p>';
-    return '<div class="card"><h3>Göz MPE — kurallara göre</h3><div class="body"><div class="tablewrap"><table class="t"><thead><tr><th>Kural</th><th>' + head + ' (J/m²)</th><th>(J/cm²)</th><th>Mekanizma</th></tr></thead><tbody>' + rows.join('') + '</tbody></table></div>' + extra +
-      '<p class="note">Farklı kurallar ve setler farklı ölçüm açıklıkları kullanabilir (UV/IR); tehlike değerlendirmesi her sınırı kendi açıklığıyla ayrı ayrı uygular.</p></div></div>';
+    if (mode === 'rp') extra = '<p class="note">' + T('Ortalama ışınım cinsinden: {0} W/m² ({1} W/cm²). Belirleyici: <b>{2} · {3}</b>.', U.fmt(s.Eavg), U.fmt(s.Eavg * 1e-4), rule(s.governing.rule), setName(s.governing.crit.set)) + '</p>';
+    if (mode === 'cw') extra = '<p class="note">' + T('{0} için ışınım maruziyeti {1} J/m² ({2} J/cm²) · {3}.', U.fmtTime(o.derived.T), U.fmt(s.H), U.fmt(s.H * 1e-4), setName(s.governing.crit.set)) + '</p>';
+    return '<div class="card"><h3>' + T('Göz MPE — kurallara göre') + '</h3><div class="body"><div class="tablewrap"><table class="t"><thead><tr><th>' + T('Kural') + '</th><th>' + head + ' (J/m²)</th><th>(J/cm²)</th><th>' + T('Mekanizma') + '</th></tr></thead><tbody>' + rows.join('') + '</tbody></table></div>' + extra +
+      more('<p class="note">' + T('Farklı kurallar ve setler farklı ölçüm açıklıkları kullanabilir (UV/IR); tehlike değerlendirmesi her sınırı kendi açıklığıyla ayrı ayrı uygular.') + '</p>') + '</div></div>';
   }
 
   function criteriaCard(o) {
@@ -519,62 +545,65 @@
       const isGov = gov && c.set === gov.set && c.rule === gov.rule && c.mech === gov.mech;
       rows.push('<tr class="' + (isGov ? 'gov ' : '') + (ratio > 1 ? 'over' : '') + '">' +
         (multi ? '<td>' + setName(c.set) + '</td>' : '') +
-        '<td>' + RULE[c.rule] + (c.k > 1 ? '<br><span class="muted">' + U.fmt(c.k, 3) + ' darbe</span>' : '') + '</td>' +
+        '<td>' + rule(c.rule) + (c.k > 1 ? '<br><span class="muted">' + T('{0} darbe', U.fmt(c.k, 3)) + '</span>' : '') + '</td>' +
         '<td>' + esc(mech(c.mech)) + '</td>' +
         '<td class="num">' + U.fmtTime(c.t) + '</td>' +
         '<td class="num">' + U.fmt(c.limitH) + '<br><span class="muted">' + U.fmt(c.limitH / c.t) + ' W/m²</span></td>' +
-        '<td class="num">' + U.fmt(c.apertureM * 1e3, 3) + ' mm' + (peak ? '<br><span class="muted">tepe değer</span>' : '') + '</td>' +
-        '<td>' + esc(c.formula) + (c.cpWhy ? '<br><span class="muted">' + esc(c.cpWhy) + '</span>' : '') + '</td>' +
+        '<td class="num">' + U.fmt(c.apertureM * 1e3, 3) + ' mm' + (peak ? '<br><span class="muted">' + T('tepe değer') + '</span>' : '') + '</td>' +
+        '<td>' + esc(X(c.formula)) + (c.cpWhy ? '<br><span class="muted">' + esc(X(c.cpWhy)) + '</span>' : '') + '</td>' +
         '<td class="num r">' + U.fmt(ratio, 3) + '</td>' +
         '<td class="num">' + U.fmtOD(LE.analysis.od(ratio)) + '</td></tr>');
     }
-    return '<div class="card"><h3>Ayrıntılı değerlendirme — her sınır ayrı (lazer çıkışında)</h3><div class="body"><div class="tablewrap"><table class="t"><thead><tr>' + (multi ? '<th>Set</th>' : '') + '<th>Kural</th><th>Mekanizma</th><th>Zaman tabanı</th><th>Sınır H (J/m²)</th><th>Açıklık</th><th>Formül</th><th>Maruziyet / MPE</th><th>OD</th></tr></thead><tbody>' +
-      rows.join('') + '</tbody></table></div><p class="note">Vurgulu satır çıkışta belirleyici olan sınırdır. Oran &gt; 1 ise o sınır aşılmaktadır.</p></div></div>';
+    return '<div class="card"><h3>' + T('Ayrıntılı değerlendirme — her sınır ayrı (lazer çıkışında)') + '</h3><div class="body"><div class="tablewrap"><table class="t"><thead><tr>' + (multi ? '<th>Set</th>' : '') + '<th>' + T('Kural') + '</th><th>' + T('Mekanizma') + '</th><th>' + T('Zaman tabanı') + '</th><th>' + T('Sınır H (J/m²)') + '</th><th>' + T('Açıklık') + '</th><th>' + T('Formül') + '</th><th>' + T('Maruziyet / MPE') + '</th><th>OD</th></tr></thead><tbody>' +
+      rows.join('') + '</tbody></table></div>' + more('<p class="note">' + T('Vurgulu satır çıkışta belirleyici olan sınırdır. Oran &gt; 1 ise o sınır aşılmaktadır.') + '</p>') + '</div></div>';
   }
 
   function diffuseCard(o) {
     const d = o.diffuse;
-    if (!d) return '<div class="card"><h3>Yaygın yansıma</h3><div class="body"><p class="muted">Hesaplanmadı (ilgili bölümden açabilirsiniz).</p></div></div>';
+    if (!d) return '<div class="card"><h3>' + T('Yaygın yansıma') + '</h3><div class="body"><p class="muted">' + T('Hesaplanmadı (ilgili bölümden açabilirsiniz).') + '</p></div></div>';
     const gs = d.eye.summary.governing;
-    return '<div class="card"><h3>Yaygın (Lambert) yansıma</h3><div class="body"><table class="t kv"><tbody>' +
-      '<tr><td>Göz tehlike mesafesi (NHZ)</td><td><b>' + distOrNone(d.eye.nhz, d.eye.inf) + '</b></td></tr>' +
-      '<tr><td>' + U.fmtDist(d.r) + '\'den bakışta gerekli OD</td><td>' + U.fmtOD(d.eye.odAtR) + '</td></tr>' +
-      '<tr><td>Göz MPE (' + U.fmtTime(d.T) + ')</td><td>' + U.fmt(gs.perPulseH) + ' J/m²' + (o.input.mode === 'rp' ? ' / darbe' : '') + '</td></tr>' +
-      '<tr><td>Deri tehlike mesafesi</td><td>' + distOrNone(d.skin.nhz, d.skin.inf) + '</td></tr>' +
-      '<tr><td>Yansıtma · açı</td><td>' + U.fmtPct(d.rho) + ' · ' + U.fmt(d.thetaDeg, 3) + '°</td></tr>' +
-      '<tr><td>Kaynak modeli</td><td>' + (d.extended ? 'Genişletilmiş (α = ' + U.fmt(d.alphaAtR, 3) + ' mrad @ ' + U.fmtDist(d.r) + ')' : 'Nokta kaynak (muhafazakâr)') + '</td></tr>' +
-      '</tbody></table><p class="note">E = ρ·P·cos θ / (π·r²). Aynasal (parlak) yüzeyler doğrudan ışın gibi değerlendirilmelidir.</p></div></div>';
+    const perPulse = o.input.mode === 'rp' ? T(' / darbe') : '';
+    return '<div class="card"><h3>' + T('Yaygın (Lambert) yansıma') + '</h3><div class="body"><table class="t kv"><tbody>' +
+      '<tr><td>' + T('Göz tehlike mesafesi (NHZ)') + '</td><td><b>' + distOrNone(d.eye.nhz, d.eye.inf) + '</b></td></tr>' +
+      '<tr><td>' + T('{0}\'den bakışta gerekli OD', U.fmtDist(d.r)) + '</td><td>' + U.fmtOD(d.eye.odAtR) + '</td></tr>' +
+      '<tr><td>' + T('Göz MPE ({0})', U.fmtTime(d.T)) + '</td><td>' + U.fmt(gs.perPulseH) + ' J/m²' + perPulse + '</td></tr>' +
+      '<tr><td>' + T('Deri tehlike mesafesi') + '</td><td>' + distOrNone(d.skin.nhz, d.skin.inf) + '</td></tr>' +
+      '<tr><td>' + T('Yansıtma · açı') + '</td><td>' + U.fmtPct(d.rho) + ' · ' + U.fmt(d.thetaDeg, 3) + '°</td></tr>' +
+      '<tr><td>' + T('Kaynak modeli') + '</td><td>' + (d.extended ? T('Genişletilmiş (α = {0} mrad @ {1})', U.fmt(d.alphaAtR, 3), U.fmtDist(d.r)) : T('Nokta kaynak (muhafazakâr)')) + '</td></tr>' +
+      '</tbody></table><p class="note">' + T('Aynasal (parlak) yüzeyler doğrudan ışın gibi değerlendirilmelidir.') + '</p>' +
+      more('<p class="note">E = ρ·P·cos θ / (π·r²)</p>', T('Yöntem')) + '</div></div>';
   }
 
   function skinCard(o) {
     const s = o.skin;
     const g = s.summary.governing;
-    return '<div class="card"><h3>Deri</h3><div class="body"><table class="t kv"><tbody>' +
-      '<tr><td>Deri MPE (' + RULE[g.rule] + ')</td><td>' + U.fmt(g.perPulseH) + ' J/m²' + (o.input.mode === 'rp' ? ' / darbe' : '') + '</td></tr>' +
-      '<tr><td>MPE katı (en kötü)</td><td><b>' + U.fmt(s.timesMPE, 3) + '</b></td></tr>' +
-      '<tr><td>Deri tehlike mesafesi (NSHD)</td><td>' + distOrNone(s.nshd, s.nshdInf) + '</td></tr>' +
-      '<tr><td>Maruziyet süresi</td><td>' + U.fmtTime(s.T) + '</td></tr>' +
-      '<tr><td>Ölçüm açıklığı</td><td>' + U.fmt(o.factors.apertureSkin * 1e3, 3) + ' mm</td></tr>' +
+    const perPulse = o.input.mode === 'rp' ? T(' / darbe') : '';
+    return '<div class="card"><h3>' + T('Deri') + '</h3><div class="body"><table class="t kv"><tbody>' +
+      '<tr><td>' + T('Deri MPE ({0})', rule(g.rule)) + '</td><td>' + U.fmt(g.perPulseH) + ' J/m²' + perPulse + '</td></tr>' +
+      '<tr><td>' + T('MPE katı (en kötü)') + '</td><td><b>' + U.fmt(s.timesMPE, 3) + '</b></td></tr>' +
+      '<tr><td>' + T('Deri tehlike mesafesi (NSHD)') + '</td><td>' + distOrNone(s.nshd, s.nshdInf) + '</td></tr>' +
+      '<tr><td>' + T('Maruziyet süresi') + '</td><td>' + U.fmtTime(s.T) + '</td></tr>' +
+      '<tr><td>' + T('Ölçüm açıklığı') + '</td><td>' + U.fmt(o.factors.apertureSkin * 1e3, 3) + ' mm</td></tr>' +
       '</tbody></table></div></div>';
   }
 
   function lensCard(o) {
     const L = o.lens;
-    return '<div class="card"><h3>Mercek (lens-on-laser)</h3><div class="body"><table class="t kv"><tbody>' +
-      '<tr><td>Odaktan tehlike mesafesi</td><td><b>' + distOrNone(L.nohd, L.inf) + '</b></td></tr>' +
-      '<tr><td>' + U.fmtDist(L.range) + '\'de gerekli OD</td><td>' + U.fmtOD(L.odAtRange) + '</td></tr>' +
-      '<tr><td>Odaktan sonra ıraksama</td><td>' + U.fmt(L.beam.phix * 1e3, 4) + ' mrad (1/e)</td></tr>' +
-      '<tr><td>Odak lekesi (≈)</td><td>' + U.fmt(L.beam.dx * 1e6, 3) + ' µm</td></tr>' +
-      '</tbody></table><p class="note">' + (L.negative ? 'Iraksak mercek: mesafe sanal odak noktasından ölçülür.' : 'Mesafe odak noktasından ölçülür.') + '</p></div></div>';
+    return '<div class="card"><h3>' + T('Mercek (lens-on-laser)') + '</h3><div class="body"><table class="t kv"><tbody>' +
+      '<tr><td>' + T('Odaktan tehlike mesafesi') + '</td><td><b>' + distOrNone(L.nohd, L.inf) + '</b></td></tr>' +
+      '<tr><td>' + T('{0}\'de gerekli OD', U.fmtDist(L.range)) + '</td><td>' + U.fmtOD(L.odAtRange) + '</td></tr>' +
+      '<tr><td>' + T('Odaktan sonra ıraksama') + '</td><td>' + U.fmt(L.beam.phix * 1e3, 4) + ' mrad (1/e)</td></tr>' +
+      '<tr><td>' + T('Odak lekesi (≈)') + '</td><td>' + U.fmt(L.beam.dx * 1e6, 3) + ' µm</td></tr>' +
+      '</tbody></table><p class="note">' + (L.negative ? T('Iraksak mercek: mesafe sanal odak noktasından ölçülür.') : T('Mesafe odak noktasından ölçülür.')) + '</p></div></div>';
   }
 
   function fiberCard(o) {
     const F = o.fiber;
-    return '<div class="card"><h3>Fiber optik çıkış</h3><div class="body"><table class="t kv"><tbody>' +
-      '<tr><td>Fiber ucundan NOHD</td><td><b>' + distOrNone(F.nohd, F.inf) + '</b></td></tr>' +
-      '<tr><td>' + U.fmtDist(F.range) + '\'de gerekli OD</td><td>' + U.fmtOD(F.odAtRange) + '</td></tr>' +
-      '<tr><td>Iraksama (1/e tam açı)</td><td>' + U.fmt(F.beam.phix * 1e3, 4) + ' mrad</td></tr>' +
-      '</tbody></table><p class="note">' + (F.type === 'multi' ? 'Çok modlu: ANSI yaklaşımı, NA %5 yoğunluk noktasında (φ₆₃ = 2·NA/1,7).' : 'Tek modlu: Gauss uzak alan, θ = λ/(π·w₀).') + '</p></div></div>';
+    return '<div class="card"><h3>' + T('Fiber optik çıkış') + '</h3><div class="body"><table class="t kv"><tbody>' +
+      '<tr><td>' + T('Fiber ucundan NOHD') + '</td><td><b>' + distOrNone(F.nohd, F.inf) + '</b></td></tr>' +
+      '<tr><td>' + T('{0}\'de gerekli OD', U.fmtDist(F.range)) + '</td><td>' + U.fmtOD(F.odAtRange) + '</td></tr>' +
+      '<tr><td>' + T('Iraksama (1/e tam açı)') + '</td><td>' + U.fmt(F.beam.phix * 1e3, 4) + ' mrad</td></tr>' +
+      '</tbody></table>' + more('<p class="note">' + (F.type === 'multi' ? T('Çok modlu: ANSI yaklaşımı, NA %5 yoğunluk noktasında (φ₆₃ = 2·NA/1,7).') : T('Tek modlu: Gauss uzak alan, θ = λ/(π·w₀).')) + '</p>', T('Yöntem')) + '</div></div>';
   }
 
   function factorsCard(o) {
@@ -596,18 +625,18 @@
     add('C_A', n4(f.CA), n4(A.CA));
     add('C_B', n4(f.CB), n4(A.CB));
     add('C_C', n4(f.CC), n4(A.CC));
-    if (o.input.lambda >= 1200 && o.input.lambda < 1400) add('K_λ (ANSI, ikili sınır)', U.fmt(LE.mpe.Klambda(o.input.lambda), 4), null);
+    if (o.input.lambda >= 1200 && o.input.lambda < 1400) add(T('K_λ (ANSI, ikili sınır)'), U.fmt(LE.mpe.Klambda(o.input.lambda), 4), null);
     add('C_E (t = T)', n4(f.CE), n4(A.CE));
-    add('C_P (Kural 3)', f.CP !== undefined ? n4(f.CP) : null, A.CP !== undefined ? n4(A.CP) : null);
+    add(T('C_P (Kural 3)'), f.CP !== undefined ? n4(f.CP) : null, A.CP !== undefined ? n4(A.CP) : null);
     add('T₁', tm(f.T1), null);
     add('T₂', tm(f.T2), tm(A.T2));
-    add('Tᵢ / T_min (darbe gruplama)', tm(f.Ti), tm(A.Tmin));
-    add('α_max (T)', f.alphaMaxT !== null ? U.fmt(f.alphaMaxT, 3) + ' mrad' : null, ab && f.alphaMaxT !== null ? '100 mrad (sabit)' : null);
-    add('Göz ölçüm açıklığı (T)', U.fmt(f.apertureEye * 1e3, 3) + ' mm', ab ? U.fmt(A.apertureEye * 1e3, 3) + ' mm' : null);
-    if (f.apertureEyePulse !== null) add('Göz ölçüm açıklığı (τ)', U.fmt(f.apertureEyePulse * 1e3, 3) + ' mm', null);
-    add('Deri ölçüm açıklığı', U.fmt(f.apertureSkin * 1e3, 3) + ' mm', ab ? U.fmt(A.apertureSkin * 1e3, 3) + ' mm' : null);
-    const head = two ? '<thead><tr><th>Parametre</th><th>ICNIRP 2013</th><th>2006/25/AT</th></tr></thead>' : '';
-    return '<div class="card"><h3>Düzeltme faktörleri ve parametreler</h3><div class="body"><table class="t kv">' + head + '<tbody>' + rows.join('') + '</tbody></table></div></div>';
+    add(T('Tᵢ / T_min (darbe gruplama)'), tm(f.Ti), tm(A.Tmin));
+    add('α_max (T)', f.alphaMaxT !== null ? U.fmt(f.alphaMaxT, 3) + ' mrad' : null, ab && f.alphaMaxT !== null ? T('100 mrad (sabit)') : null);
+    add(T('Göz ölçüm açıklığı (T)'), U.fmt(f.apertureEye * 1e3, 3) + ' mm', ab ? U.fmt(A.apertureEye * 1e3, 3) + ' mm' : null);
+    if (f.apertureEyePulse !== null) add(T('Göz ölçüm açıklığı (τ)'), U.fmt(f.apertureEyePulse * 1e3, 3) + ' mm', null);
+    add(T('Deri ölçüm açıklığı'), U.fmt(f.apertureSkin * 1e3, 3) + ' mm', ab ? U.fmt(A.apertureSkin * 1e3, 3) + ' mm' : null);
+    const head = two ? '<thead><tr><th>' + T('Parametre') + '</th><th>ICNIRP 2013</th><th>' + setName('AB') + '</th></tr></thead>' : '';
+    return '<div class="card"><h3>' + T('Düzeltme faktörleri ve parametreler') + '</h3><div class="body"><table class="t kv">' + head + '<tbody>' + rows.join('') + '</tbody></table></div></div>';
   }
 
   function derivedCard(o) {
@@ -615,44 +644,50 @@
     const inp = o.input;
     const rows = [];
     const add = (k, v) => rows.push('<tr><td>' + k + '</td><td>' + v + '</td></tr>');
-    add('Dalga boyu', U.fmt(inp.lambda, 5) + ' nm');
-    if (d.P !== null) add('Ortalama güç', U.fmtPrefixed(d.P, 'W', 4));
-    if (d.Q !== null) add('Darbe enerjisi', U.fmtPrefixed(d.Q, 'J', 4));
-    if (d.Ppeak !== null) add('Tepe güç', U.fmtPrefixed(d.Ppeak, 'W', 4));
-    if (d.duty !== null) add('Görev oranı', U.fmtPct(d.duty));
-    if (o.eye.info.N) add('T içindeki darbe sayısı', U.fmt(o.eye.info.N, 4));
-    add('Göz maruziyet süresi', U.fmtTime(d.T) + (inp.mode !== 'sp' && Math.abs(d.T - d.Tdefault) > 1e-12 ? ' <span class="muted">(standart ' + U.fmtTime(d.Tdefault) + ')</span>' : ''));
+    add(T('Dalga boyu'), U.fmt(inp.lambda, 5) + ' nm');
+    if (d.P !== null) add(T('Ortalama güç'), U.fmtPrefixed(d.P, 'W', 4));
+    if (d.Q !== null) add(T('Darbe enerjisi'), U.fmtPrefixed(d.Q, 'J', 4));
+    if (d.Ppeak !== null) add(T('Tepe güç'), U.fmtPrefixed(d.Ppeak, 'W', 4));
+    if (d.duty !== null) add(T('Görev oranı'), U.fmtPct(d.duty));
+    if (o.eye.info.N) add(T('T içindeki darbe sayısı'), U.fmt(o.eye.info.N, 4));
+    add(T('Göz maruziyet süresi'), U.fmtTime(d.T) + (inp.mode !== 'sp' && Math.abs(d.T - d.Tdefault) > 1e-12 ? ' <span class="muted">' + T('(standart {0})', U.fmtTime(d.Tdefault)) + '</span>' : ''));
     const sec = LE.beam.sectionAt(inp.beam, inp.range || 0, inp.model);
-    add('Çıkış çapı / ıraksama (1/e)', U.fmt(inp.beam.dx * 1e3, 4) + ' mm · ' + U.fmt(inp.beam.phix * 1e3, 4) + ' mrad');
-    if (inp.range > 0) add(U.fmtDist(inp.range) + '\'de çap (1/e)', U.fmt(sec.dx * 1e3, 4) + (sec.dy !== sec.dx ? ' × ' + U.fmt(sec.dy * 1e3, 4) : '') + ' mm');
-    return '<div class="card"><h3>Lazer ve ışın değerleri</h3><div class="body"><table class="t kv"><tbody>' + rows.join('') + '</tbody></table></div></div>';
+    add(T('Çıkış çapı / ıraksama (1/e)'), U.fmt(inp.beam.dx * 1e3, 4) + ' mm · ' + U.fmt(inp.beam.phix * 1e3, 4) + ' mrad');
+    if (inp.range > 0) add(T('{0}\'de çap (1/e)', U.fmtDist(inp.range)), U.fmt(sec.dx * 1e3, 4) + (sec.dy !== sec.dx ? ' × ' + U.fmt(sec.dy * 1e3, 4) : '') + ' mm');
+    return '<div class="card"><h3>' + T('Lazer ve ışın değerleri') + '</h3><div class="body"><table class="t kv"><tbody>' + rows.join('') + '</tbody></table></div></div>';
   }
 
   function assumptions(o) {
     const a = [];
-    if (o.limits === 'aord') a.push('Sınır değerler: yalnız 2006/25/AT Ek II maruziyet sınır değerleri (AB / Türkiye işyeri).');
-    else if (o.limits === 'icnirp') a.push('Sınır değerler: yalnız ICNIRP 2013 (IEC 60825-1:2014 Ek A ve ANSI Z136.1-2014 ile uyumlu); 302–315 nm ve 1200–1400 nm\'de standartlardan daha koruyucu olanı uygulanır.');
-    else a.push('Sınır değerler: ICNIRP 2013 (IEC 60825-1:2014 / ANSI Z136.1-2014) ve 2006/25/AT Ek II birlikte; her setin kuralları kendi açıklığıyla uygulanır, en kısıtlayıcı olan belirler.');
-    a.push(o.input.alpha > 1.5 ? 'Işın içi bakışta genişletilmiş kaynak: α = ' + U.fmt(o.input.alpha, 3) + ' mrad.' : 'Işın içi bakış: nokta kaynak (α ≤ 1,5 mrad) — en muhafazakâr durum.');
-    a.push('Işın merkezine bakış; çap ve ıraksama 1/e ölçütüne çevrildi; büyüme modeli: ' + (o.input.model === 'linear' ? 'doğrusal (IEC TR 60825-14).' : 'karesel toplam (ANSI).'));
-    if (o.eye.oav.on) a.push('Dürbünle bakış: objektif ' + U.fmt(o.eye.oav.D * 1e3, 3) + ' mm, büyütme ' + U.fmt(o.eye.oav.M, 3) + '×, geçirgenlik ' + U.fmtPct(o.eye.oav.tau) + '; optik, girişte M·(ölçüm açıklığı) çaplı bölgeyi göze taşır (retina için etkin giriş = objektif, IEC Koşul 1 ile tutarlı).');
-    a.push(o.input.mu > 0 ? 'Atmosferik zayıflama: μ = ' + U.fmt(o.input.mu * 1e3, 3) + ' 1/km.' : 'Atmosferik zayıflama yok sayıldı (muhafazakâr).');
-    a.push(o.eye.scint ? 'Atmosferik türbülans (sintilasyon) payı: ışınım ×' + o.eye.scint.factor + ' (+' + o.eye.scint.odPlus + ' OD), ayrı NOHD ve gözlük önerisi olarak verildi; standart değerler payısızdır.' : 'Atmosferik türbülans (sintilasyon) payı uygulanmadı.');
-    if (o.input.mode === 'rp') a.push('Tekrarlı darbe: Kural 1, Kural 2 (tüm alt gruplar) ve retina için Kural 3 birlikte uygulanır; en kısıtlayıcı olan belirler.');
-    if (o.eyewear) a.push('EN 207: yoğunluklar gözlükteki ışının 1/e kesit alanıyla; tekrarlı darbede 400–1400 nm için N^¼ düzeltmesi (N = f × ' + o.eyewear.window + ' s).');
-    a.push('Bu değerlendirme tek dalga boyu içindir. Taramalı ışınlar, çoklu dalga boyları ve sınıflandırma (AEL) kapsam dışıdır.');
+    if (o.limits === 'aord') a.push(T('Sınır değerler: yalnız 2006/25/AT Ek II maruziyet sınır değerleri (AB / Türkiye işyeri).'));
+    else if (o.limits === 'icnirp') a.push(T('Sınır değerler: yalnız ICNIRP 2013 (IEC 60825-1:2014 Ek A ve ANSI Z136.1-2014 ile uyumlu); 302–315 nm ve 1200–1400 nm\'de standartlardan daha koruyucu olanı uygulanır.'));
+    else a.push(T('Sınır değerler: ICNIRP 2013 (IEC 60825-1:2014 / ANSI Z136.1-2014) ve 2006/25/AT Ek II birlikte; her setin kuralları kendi açıklığıyla uygulanır, en kısıtlayıcı olan belirler.'));
+    a.push(o.input.alpha > 1.5 ? T('Işın içi bakışta genişletilmiş kaynak: α = {0} mrad.', U.fmt(o.input.alpha, 3)) : T('Işın içi bakış: nokta kaynak (α ≤ {0} mrad) — en muhafazakâr durum.', U.fmt(1.5)));
+    a.push(o.input.model === 'linear'
+      ? T('Işın merkezine bakış; çap ve ıraksama 1/e ölçütüne çevrildi; büyüme modeli: doğrusal (IEC TR 60825-14).')
+      : T('Işın merkezine bakış; çap ve ıraksama 1/e ölçütüne çevrildi; büyüme modeli: karesel toplam (ANSI).'));
+    if (o.eye.oav.on) a.push(T('Dürbünle bakış: objektif {0} mm, büyütme {1}×, geçirgenlik {2}; optik, girişte M·(ölçüm açıklığı) çaplı bölgeyi göze taşır (retina için etkin giriş = objektif, IEC Koşul 1 ile tutarlı).', U.fmt(o.eye.oav.D * 1e3, 3), U.fmt(o.eye.oav.M, 3), U.fmtPct(o.eye.oav.tau)));
+    a.push(o.input.mu > 0 ? T('Atmosferik zayıflama: μ = {0} 1/km.', U.fmt(o.input.mu * 1e3, 3)) : T('Atmosferik zayıflama yok sayıldı (muhafazakâr).'));
+    a.push(o.eye.scint ? T('Atmosferik türbülans (sintilasyon) payı: ışınım ×{0} (+{1} OD), ayrı NOHD ve gözlük önerisi olarak verildi; standart değerler payısızdır.', o.eye.scint.factor, o.eye.scint.odPlus) : T('Atmosferik türbülans (sintilasyon) payı uygulanmadı.'));
+    if (o.input.mode === 'rp') a.push(T('Tekrarlı darbe: Kural 1, Kural 2 (tüm alt gruplar) ve retina için Kural 3 birlikte uygulanır; en kısıtlayıcı olan belirler.'));
+    if (o.eyewear) a.push(T('EN 207: yoğunluklar gözlükteki ışının 1/e kesit alanıyla; tekrarlı darbede 400–1400 nm için N^¼ düzeltmesi (N = f × {0} s).', o.eyewear.window));
+    a.push(T('Bu değerlendirme tek dalga boyu içindir. Taramalı ışınlar, çoklu dalga boyları ve sınıflandırma (AEL) kapsam dışıdır.'));
     return a;
   }
 
   function messagesCard(o, ctx) {
-    const items = [];
-    for (const e of (ctx.formWarnings || [])) items.push('<li class="warn">' + esc(e) + '</li>');
-    for (const w of o.warnings) items.push('<li class="warn">' + esc(w) + '</li>');
-    for (const n of o.notes) items.push('<li class="note">' + esc(n) + '</li>');
-    for (const a of assumptions(o)) items.push('<li class="asm">' + esc(a) + '</li>');
-    return '<div class="card"><h3>Uyarılar, notlar ve varsayımlar</h3><div class="body"><ul class="msgs">' + items.join('') + '</ul>' +
-      '<p class="note">Bu yazılım yetkin bir lazer güvenlik sorumlusunun değerlendirmesinin yerine geçmez; sonuçlar girilen parametreler kadar doğrudur.</p></div></div>';
+    // Uyarılar her zaman görünür; notlar ve varsayımlar dokununca açılır.
+    const warns = [];
+    for (const e of (ctx.formWarnings || [])) warns.push('<li class="warn">' + esc(e) + '</li>');
+    for (const w of o.warnings) warns.push('<li class="warn">' + esc(X(w)) + '</li>');
+    const info = [];
+    for (const n of o.notes) info.push('<li class="note">' + esc(X(n)) + '</li>');
+    for (const a of assumptions(o)) info.push('<li class="asm">' + esc(a) + '</li>');
+    return '<div class="card"><h3>' + T('Uyarılar, notlar ve varsayımlar') + '</h3><div class="body">' +
+      (warns.length ? '<ul class="msgs">' + warns.join('') + '</ul>' : '') +
+      more('<ul class="msgs">' + info.join('') + '</ul>', T('Notlar ve varsayımlar ({0})', info.length)) +
+      '<p class="note">' + T('Bu yazılım yetkin bir lazer güvenlik sorumlusunun değerlendirmesinin yerine geçmez; sonuçlar girilen parametreler kadar doğrudur.') + '</p></div></div>';
   }
 
-  LE.render = { render, verdict, derivedCard, chart, chartReadout, chartRange, attachChart, assumptions, mech, RULE, esc, limitText, ansi, distOrNone, setName };
+  LE.render = { render, verdict, derivedCard, chart, chartReadout, chartRange, attachChart, assumptions, mech, rule, RULE, esc, limitText, ansi, distOrNone, setName, more };
 })(typeof globalThis !== 'undefined' ? globalThis : this);
