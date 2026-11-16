@@ -23,6 +23,7 @@ Sınır değerler iki set hâlinde uygulanır ve varsayılan olarak **en koruyuc
 | Doğrudan | `index.html` dosyasını Firefox/Chrome ile açın |
 | Komut satırı | `./baslat.sh` |
 | Tek dosya (taşınabilir) | `dist/LazerEmniyet.html` — tek başına kopyalanıp her bilgisayarda açılabilir |
+| Android (11 ve üstü) | `android/` klasöründeki uygulama — aşağıdaki **Android sürümü** bölümü |
 
 Klasör istenen yere taşınabilir; tüm dosyalar göreli yollarla bağlıdır.
 
@@ -227,6 +228,84 @@ aynasal yansıma geometrisi. 2006/25/AT setinde radyans biçimindeki fotokimyasa
 uygulanmaz (nokta kaynak varsayımı, daha koruyucu). Bu durumlarda her bileşeni ayrı analiz edip en kötüsünü esas alın veya
 uzman değerlendirmesine başvurun.
 
+## Android sürümü
+
+`android/` klasöründeki uygulama, masaüstündeki doğrulanmış tek dosyalık sürümü (`dist/LazerEmniyet.html`) olduğu gibi
+içine gömen çevrimdışı bir **WebView kabuğudur**. Hesap motoru, arayüz, öz-denetim ve rapor masaüstüyle aynı koddur; Android'e
+özgü işler küçük bir yerel köprüyle yapılır. Ayrı bir hesap doğrulaması gerekmez.
+
+| Özellik | Android'de |
+|---|---|
+| Rapor | "Yazdır / PDF" → sistem yazdırma ekranı (PrintManager) → **Save as PDF / PDF olarak kaydet**, A4 |
+| JSON / CSV / HTML kaydetme | Sistem dosya seçici (SAF) açılır, konum ve ad seçilir; depolama izni gerekmez |
+| JSON içe aktarma | "JSON içe aktar" → sistem dosya seçici |
+| Envanter ve son oturum | Uygulamanın kendi deposunda kalıcı (localStorage); kapatıp açınca geri gelir |
+| Geri tuşu | Önce açık pencereyi/menüyü kapatır, sonra uygulamadan çıkar |
+| Tema | Sistemin açık/koyu ayarını izler; durum çubuğu başlık renginde |
+| Ağ | **INTERNET izni yok, hiçbir izin istenmez.** Sayfa APK'nın içinden, ağa çıkmayan sabit bir https kökenden sunulur |
+| Yedek | Bulut yedeği kapalıdır (`allowBackup=false`); envanter yalnız cihazda kalır, yedek için **JSON dışa aktar** |
+
+Gereksinim: Android 11 veya üstü (minSdk 30); hedef Android 15 (targetSdk 35). Uygulama kimliği `com.quarka.lazeremniyet`.
+Sürüm numarası hesap motorundan otomatik alınır: motor 1.3.1 → versionName 1.3.1, versionCode 10301.
+
+### Derleme
+
+Sistem JDK'sında `javac` yoktur; Android Studio'nun JDK'sı kullanılır. Gradle önbelleği dolu olduğundan internet gerekmez:
+
+```bash
+cd android
+export JAVA_HOME=~/Downloads/android-studio/jbr
+./gradlew --offline -Porg.gradle.java.installations.paths=$JAVA_HOME :app:assembleDebug
+```
+
+Çıktı: `android/app/build/outputs/apk/debug/app-debug.apk`, yaklaşık 2,6 MB. Klasör Android Studio ile de açılabilir
+(Open → `android`).
+
+Derleme `copyWebApp` göreviyle `../dist/LazerEmniyet.html` dosyasını varlık olarak kopyalar. Dosya eskiyse görev derlemeyi
+durdurur. Bunun iki ölçütü var: gömülü motor sürümü `js/core/analysis.js` ile aynı değilse ya da Android köprüsü
+(`LazerAndroid`) yoksa. Uyarı mesajı ne yapılacağını söyler.
+
+### Kurulum
+
+- **USB ile** (telefonda Geliştirici seçenekleri → USB hata ayıklama açık):
+
+  ```bash
+  ~/Android/Sdk/platform-tools/adb install -r android/app/build/outputs/apk/debug/app-debug.apk
+  ```
+
+- **Dosya ile**: APK'yı telefona kopyalayıp dosya yöneticisinden açın. Telefon, o uygulama için "bilinmeyen kaynaklardan
+  yükleme" iznini bir kez sorar.
+
+### Güncelleme
+
+1. Web kaynaklarında (`js/`, `css/`, `index.html`) değişiklik yapıldıysa önce testleri çalıştırın, sonra tek dosyayı
+   üretin: `node --test test/*.test.js`, ardından `node tools/build-single.js`. Hesap motoru değiştiyse
+   `ENGINE_VERSION` değerini artırın; Android sürüm numarası buradan gelir.
+2. Yukarıdaki komutla APK'yı yeniden derleyin ve `adb install -r` ile üzerine kurun. Aynı bilgisayarın debug anahtarıyla
+   imzalı APK verileri korur.
+3. Başka bir bilgisayarda derlenen APK farklı anahtarla imzalanır. O zaman önce kaldırmak gerekir ve bu envanteri siler.
+   Güncellemeden önce **Envanter → JSON dışa aktar** ile yedek alın.
+
+### Doğrulama (16.11.2026, emülatör: Android 15, WebView 124)
+
+- APK: hiç izin yok; gömülü HTML `dist/LazerEmniyet.html` ile bayt bayt aynı.
+- Açılışta öz-denetim rozeti **✓ 64/64**.
+- 12 örnek lazer WebView'da (Chrome hata ayıklama protokolüyle) ve masaüstü tarayıcıda yüklendi:
+  - Ekranda görünen sonuç kutuları ve karar metinleri **birebir aynı**.
+  - Ham sayılar 12 örneğin 8'inde bit bit aynı. Kalan 4'ünde en çok 1 ULP fark var (göreli ≈ 2·10⁻¹⁶). Fark, iki
+    Chromium sürümünün (124 ve 156) `Math.pow` sonucunun son bitinden geliyor ve hiçbir gösterilen değeri değiştirmiyor.
+- Envanter → JSON dışa aktar: dosya seçiciyle `Download/lazer-envanter-20261116.json` yazıldı.
+- JSON içe aktar: envanter silindi, dosya seçiciden geri yüklendi ("1 yeni").
+- Rapor → Yazdır / PDF → Save as PDF: 3 sayfa A4 PDF. İçeriği `pdftotext` ile kontrol edildi (karar, NOHD 316 m,
+  D 532 LB5, motor v1.3.1, öz-denetim 64/64).
+- Geri tuşu: ilk basış açık pencereyi kapattı, ikinci basış uygulamadan çıktı.
+- Zorla durdurma sonrası: envanter ve son oturum geri geldi.
+- Gece modu: sayfa koyu temaya geçti, kayıtlar yerinde.
+- Klavye: açıldığında sayfa küçülür, odaktaki alan görünür kalır; ondalık klavyede virgül ve nokta var.
+
+Henüz yapılmadı: gerçek telefonda (Honor 400, MagicOS) deneme. Üreticinin yazdırma ve dosya seçici ekranları farklı
+görünebilir; akış aynıdır.
+
 ## Klasör yapısı
 
 ```
@@ -245,6 +324,9 @@ js/ui/                form, sonuç ekranı, envanter, rapor, yardım, örnekler
 test/                 Node testleri; test/data: EasyHaz 2014 doğrulama verisi ve 2010 örnek dosyaları
 tools/build-single.js tek dosya derlemesi → dist/LazerEmniyet.html
 tools/easyhaz_oracle.py  EasyHaz çapraz doğrulama aracı (LibreOffice UNO, makrosuz)
+android/              Android uygulaması (WebView kabuğu; dist/LazerEmniyet.html'i gömer)
+  app/build.gradle.kts           sürüm motor sürümünden; copyWebApp görevi
+  app/src/main/java/.../MainActivity.kt  WebView, PDF, dosya seçici, geri tuşu, kenardan kenara düzen
 ```
 
 ## Geliştirme
@@ -281,7 +363,8 @@ Motorda tablo hatası bulunmadı. Düzeltilenler:
 - **Metinler** — notlarda ondalık virgül, yüzde "%x" yazımı. 1200–1400 nm ikili sınır bilgisi doğru ve not
   olarak verilir. NOHD yokken karar metni düzeltildi.
 - **Envanter** — özeti olmayan kayıt kopyalanabilir; JSON içe aktarma klavyeyle seçilebilir.
-- **Android** — WebView kabuğu için köprü: dosya kaydetme, PDF yazdırma, geri tuşu.
+- **Android** — `android/` uygulaması ve web tarafında yerel köprü (dosya kaydetme, PDF yazdırma, geri tuşu).
+  Tarayıcıdaki davranış değişmez.
 
 Eski (1.3.0) ve yeni motor 3000 rastgele vakada karşılaştırıldı. Standart çıktılar birebir aynı: OD, NOHD, ENOHD,
 yaygın yansıma, deri, EN 207. Yalnız türbülans paylı NOHD (47 vaka) ve ENOHD (10 vaka) 0'dan doğru değere geçti.

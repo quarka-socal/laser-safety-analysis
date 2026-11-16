@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Lazer Emniyet</string>
+    <string name="ok">Tamam</string>
+    <string name="cancel">İptal</string>
+    <string name="saved">Kaydedildi: %1$s</string>
+    <string name="save_failed">Kaydedilemedi: %1$s</string>
+    <string name="no_picker">Dosya seçici açılamadı.</string>
+</resources>

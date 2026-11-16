@@ -1,0 +1,6 @@
+[versions]
+# ZOGLAB_HWS1000 ve SCD41 uygulamalarıyla aynı: yerel Gradle önbelleğinde var.
+agp = "9.3.1"
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }

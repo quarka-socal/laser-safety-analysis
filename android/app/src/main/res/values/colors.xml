@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- css/app.css ile aynı renkler: başlık çubuğu (head) ve sayfa (bg) -->
+    <color name="header_bg">#151A24</color>
+    <color name="page_bg">#F3F4F7</color>
+    <color name="laser">#FFD400</color>
+</resources>

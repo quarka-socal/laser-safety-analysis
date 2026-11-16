@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+        Hiçbir izin istenmez. INTERNET izni YOKTUR: uygulama tamamen çevrimdışı çalışır;
+        sayfa ve hesap motoru APK'nın içindeki tek HTML dosyasından gelir.
+        Dosyalar sistem dosya seçicisiyle (SAF) kaydedilir/açılır, depolama izni gerekmez.
+
+        allowBackup=false: envanter yalnız bu cihazda kalır (bulut yedeği yok);
+        yedek için uygulamadaki "JSON dışa aktar" kullanılır.
+    -->
+    <application
+        android:allowBackup="false"
+        android:enableOnBackInvokedCallback="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.LazerEmniyet">
+        <activity
+            android:name=".MainActivity"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboard|keyboardHidden|navigation"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

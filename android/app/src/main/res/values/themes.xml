@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        WebView (targetSdk ≥ 33) prefers-color-scheme değerini temanın isLightTheme özelliğinden alır:
+        açık tema → sayfa açık, values-night → sayfa koyu (css/app.css kendi koyu temasını kullanır).
+        forceDarkAllowed=false: üretici "zorla koyu" modu sayfayı ikinci kez karartmasın.
+    -->
+    <style name="Theme.LazerEmniyet" parent="android:Theme.DeviceDefault.Light.NoActionBar">
+        <item name="android:windowBackground">@color/page_bg</item>
+        <item name="android:forceDarkAllowed">false</item>
+    </style>
+</resources>
