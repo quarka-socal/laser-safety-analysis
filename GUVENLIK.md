@@ -6,9 +6,10 @@ Bu belge iki bölümdür: **Android uygulaması** (aşağıda) ve **PC sürümü
 |---|---|
 | Tarih | 16.11.2026 |
 | Uygulama | 1.5.2 (Android versionCode 10502), hesap motoru 1.3.1 |
-| Dağıtım APK'sı | `android/app/build/outputs/apk/release/app-release.apk`, 2 266 680 bayt |
-| APK SHA-256 | `165e706691dae152a10bcb9e79cf773c542eba9d5cf505c571e1ec5fe774eb94` |
-| İmza sertifikası SHA-256 | `09014ea88483b89050e6a622fd596a93350806323ba794db1588340b1ed4ea00` |
+| Dağıtım APK'sı | `LaserSafetyAnalysis-1.5.2.apk` ([GitHub sürümü](https://github.com/quarka-socal/laser-safety-analysis/releases/tag/v1.5.2)), 2 278 899 bayt |
+| APK SHA-256 | `db16e69e8333a117842afdc86d2ec6718a63f01c2530d95c09ec4ad7529a595a` |
+| İmza sertifikası | `CN=S.OCAL, O=Laser Safety Analysis`, RSA 4096, APK Signature Scheme v3 |
+| Sertifika SHA-256 | `e8c9cbff9fd9026be0522150d81a7f0a21884c2d431b88c9816b5cf23687dda0` |
 | PC tek dosya | `dist/LazerEmniyet.html`, 453 609 bayt, SHA-256 `b2287ecf1e522c2c65b7b312f610f711466e9e93a40e0fb4df4dbc55b269cab4` |
 | Geliştirici | S.OCAL · Lisans GPL-3.0-or-later |
 
@@ -57,7 +58,7 @@ sağlık verisi), ayarlar.
 
 | # | Bulgu | Önem | Düzeltme (1.5.2) | Kanıt |
 |---|---|---|---|---|
-| 1 | Dağıtılan APK **debug derlemesiydi** (`debuggable=true`): USB hata ayıklaması açık bir cihazda `run-as` ile uygulama verisi okunabilir, WebView uzaktan hata ayıklanabilirdi. | Orta | Dağıtım (release) derlemesi. Kurulu sürümle aynı anahtarla imzalı, telefondaki sürümün üzerine kurulur, veriler korunur. | `pkgFlags=[ HAS_CODE ALLOW_CLEAR_USER_DATA ]` (DEBUGGABLE yok); `run-as: package not debuggable`; test |
+| 1 | Dağıtılan APK **debug derlemesiydi** (`debuggable=true`): USB hata ayıklaması açık bir cihazda `run-as` ile uygulama verisi okunabilir, WebView uzaktan hata ayıklanabilirdi. | Orta | Dağıtım (release) derlemesi; GitHub sürümünden itibaren geliştiricinin ayrı dağıtım anahtarıyla imzalı (aşağıda "İmza anahtarı"). | `pkgFlags=[ HAS_CODE ALLOW_CLEAR_USER_DATA ]` (DEBUGGABLE yok); `run-as: package not debuggable`; test |
 | 2 | **CSV formül enjeksiyonu** (CWE-1236): `=`, `+`, `-`, `@` ile başlayan ad, konum gibi alanlar CSV Excel/LibreOffice'te açılınca formül olarak çalışabiliyordu (ör. içe aktarılan kötü niyetli JSON'dan). | Orta | Bu hücreler tek tırnakla başlatılır; yalnız sayı olan değerler (ör. `-0,52`) değişmez. | test "CSV formül enjeksiyonu" (6 saldırı biçimi) |
 | 3 | **Dış adres yönlendirmesi**: sayfadan gelen her http(s) adresi sistem tarayıcısına veriliyordu. Sayfaya bir şekilde betik sızsaydı veriler adres üzerinden dışarı taşınabilirdi. | Düşük | Uygulamanın kendi adresi dışındaki her adres engellenir; hiçbir şey dışarı açılmaz. | test; emülatörde `location` ve `window.open` denemesi |
 | 4 | **Cihazdan cihaza aktarım**: Android 12+ hedefleyen uygulamalarda bazı üreticilerin cihazlarında `allowBackup="false"` cihaz aktarımını kapatmıyor ([Android belgesi](https://developer.android.com/identity/data/autobackup)). "Veriler yalnız bu cihazda" iddiasıyla çelişiyordu. | Düşük | `dataExtractionRules`: bulut yedeği ve cihaz aktarımı tüm uygulama klasörleri için kapalı. | test; `aapt2` manifestte `dataExtractionRules` |
@@ -141,10 +142,13 @@ sağlık verisi), ayarlar.
 
 ## Kalan riskler ve öneriler
 
-1. **İmza anahtarı.** APK bu bilgisayarın Android debug anahtarıyla imzalı (`~/.android/debug.keystore`). Kişisel ve kurum içi
-   kullanım için yeterlidir; ancak bu dosyaya erişen biri aynı uygulama için güncelleme imzalayabilir, dosya bu bilgisayarın
-   dışına çıkmamalıdır. Geniş dağıtım için ayrı, parolalı bir dağıtım anahtarı önerilir. Anahtar değişince telefonda uygulama
-   kaldırılıp yeniden kurulmalıdır (önce Envanter → JSON dışa aktar). Parolayı sizin belirlemeniz gerekir.
+1. **İmza anahtarı (giderildi, 16.11.2026).** GitHub'da yayınlanan APK, geliştiricinin ayrı ve parolalı dağıtım anahtarıyla
+   imzalıdır (RSA 4096; sertifika SHA-256 yukarıda). Anahtar deposu depoda ve derleme dosyalarında yoktur, yalnız geliştiricinin
+   bilgisayarında (`-rw-------`) ve yedeğindedir; parola yalnız imzalama anında terminalde sorulur (`tools/apk-imzala.sh`).
+   Bundan önce telefona elle kopyalanan sürümler (≤ 1.5.2) Android'in hata ayıklama anahtarıyla imzalıydı; Android farklı
+   anahtarla imzalanmış sürümün üzerine kurmaya izin vermediği için bunlar bir kez kaldırılıp GitHub sürümü kurulmalıdır
+   (önce Envanter → JSON dışa aktar; Amsler sonuçları → Yazdır / PDF). Kullanıcılar indirdikleri APK'yı sertifika
+   parmak iziyle doğrulayabilir: `apksigner verify --print-certs LaserSafetyAnalysis-1.5.2.apk`.
 2. **WebView motoru.** Tarayıcı motorunun güvenlik güncellemeleri "Android System WebView" / Chrome güncellemesiyle gelir;
    Play Store'dan güncel tutulmalıdır.
 3. **Cihaz kilidi.** Ekran kilidi (PIN, desen) Android'in dosya şifrelemesini etkinleştirir. Root'lu ya da kilitsiz bir cihazda

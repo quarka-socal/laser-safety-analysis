@@ -322,6 +322,22 @@ Lisans: **GNU Genel Kamu Lisansı sürüm 3 ya da (seçiminize bağlı olarak) d
 uygulamanın içinde Hakkında penceresinden okunabilir (`js/ui/license.js`; test, iki metnin aynı olduğunu denetler).
 Kaynak kodu HTML/JS dosyaları ve `android/` klasörüdür; tek dosya sürümü de küçültülmemiş, okunur kaynak içerir.
 
+## GitHub
+
+Depo: https://github.com/quarka-socal/laser-safety-analysis (herkese açık, GPL-3.0-or-later). Sürümler (Releases) sayfasında
+Android APK'sı, PC için tek HTML dosyası ve `SHA256SUMS.txt` bulunur. APK imza sertifikası: `CN=S.OCAL, O=Laser Safety
+Analysis`, SHA-256 `e8c9cbff9fd9026be0522150d81a7f0a21884c2d431b88c9816b5cf23687dda0`.
+
+Yeni sürüm yayınlama:
+
+1. `node --test test/*.test.js`, `node tools/build-single.js`; `js/ui/version.js` içinde `APP_VERSION` / `APP_DATE` artırılmış olsun.
+2. `cd android && ./gradlew --offline :app:assembleRelease`, ardından `tools/apk-imzala.sh` (parola terminalde sorulur).
+3. Commit ve `git push`; sonra APK, `dist/LazerEmniyet.html` (adı `LaserSafetyAnalysis-<sürüm>.html`) ve `SHA256SUMS.txt` ile
+   `gh release create v<sürüm> …`.
+
+Commit'ler GitHub'ın gizli adresiyle yazılır (yerel `git config user.email` …`@users.noreply.github.com`); kişisel e-posta
+depoya girmez.
+
 ## Güvenlik
 
 Siber güvenlik değerlendirmesi, bulgular, düzeltmeler, kanıtlar ve kalan riskler: **`GUVENLIK.md`**. Özet: uygulama hiçbir

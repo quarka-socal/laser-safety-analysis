@@ -14,8 +14,11 @@ Android uygulaması ve tek dosyalık PC sürümü aynı, doğrulanmış koddur.
   "bilinmeyen kaynaklardan yükleme" izni ister.
 - **PC** (Windows, Linux, macOS): `LaserSafetyAnalysis-<sürüm>.html`. Firefox ile açın; kurulum ve internet gerekmez.
   Linux'ta uygulama menüsü ve masaüstü kısayolu için kaynak koddaki `tools/kisayol-kur.sh`.
-- `SHA256SUMS.txt`: dosyaların bütünlüğünü `sha256sum -c SHA256SUMS.txt` ile doğrulayabilirsiniz. APK'nın imza sertifikası
-  sürüm notlarında yazılıdır.
+- `SHA256SUMS.txt`: dosyaların bütünlüğünü `sha256sum -c SHA256SUMS.txt` ile doğrulayabilirsiniz.
+- APK imza sertifikası: `CN=S.OCAL, O=Laser Safety Analysis`, SHA-256
+  `e8c9cbff9fd9026be0522150d81a7f0a21884c2d431b88c9816b5cf23687dda0` (`apksigner verify --print-certs` ile denetlenir).
+  Bundan önce elle dağıtılan geliştirme sürümleri farklı anahtarla imzalıdır: önce kaldırıp sonra kurun (envanteri JSON
+  olarak dışa aktarmayı unutmayın).
 
 ## Özellikler
 
@@ -58,6 +61,7 @@ fibre hazards) and an Amsler grid test for a quick first eye check in the field.
 - **Android** (11+): the app requests no permissions and has no network access; data stay on the device.
 - **PC**: a single HTML file that runs offline in any modern browser (Firefox recommended).
 - Turkish and English user interface. Downloads are on the [Releases](../../releases) page.
+- APK signing certificate SHA-256: `e8c9cbff9fd9026be0522150d81a7f0a21884c2d431b88c9816b5cf23687dda0` (CN=S.OCAL).
 - Security assessment: [GUVENLIK.md](GUVENLIK.md) (Turkish).
 
 Results depend on the data entered and do not replace the assessment of a competent laser safety officer.
