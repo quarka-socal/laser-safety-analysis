@@ -64,21 +64,32 @@
   }
 
   function recalc() {
-    const r = LE.form.read();
-    const formErrors = Object.keys(r.errs).map((id) => label(id) + ': ' + r.errs[id]);
-    const formWarnings = Object.keys(r.warns).map((id) => label(id) + ': ' + r.warns[id]);
+    // Hiçbir hata durumunda ekranda önceki girişin sonuçları kalmamalı: okuma, hesap ve çizimdeki
+    // her istisna sonuç alanını hata kutusuyla değiştirir.
+    let r = null;
     let out = null;
-    if (r.ok) {
-      try {
-        out = LE.analysis.analyze(r.inp);
-      } catch (e) {
-        out = { ok: false, errors: ['Beklenmeyen hesap hatası: ' + e.message] };
-        if (root.console) console.error(e);
-      }
+    let formErrors = [];
+    let formWarnings = [];
+    try {
+      r = LE.form.read();
+      formErrors = Object.keys(r.errs).map((id) => label(id) + ': ' + r.errs[id]);
+      formWarnings = Object.keys(r.warns).map((id) => label(id) + ': ' + r.warns[id]);
+      if (r.ok) out = LE.analysis.analyze(r.inp);
+    } catch (e) {
+      out = { ok: false, errors: ['Beklenmeyen hata: ' + e.message] };
+      if (root.console) console.error(e);
     }
     lastOut = out && out.ok ? out : null;
-    LE.render.render($('results'), out || { ok: false, errors: [] }, { formErrors, formWarnings });
-    hints(r, out);
+    try {
+      LE.render.render($('results'), out || { ok: false, errors: [] }, { formErrors, formWarnings });
+    } catch (e) {
+      lastOut = null;
+      $('results').innerHTML = '<div class="verdict err"><h2>Hesap yapılamadı</h2><p>Beklenmeyen gösterim hatası: ' + esc(e.message) + '</p></div>';
+      if (root.console) console.error(e);
+    }
+    if (r) {
+      try { hints(r, lastOut); } catch (e) { if (root.console) console.error(e); }
+    }
     const st = LE.form.getState();
     st.currentId = currentId;
     LE.store.saveSession(st);

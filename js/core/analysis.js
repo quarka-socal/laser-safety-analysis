@@ -375,6 +375,9 @@
     return ratio > 1 ? Math.log10(ratio) : 0;
   }
 
+  /** Türbülans paylı mesafe aramasının başlangıcı (m): payın uygulandığı en yakın nokta. */
+  const SCINT_R0 = 1e-9;
+
   // ---------------------------------------------------------------------------
   // Ana analiz
   // ---------------------------------------------------------------------------
@@ -538,8 +541,10 @@
     if (scintF > 1) {
       const ctxS = { beam, model, mu, oav: { on: false }, scint: scintF };
       const ctxSO = { beam, model, mu, oav, scint: scintF };
-      const nS = solveDistance((r) => intrabeamEval(eyeC.list, ctxS, r).ratio, 0);
-      const eS = oav.on ? solveDistance((r) => intrabeamEval(eyeC.list, ctxSO, r).ratio, 0) : null;
+      // Pay yalnız r > 0'da var (çıkışta ışın yolu yok); arama r → 0⁺'dan başlar. Aksi hâlde çıkışta
+      // MPE altında kalan ama paylı (tüm güç sınırına kadar) tehlikeli olan ışında mesafe 0 çıkardı.
+      const nS = solveDistance((r) => intrabeamEval(eyeC.list, ctxS, r).ratio, SCINT_R0);
+      const eS = oav.on ? solveDistance((r) => intrabeamEval(eyeC.list, ctxSO, r).ratio, SCINT_R0) : null;
       const atRS = intrabeamEval(eyeC.list, oav.on ? ctxSO : ctxS, range);
       const plus = Math.ceil(Math.log10(scintF) - 1e-9);
       const rec = Math.ceil(odWorst - 1e-9);

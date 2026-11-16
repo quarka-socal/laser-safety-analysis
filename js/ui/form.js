@@ -130,6 +130,9 @@
   const FIELDS = {};
   for (const s of SECTIONS) for (const f of s.fields) FIELDS[f.id] = f;
 
+  /** Hesaba giren seçim alanları (kimlik bölümündeki sınıf/durum hariç). */
+  const CALC_CHOICES = ['limits', 'mode', 'sp_kind', 'rp_kind', 'spec', 'profile', 'model', 'fiber', 'skinArea', 'ew_mode', 'ew_win'];
+
   // ---------------------------------------------------------------------------
   // Durum
   // ---------------------------------------------------------------------------
@@ -320,6 +323,9 @@
   // ---------------------------------------------------------------------------
   function readNum(id, errs, warns, echo) {
     const f = FIELDS[id];
+    const unit = state.u[id];
+    // İçe aktarılan / eski kayıtta listede olmayan birim: sessizce başka birimle yorumlanmaz
+    if (UL[f.units].indexOf(unit) < 0) { errs[id] = 'Bilinmeyen birim "' + String(unit) + '": listeden bir birim seçin.'; return NaN; }
     const r = U.parseNumber(state.v[id]);
     if (!r.ok) { errs[id] = r.error; return NaN; }
     const kind = KIND[f.units] || f.units;
@@ -366,6 +372,11 @@
     const warns = {};
     const echo = {};
     const num = (id) => readNum(id, errs, warns, echo);
+    // hesaba giren seçimler listedeki bir değer olmalı (bozuk kayıt sessizce varsayılana dönmez)
+    for (const id of CALC_CHOICES) {
+      const f = FIELDS[id];
+      if (!f.options.some((o) => o[0] === state.v[id])) errs[id] = 'Geçersiz seçim "' + String(state.v[id]) + '": listeden seçin.';
+    }
     const mode = g('mode');
     const lambda = num('wl');
     const inp = { lambda, mode, limits: g('limits') || 'both' };
@@ -480,7 +491,11 @@
   function showMessages(errs, warns, echo) {
     for (const id in els) {
       const r = els[id];
-      if (!r.echo) continue;
+      if (!r.echo) {
+        // seçim kutuları: hata metni sonuç alanında listelenir, alan kırmızı çerçeveyle işaretlenir
+        r.wrap.classList.toggle('invalid', !!errs[id]);
+        continue;
+      }
       r.wrap.classList.toggle('invalid', !!errs[id]);
       if (errs[id]) { r.echo.textContent = errs[id]; r.echo.className = 'echo err'; }
       else if (warns[id]) { r.echo.textContent = (echo[id] ? echo[id] + ' — ' : '') + warns[id]; r.echo.className = 'echo warn'; }
@@ -509,6 +524,13 @@
   function setState(s) {
     const d = defaultState();
     state = { v: Object.assign(d.v, (s && s.v) || {}), u: Object.assign(d.u, (s && s.u) || {}) };
+    // içe aktarılan JSON'da tür farkları: onay kutusu boolean, seçim değeri metin olmalı
+    for (const id in FIELDS) {
+      const f = FIELDS[id];
+      const v = state.v[id];
+      if (f.type === 'check') state.v[id] = v === true || v === 'true';
+      else if ((f.type === 'select' || f.type === 'seg') && v !== undefined) state.v[id] = v === null ? f.value : String(v);
+    }
     syncDom();
   }
 
