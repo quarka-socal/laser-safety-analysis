@@ -1,5 +1,7 @@
 # Güvenlik değerlendirmesi — Laser Safety Analysis 1.5.2
 
+Bu belge iki bölümdür: **Android uygulaması** (aşağıda) ve **PC sürümü** ([PC sürümü](#pc-sürümü) bölümü).
+
 | | |
 |---|---|
 | Tarih | 16.11.2026 |
@@ -7,6 +9,7 @@
 | Dağıtım APK'sı | `android/app/build/outputs/apk/release/app-release.apk`, 2 266 680 bayt |
 | APK SHA-256 | `165e706691dae152a10bcb9e79cf773c542eba9d5cf505c571e1ec5fe774eb94` |
 | İmza sertifikası SHA-256 | `09014ea88483b89050e6a622fd596a93350806323ba794db1588340b1ed4ea00` |
+| PC tek dosya | `dist/LazerEmniyet.html`, 453 609 bayt, SHA-256 `b2287ecf1e522c2c65b7b312f610f711466e9e93a40e0fb4df4dbc55b269cab4` |
 | Geliştirici | S.OCAL · Lisans GPL-3.0-or-later |
 
 ## Sonuç
@@ -160,6 +163,77 @@ sağlık verisi), ayarlar.
    sızdırma mümkün değildir.
 9. **Kod küçültme (R8) kapalı.** Kullanılmayan Kotlin sınıfları pakette durur; uygulama kodundan erişilemez ve ağ izni yoktur.
 
+## PC sürümü
+
+İnceleme 16.11.2026. PC sürümü, Android uygulamasının içine gömülen dosyanın aynısıdır; yukarıdaki web kodu bulguları
+(XSS, CSV formülü, içe aktarma, İçerik Güvenlik Politikası) PC'de de geçerli ve düzeltilmiştir. Bu bölüm PC'ye özgü
+yüzeyleri kapsar.
+
+### Kapsam
+
+| Bileşen | Ne yapar |
+|---|---|
+| `dist/LazerEmniyet.html` | Dağıtılan tek dosya; masaüstü kısayolu bunu varsayılan tarayıcıda (Firefox 160) `file://` ile açar |
+| `index.html` | Kaynak (geliştirme) sürümü; `baslat.sh` ve `npm start` bunu açar |
+| `tools/kisayol-kur.sh` | Uygulama menüsü ve masaüstü kısayolu (`.desktop`) kurar |
+| `tools/build-single.js` | Tek dosyayı ve politikasını üretir |
+| `tools/easyhaz_oracle.py` | Geliştirici aracı: EasyHaz çalışma kitabını LibreOffice ile çalıştırıp doğrulama verisi üretir |
+| Klasör ve tarayıcı profili | Program dosyaları; Firefox'un yerel deposundaki envanter ve Amsler verisi |
+
+### Tehdit modeli (PC)
+
+| Saldırgan | Yol |
+|---|---|
+| Kötü niyetli JSON dosyası | Betik sokma, veri sızdırma, CSV formülü (web kodu; yukarıda) |
+| İndirilmiş başka bir yerel HTML dosyası | Aynı tarayıcıda açılıp envanter verisini okumak ya da yerel dosyaları okumak |
+| Bilgisayardaki başka bir yerel işlem ya da kullanıcı | Açık yerel portlar, yazılabilir program dosyaları, kısayol |
+| Program dosyalarını değiştirebilen biri | Değiştirilmiş HTML/JS çalıştırmak |
+
+### Bulgular ve düzeltmeler (PC)
+
+| # | Bulgu | Önem | Düzeltme | Kanıt |
+|---|---|---|---|---|
+| P1 | EasyHaz doğrulama aracı LibreOffice'i **kimlik doğrulamasız bir TCP portunda** (127.0.0.1:2002) dinletiyordu ve iş bitince kapatmıyordu. Port açık kaldıkça bilgisayardaki her yerel işlem ve kullanıcı LibreOffice'i UNO üzerinden yönetip komut çalıştırabilirdi. | Orta (geliştirici aracı) | Araç LibreOffice'i kendisi başlatıyor: TCP yok, rastgele adlı ve yalnız bu kullanıcının bağlanabildiği boru (`/tmp/OSL_PIPE_1000_…`, `srwxrwxr-x`), geçici profil, iş bitince ya da hata olunca kesin kapatma. Makrolar yine asla çalışmaz, çalışma kitabı salt okunur. | test; 5 vakalık çalıştırma: çalışırken 2002 portu hiç açılmadı, LibreOffice kapandı, geçici profil silindi, sonuçlar kayıtlı değerlerle kayıtlı girdilerin hassasiyeti içinde aynı (en büyük göreli fark 2,6·10⁻⁵) |
+| P2 | Kaynak sürüm (`index.html`) **İçerik Güvenlik Politikası olmadan** açılıyordu (tek dosyada vardı). | Düşük | `index.html`'e politika: yalnız kendi betik/stil dosyaları ve satır içi betiğin SHA-256 özeti; ağ, çerçeve, `eval` kapalı. Tek dosya derlemesi bunu kaldırıp kendi politikasını yazar (tek politika kalır). | test; Firefox'ta sıfır ihlal, saldırı denemeleri engellendi |
+| P3 | Kısayol kurulum betiği klasör yolundaki **denetim karakterlerini** (satır sonu) reddetmiyordu: adında satır sonu olan bir klasörde `.desktop` dosyasına yeni satır (ör. ikinci bir `Exec=`) sızabilirdi. | Düşük | Denetim karakteri içeren yol reddedilir. | test: adı `Lazer\nExec=sh -c kotu` olan klasörde kurulum reddedildi, dosya yazılmadı |
+| P4 | Üst klasör `EasyHazLSO2014 (v1.07)` ve içindeki EasyHaz dosyaları **herkese yazılabilir** (777; büyük olasılıkla Windows'tan kopyalanırken). Ev klasörünüz 750 olduğu için başka kullanıcılar şu an ulaşamıyor. | Bilgi | Sizin klasörünüz olduğu için değiştirilmedi. Önerilen: `chmod -R go-w "/home/quarka/EasyHazLSO2014 (v1.07)"` | `ls -la` |
+
+### Kanıtlar (Firefox 160, `file://`)
+
+- **Normal kullanım:** tek dosya ve kaynak sürüm, yeni politikalarıyla bütün akışlarda (örnek, rapor, yardım, Hakkında ve
+  lisans, ayarlar, Amsler testi, envanter) **sıfır politika ihlaliyle** çalıştı; öz-denetim 64/64.
+- **Politika denemesi** (her iki sürüm): satır içi olay işleyicisi, sonradan eklenen betik, metinden kod (zamanlayıcı dizgesi),
+  `https` bağlantısı, `sendBeacon`, resimle veri sızdırma, çerçeve engellendi (`script-src-attr`, `script-src-elem`,
+  `script-src`, `connect-src`, `img-src`, `frame-src` ihlalleri).
+- **Kötü niyetli JSON:** içe aktarıldı, envanter, rapor ve Amsler açıldı: betik çalışmadı, tehlikeli öğe yok.
+- **Yerel dosya okuma:** normal Firefox'ta `file://` sayfası `/etc/passwd`'u, komşu dosyayı ve alt klasördeki dosyayı
+  okuyamıyor (NetworkError), politikalı da politikasız da. Not: Firefox otomasyon (WebDriver, uzaktan hata ayıklama)
+  moduyla başlatılırsa bu kural gevşiyor; denetimde bu yüzden gerçek kullanımı ayrıca normal Firefox'la ölçtüm.
+  Programı böyle bir oturumda kullanmayın.
+- **Yerel depo ayrımı:** bir dosyanın yazdığı veriyi aynı klasördeki ya da başka klasördeki başka bir HTML dosyası okuyamıyor
+  (`null`). İndirilmiş başka bir HTML dosyası envanter ve Amsler verisini göremez.
+- **Dışa aktarma:** politika altında JSON, CSV ve HTML rapor sıfır ihlalle indirildi; CSV'de formül hücresi etkisiz
+  (`'=HYPERLINK…`); kaydedilen HTML raporda politika var; dosya adındaki saldırı metni temizlenmiş
+  (`rapor-_script_window___xss_3_script_.html`).
+- **Kısayol:** `.desktop` dosyası `desktop-file-validate` ile geçerli; çalıştırdığı komut GIO ile çözümlendi
+  (`xdg-open` + tek dosyanın tırnaklı tam yolu).
+
+### Kalan riskler ve öneriler (PC)
+
+1. **Tarayıcı.** Firefox 160'ta denendi (bu bilgisayarın varsayılanı). MDN'e göre `file:` sayfalarının yerel depo davranışı
+   standartta tanımsızdır; güncel tarayıcılar her dosyayı ayrı tutar ama garanti yoktur. Chrome/Edge burada denenmedi.
+   Programı Firefox'la açın.
+2. **Durağan veri.** Envanter ve Amsler verisi Firefox profilinde (`~/.mozilla/firefox/…`) şifresiz durur; ev klasörü izinleri
+   (750) korur. Sağlık verisi için disk şifrelemesi ve ekran kilidi önerilir. Dışa aktarılan JSON, CSV, PDF ve HTML dosyaları
+   da kişisel veri içerir; gereksizleri silin.
+3. **Program dosyalarının bütünlüğü.** Klasöre yazabilen biri programı değiştirebilir; açılış öz-denetimi yalnız hesap
+   motorunu yakalar. Klasörü yalnız sizin yazabileceğiniz durumda tutun; tek dosyayı başkasına verirken güvenilir yoldan
+   gönderin ve yukarıdaki SHA-256 değeriyle karşılaştırın: `sha256sum LazerEmniyet.html`.
+4. **Ağ.** Android'deki gibi işletim sistemi engeli yok (tarayıcının ağı var); dış bağlantıyı sayfanın politikası
+   (`connect-src 'none'`) ve kodda hiç ağ çağrısı olmaması engeller.
+5. **Veri ayrımı (güvenlik değil).** Kısayol tek dosyayı, `baslat.sh` kaynak sürümü açar; Firefox ikisinin verisini ayrı tutar.
+   Hep aynı dosyayı kullanın; taşımak için JSON dışa/içe aktarın.
+
 ## Yeniden doğrulama
 
 ```bash
@@ -182,3 +256,4 @@ $BT/apksigner verify --verbose --print-certs app/build/outputs/apk/release/app-r
 - Chromium — [android_webview/docs/net-debugging.md](https://chromium.googlesource.com/chromium/src/+show/refs/tags/142.0.7411.0/android_webview/docs/net-debugging.md)
 - OWASP — [Mobile Application Security Verification Standard (MASVS)](https://mas.owasp.org/MASVS/)
 - OWASP — [CSV Injection](https://owasp.org/www-community/attacks/CSV_Injection) · MITRE — [CWE-1236](https://cwe.mitre.org/data/definitions/1236.html)
+- MDN — [Window: localStorage (file: URL davranışı)](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage)

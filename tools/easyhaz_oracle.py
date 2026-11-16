@@ -5,10 +5,13 @@ Makrolar ASLA çalıştırılmaz (MacroExecutionMode=0); yalnız çalışma kita
 hücre formülleri LibreOffice tarafından yeniden hesaplanır. Çalışma kitabı salt
 okunur açılır; orijinal dosya değişmez.
 
+Güvenlik: LibreOffice'i araç kendisi başlatır ve iş bitince (hata olsa da) kapatır.
+Bağlantı TCP portu değil, rastgele adlı ve yalnız bu kullanıcının bağlanabildiği bir
+borudur (/tmp/OSL_PIPE_<uid>_…, srwxrwxr-x); başka yerel kullanıcılar ve işlemler
+LibreOffice'i uzaktan yönetemez. Geçici bir profil kullanılır; kalıcı profil değişmez.
+
 Kullanım:
-  1) soffice --headless --invisible --norestore \
-        --accept="socket,host=127.0.0.1,port=2002;urp;" &
-  2) python3 tools/easyhaz_oracle.py vakalar.json cikti.json "/yol/EasyHazLSO2014 (v1.07).xlsm"
+  python3 tools/easyhaz_oracle.py vakalar.json cikti.json "/yol/EasyHazLSO2014 (v1.07).xlsm"
 
 vakalar.json: [{"wl": 532, "mode": "rp", "value": 0.4, "tau": 5e-9, "prf": 10,
                 "t": 0.25, "d": 7, "div": 0.6, "BE_beam_e_e2": "(1/e2)",
@@ -16,7 +19,7 @@ vakalar.json: [{"wl": 532, "mode": "rp", "value": 0.4, "tau": 5e-9, "prf": 10,
 Not: EasyHaz NOHD değerlerini VBA ile yinelemeli hesapladığından burada okunmaz;
 NOHD, "OD at Observer Range" sıfıra inene kadar mesafe taranarak bulunabilir.
 """
-import json, sys, time
+import json, os, secrets, shutil, subprocess, sys, tempfile, time
 import uno
 from com.sun.star.beans import PropertyValue
 
@@ -29,29 +32,57 @@ def pv(name, value):
     return p
 
 
-def connect():
+def start_office():
+    """Bu işe özel LibreOffice: rastgele adlı boru (TCP yok), geçici profil."""
+    profile = tempfile.mkdtemp(prefix='lazer-easyhaz-')  # 0700
+    pipe = 'lazer_easyhaz_' + secrets.token_hex(16)
+    proc = subprocess.Popen(
+        ['soffice', '--headless', '--invisible', '--norestore', '--nologo', '--nodefault',
+         '-env:UserInstallation=' + uno.systemPathToFileUrl(profile),
+         '--accept=pipe,name=%s;urp;' % pipe],
+        stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    return proc, profile, pipe
+
+
+def connect(proc, pipe):
     local = uno.getComponentContext()
     resolver = local.ServiceManager.createInstanceWithContext(
         'com.sun.star.bridge.UnoUrlResolver', local)
-    for _ in range(60):
+    for _ in range(120):
+        if proc.poll() is not None:
+            raise RuntimeError('soffice başlatılamadı')
         try:
-            ctx = resolver.resolve(
-                'uno:socket,host=127.0.0.1,port=2002;urp;StarOffice.ComponentContext')
-            return ctx
+            return resolver.resolve('uno:pipe,name=%s;urp;StarOffice.ComponentContext' % pipe)
         except Exception:
             time.sleep(0.5)
     raise RuntimeError('soffice not reachable')
 
 
-ctx = connect()
-smgr = ctx.ServiceManager
-desktop = smgr.createInstanceWithContext('com.sun.star.frame.Desktop', ctx)
-import os
-url = uno.systemPathToFileUrl(os.path.abspath(XLSM))
-doc = desktop.loadComponentFromURL(url, '_blank', 0, (
-    pv('Hidden', True), pv('MacroExecutionMode', 0), pv('ReadOnly', True)))
-names = doc.NamedRanges
-ehlso = doc.Sheets.getByName('EHLSO')
+def stop_office(proc, profile, desktop):
+    """Her durumda LibreOffice'i kapatır ve geçici profili siler."""
+    if desktop is not None:
+        try:
+            desktop.terminate()
+        except Exception:
+            pass  # bağlantı kapanırken istisna normal
+    try:
+        proc.wait(timeout=15)
+    except subprocess.TimeoutExpired:
+        proc.terminate()
+        try:
+            proc.wait(timeout=10)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+    shutil.rmtree(profile, ignore_errors=True)
+
+
+def open_workbook(desktop):
+    url = uno.systemPathToFileUrl(os.path.abspath(XLSM))
+    return desktop.loadComponentFromURL(url, '_blank', 0, (
+        pv('Hidden', True), pv('MacroExecutionMode', 0), pv('ReadOnly', True)))
+
+
+doc = names = ehlso = None  # main() içinde atanır
 
 
 _cells = {}
@@ -145,17 +176,35 @@ def run(case):
     return {k: get(a) for k, a in OUT.items()}
 
 
-cases = json.load(open(sys.argv[1]))
-res = []
-t0 = time.time()
-for i, c in enumerate(cases):
-    if i % 200 == 0:
-        print('progress', i, round(time.time() - t0, 1), flush=True)
+def main():
+    global doc, names, ehlso
+    with open(sys.argv[1]) as f:
+        cases = json.load(f)
+    proc, profile, pipe = start_office()
+    desktop = None
     try:
-        r = run(c)
-    except Exception as e:  # keep going, record the failure
-        r = {'error': str(e)}
-    res.append({'case': c, 'eh': r})
-json.dump(res, open(sys.argv[2], 'w'), indent=1)
-doc.close(True)
-print('ok', len(res))
+        ctx = connect(proc, pipe)
+        desktop = ctx.ServiceManager.createInstanceWithContext('com.sun.star.frame.Desktop', ctx)
+        doc = open_workbook(desktop)
+        names = doc.NamedRanges
+        ehlso = doc.Sheets.getByName('EHLSO')
+        res = []
+        t0 = time.time()
+        for i, c in enumerate(cases):
+            if i % 200 == 0:
+                print('progress', i, round(time.time() - t0, 1), flush=True)
+            try:
+                r = run(c)
+            except Exception as e:  # keep going, record the failure
+                r = {'error': str(e)}
+            res.append({'case': c, 'eh': r})
+        with open(sys.argv[2], 'w') as f:
+            json.dump(res, f, indent=1)
+        doc.close(True)
+        print('ok', len(res))
+    finally:
+        stop_office(proc, profile, desktop)
+
+
+if __name__ == '__main__':
+    main()

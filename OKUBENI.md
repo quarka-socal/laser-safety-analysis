@@ -21,7 +21,7 @@ Sınır değerler iki set hâlinde uygulanır ve varsayılan olarak **en koruyuc
 
 | Yöntem | Nasıl |
 |---|---|
-| Doğrudan | `index.html` dosyasını Firefox/Chrome ile açın |
+| Doğrudan | `dist/LazerEmniyet.html` dosyasını Firefox ile açın (masaüstü kısayolu da bunu açar). `index.html` kaynak (geliştirme) sürümüdür |
 | Komut satırı | `./baslat.sh` |
 | Tek dosya (taşınabilir) | `dist/LazerEmniyet.html` — tek başına kopyalanıp her bilgisayarda açılabilir |
 | Masaüstü kısayolu (Linux) | `tools/kisayol-kur.sh` — uygulama menüsüne (Bilim) ve masaüstüne **Laser Safety Analysis** simgesi; tek dosya sürümünü varsayılan tarayıcıda açar. Kaldırmak için `tools/kisayol-kur.sh --kaldir` |
@@ -190,7 +190,7 @@ Standart tablolarındaki yuvarlamadan doğan küçük basamaklar olduğu gibi uy
 elle hesaplanmış değerler, EasyHaz LSO örnek dosyalarındaki sonuçlar, yayımlanmış EN 207/208 örnekleri).
 Biri bile başarısız olursa kırmızı uyarı bandı çıkar. Başlıktaki yeşil rozete tıklayarak ayrıntıyı görebilirsiniz.
 
-**Geliştirme testleri** — `node --test test/*.test.js` (Node ≥ 18; Node 18 ve 24 ile denenir): 130 test.
+**Geliştirme testleri** — `node --test test/*.test.js` (Node ≥ 18; Node 18 ve 24 ile denenir): 134 test.
 
 - ICNIRP Tablo 5, 7, 8 satır noktaları; düzeltme faktörleri; ölçüm açıklıkları
 - Tüm dalga boylarında MPE'nin süreyle azalmadığı (bilinen tablo basamakları hariç) ve sürekliliği
@@ -328,6 +328,8 @@ Siber güvenlik değerlendirmesi, bulgular, düzeltmeler, kanıtlar ve kalan ris
 izin istemez (ağ yok; işletim sistemi düzeyinde de engelli), dışarıdan veri yalnız kullanıcının seçtiği JSON dosyasıyla girer
 ve her metin kaçışlı basılır, tek dosya sürümünde İçerik Güvenlik Politikası yalnız gömülü betiklere izin verir, veriler yalnız
 cihazda kalır, dağıtım APK'sı hata ayıklanamaz. `test/guvenlik.test.js` bunları her test çalıştırmasında denetler.
+PC sürümü (Firefox, `file://`) ayrıca incelendi: kaynak sürümde de politika var, yerel dosyalar ve başka HTML dosyalarının
+verisi okunamıyor, doğrulama aracı port açmıyor (`GUVENLIK.md` → PC sürümü; `test/pc-guvenlik.test.js`).
 
 ## Android sürümü
 
@@ -466,7 +468,8 @@ GUVENLIK.md           siber güvenlik değerlendirmesi (bulgular, kanıtlar, kal
 tools/kisayol-kur.sh  Linux masaüstü kısayolu (uygulama menüsü + masaüstü); --kaldir ile kaldırır
 tools/laser-safety-analysis.svg  kısayol simgesi
 tools/build-single.js tek dosya derlemesi → dist/LazerEmniyet.html (derleme zamanını da yazar)
-tools/easyhaz_oracle.py  EasyHaz çapraz doğrulama aracı (LibreOffice UNO, makrosuz)
+tools/easyhaz_oracle.py  EasyHaz çapraz doğrulama aracı (LibreOffice UNO, makrosuz; LibreOffice'i kendisi başlatıp
+                         kapatır, TCP portu açmaz)
 android/              Android uygulaması (WebView kabuğu; dist/LazerEmniyet.html'i gömer)
   app/build.gradle.kts           sürüm js/ui/version.js'ten; copyWebApp görevi
   app/src/main/java/.../MainActivity.kt  WebView, PDF, dosya seçici, geri tuşu, tema/dil köprüsü, kenardan kenara düzen,
@@ -490,6 +493,11 @@ Klasör bir git deposudur. İlk commit `1be12d6`, inceleme öncesi v1.3 durumudu
 `git log` ile görülebilir.
 
 ## Sürüm notları
+
+**PC güvenliği (16.11.2026, uygulama 1.5.2 değişmedi)** — PC'ye özgü inceleme (`GUVENLIK.md` → PC sürümü):
+EasyHaz doğrulama aracı artık LibreOffice'e TCP portu açtırmıyor (özel boru, geçici profil, iş bitince kapatma);
+`index.html`'e İçerik Güvenlik Politikası; kısayol kurulumu yoldaki denetim karakterlerini reddediyor. Firefox 160'ta
+`file://` saldırı denemeleri belgelendi. Tek dosya ve APK içerikte değişmedi. Testler 134 (yeni: pc-guvenlik.test.js).
 
 **Uygulama 1.5.2 (16.11.2026, motor 1.3.1 değişmedi) — güvenlik**
 - Siber güvenlik incelemesi: 8 bulgu (2 orta, 3 düşük, 3 sertleştirme), hepsi düzeltildi; ayrıntılar `GUVENLIK.md`.

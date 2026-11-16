@@ -33,9 +33,11 @@ if [ ! -f "$HTML" ]; then
   echo "Bulunamadı: $HTML (önce: node tools/build-single.js)" >&2
   exit 1
 fi
-# Exec satırında tırnak içinde bu karakterler kaçış ister; klasör yolunda olmamalı
+# Exec satırında tırnak içinde bu karakterler kaçış ister; satır sonu gibi denetim karakterleri .desktop dosyasına
+# yeni satır (yeni anahtar) sokabilir: klasör yolunda bunlar olmamalı
 case "$HTML" in
   *[\"\`\$\\]*) echo "Klasör yolunda \" \` \$ \\ karakterleri olmamalı: $HTML" >&2; exit 1 ;;
+  *[[:cntrl:]]*) echo "Klasör yolunda denetim karakteri (satır sonu, sekme vb.) olmamalı." >&2; exit 1 ;;
 esac
 
 mkdir -p "$APPS" "$ICONS"

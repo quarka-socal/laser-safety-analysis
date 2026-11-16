@@ -13,6 +13,13 @@ const crypto = require('crypto');
 const root = path.join(__dirname, '..');
 const built = new Date().toISOString().replace(/\.\d{3}Z$/, 'Z');
 let html = fs.readFileSync(path.join(root, 'index.html'), 'utf8').replace(/\r\n?/g, '\n');
+// kaynak sürümün politikası ('self' + dosyalar) tek dosyaya taşınmaz; aşağıda gömülü betiklerin özetleriyle yenisi yazılır
+html = html.replace(/\n?[ \t]*<!-- İçerik Güvenlik Politikası \(kaynak sürüm\)[\s\S]*?-->/, '');
+html = html.replace(/\n?[ \t]*<meta http-equiv="Content-Security-Policy"[^>]*>/, '');
+if (html.includes('Content-Security-Policy')) {
+  console.error('index.html içindeki CSP kaldırılamadı.');
+  process.exit(1);
+}
 
 html = html.replace(/<link rel="stylesheet" href="([^"]+)">/g, (m, href) => {
   const css = fs.readFileSync(path.join(root, href), 'utf8');
