@@ -83,9 +83,9 @@ android {
 
     buildTypes {
         release {
-            // Dağıtım derlemesi: hata ayıklanamaz (WebView uzaktan hata ayıklaması ve run-as kapalı).
-            // Kurulu sürümle aynı anahtarla imzalanır; böylece telefonda üzerine kurulur, veriler korunur.
-            signingConfig = signingConfigs.getByName("debug")
+            // Dağıtım derlemesi: hata ayıklanamaz (WebView uzaktan hata ayıklaması ve run-as kapalı) ve İMZASIZ üretilir
+            // (app-release-unsigned.apk). İmzayı geliştiricinin ayrı dağıtım anahtarı atar: tools/apk-imzala.sh, parola
+            // yalnız o anda terminalde sorulur. Anahtar deposu ve parola depoda ya da derleme dosyalarında bulunmaz.
             optimization {
                 enable = false
             }

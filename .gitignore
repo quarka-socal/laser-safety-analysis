@@ -1,0 +1,13 @@
+# İmza anahtarları ve parolalar asla depoya girmez
+*.jks
+*.keystore
+*.p12
+keystore.properties
+
+# Derleme çıktıları (sürüm dosyaları GitHub Releases'e yüklenir)
+*.apk
+*.aab
+*.idsig
+
+# Geçici dosyalar
+tools/__pycache__/

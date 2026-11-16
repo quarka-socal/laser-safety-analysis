@@ -221,9 +221,16 @@ test('Android: izin yok, tek açık bileşen, yedek ve cihazdan cihaza aktarım 
   }
 });
 
-test('Android: dağıtım (release) derlemesi hata ayıklanamaz ve kurulu sürümle aynı anahtarla imzalanır', () => {
+test('Android: dağıtım (release) derlemesi hata ayıklanamaz ve imzasız üretilir; imzayı dağıtım anahtarı atar, parola yalnız terminalde sorulur', () => {
   const g = fs.readFileSync(path.join(ROOT, 'android', 'app', 'build.gradle.kts'), 'utf8');
   const rel = g.slice(g.indexOf('release {'), g.indexOf('compileOptions'));
-  assert.match(rel, /signingConfig = signingConfigs\.getByName\("debug"\)/);
+  assert.doesNotMatch(rel, /signingConfig/, 'release derlemesi hata ayıklama anahtarıyla imzalanmaz');
   assert.doesNotMatch(rel, /isDebuggable\s*=\s*true/);
+  const sh = fs.readFileSync(path.join(ROOT, 'tools', 'apk-imzala.sh'), 'utf8');
+  assert.match(sh, /apksigner" sign --ks "\$KS" --ks-key-alias "\$ALIAS"/);
+  assert.doesNotMatch(sh, /--ks-pass|--key-pass|pass:|PASSWORD/i, 'parola betikte, ortamda ya da komut satırında değil');
+  assert.match(sh, /apksigner" verify/);
+  assert.match(sh, /Android Debug/, 'hata ayıklama sertifikasıyla imzalanmış APK reddedilir');
+  const gi = fs.readFileSync(path.join(ROOT, '.gitignore'), 'utf8').split('\n');
+  for (const p of ['*.jks', '*.keystore', '*.p12', '*.apk', 'keystore.properties']) assert.ok(gi.includes(p), '.gitignore: ' + p);
 });

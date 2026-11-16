@@ -366,10 +366,26 @@ export JAVA_HOME=~/Downloads/android-studio/jbr
 ./gradlew --offline -Porg.gradle.java.installations.paths=$JAVA_HOME :app:assembleRelease
 ```
 
-Çıktı: `android/app/build/outputs/apk/release/app-release.apk`, yaklaşık 2,2 MB. **Telefona bu dağıtım (release) APK'sı
-kurulur**: hata ayıklanamaz, bu bilgisayarın anahtarıyla imzalıdır (debug sürümüyle aynı anahtar, bu yüzden önceki sürümlerin
-üzerine kurulur). Geliştirme ve emülatörde Chrome hata ayıklama protokolüyle sınama için `:app:assembleDebug`
-(`apk/debug/app-debug.apk`) kullanılır. Klasör Android Studio ile de açılabilir (Open → `android`).
+Çıktı: `android/app/build/outputs/apk/release/app-release-unsigned.apk` (imzasız, yaklaşık 2,2 MB). Dağıtım APK'sı hata
+ayıklanamaz ve **geliştiricinin ayrı dağıtım anahtarıyla** imzalanır:
+
+```bash
+tools/apk-imzala.sh                        # varsayılan: ~/laser-safety-release.jks, takma ad laser-safety
+```
+
+Betik `LaserSafetyAnalysis-<sürüm>.apk` dosyasını üretir, imzayı doğrular, sertifika ve dosya SHA-256 değerlerini yazar.
+Parolayı yalnız o anda terminalde `apksigner` sorar; parola hiçbir dosyaya yazılmaz. Hata ayıklama anahtarıyla imzalamayı
+reddeder.
+
+**Dağıtım anahtarı (bir kez).** Anahtar deposu proje klasörünün dışında tutulur ve yedeklenir; kaybolursa uygulama aynı adla
+güncellenemez. Depoya hiçbir zaman eklenmez (`.gitignore`: `*.jks`, `*.keystore`):
+
+```bash
+keytool -genkeypair -v -keystore ~/laser-safety-release.jks -alias laser-safety -keyalg RSA -keysize 4096 -validity 10000 -dname "CN=S.OCAL, O=Laser Safety Analysis"
+```
+
+Geliştirme ve emülatörde Chrome hata ayıklama protokolüyle sınama için `:app:assembleDebug` (`apk/debug/app-debug.apk`,
+hata ayıklama anahtarıyla imzalı) kullanılır. Klasör Android Studio ile de açılabilir (Open → `android`).
 
 Derleme `copyWebApp` göreviyle `../dist/LazerEmniyet.html` dosyasını varlık olarak kopyalar. Dosya eskiyse görev derlemeyi
 durdurur. Bunun iki ölçütü var: gömülü uygulama ya da motor sürümü kaynaktakiyle aynı değilse, ya da Android köprüsü
@@ -380,7 +396,7 @@ durdurur. Bunun iki ölçütü var: gömülü uygulama ya da motor sürümü kay
 - **USB ile** (telefonda Geliştirici seçenekleri → USB hata ayıklama açık):
 
   ```bash
-  ~/Android/Sdk/platform-tools/adb install -r android/app/build/outputs/apk/release/app-release.apk
+  ~/Android/Sdk/platform-tools/adb install -r android/app/build/outputs/apk/release/LaserSafetyAnalysis-1.5.2.apk
   ```
 
 - **Dosya ile**: APK'yı telefona kopyalayıp dosya yöneticisinden açın. Telefon, o uygulama için "bilinmeyen kaynaklardan
@@ -391,10 +407,10 @@ durdurur. Bunun iki ölçütü var: gömülü uygulama ya da motor sürümü kay
 1. Web kaynaklarında (`js/`, `css/`, `index.html`) değişiklik yapıldıysa önce testleri çalıştırın, sonra tek dosyayı
    üretin: `node --test test/*.test.js`, ardından `node tools/build-single.js`. Hesap motoru değiştiyse
    `ENGINE_VERSION` değerini artırın; Android sürüm numarası buradan gelir.
-2. Yukarıdaki komutla APK'yı yeniden derleyin ve `adb install -r` ile üzerine kurun. Aynı bilgisayarın anahtarıyla
-   imzalı APK verileri korur.
-3. Başka bir bilgisayarda derlenen APK farklı anahtarla imzalanır. O zaman önce kaldırmak gerekir ve bu envanteri siler.
-   Güncellemeden önce **Envanter → JSON dışa aktar** ile yedek alın.
+2. Yukarıdaki komutlarla APK'yı derleyip imzalayın ve üzerine kurun. Aynı dağıtım anahtarıyla imzalı APK verileri korur.
+3. Farklı anahtarla imzalanmış bir APK (ör. 1.5.2'ye kadar hata ayıklama anahtarıyla dağıtılan sürümler) üzerine kurulamaz:
+   önce kaldırmak gerekir ve bu envanteri ve Amsler geçmişini siler. Önce **Envanter → JSON dışa aktar** ile yedek alın;
+   Amsler sonuçlarını **Yazdır / PDF** ile saklayın.
 
 ### Doğrulama (16.11.2026, emülatör: Android 15, WebView 124)
 
